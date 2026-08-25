@@ -1,0 +1,14 @@
+{
+  "name": "recoup",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Closed-loop agent that diagnoses stalled rupees and recovers them inside compliance rails.",
+  "scripts": {
+    "seed": "bun run scripts/seed.ts",
+    "seed:verify": "bun run scripts/seed.ts --verify-repro"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}

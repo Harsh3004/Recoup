@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recoup — Autonomous Payment Recovery Platform</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    
+    <!-- Top Header -->
+    <header>
+      <div class="logo-area">
+        <div class="logo-badge">R</div>
+        <div class="logo-text">
+          <h1>Recoup <span class="highlight">Autonomous Recovery</span></h1>
+          <p>Multi-Surface Failed Payment Recovery & Compliance Engine</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="badge-chain-status" id="headerChainStatus">
+          <div class="pulse-dot"></div>
+          <span>Audit Chain: <strong id="headerEventCount">472</strong> Events Verified</span>
+        </div>
+        <button class="btn btn-primary" id="btnVerifyChain">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          Verify Audit Chain
+        </button>
+        <button class="btn btn-outline" id="btnTamperDemo">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+          Test Tamper Proof
+        </button>
+      </div>
+    </header>
+
+    <!-- 1. Headline Metrics Banner -->
+    <div class="metrics-grid">
+      <div class="metric-card accent-emerald">
+        <div class="metric-title">Net Incremental ₹ Recovered (R1)</div>
+        <div class="metric-value" id="valIncremental">₹9,26,95,083</div>
+        <div class="metric-subtitle">
+          <span class="tag-lift">+1,207.6% Lift</span> over 15% holdout
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-title">Gross Treatment Cash Collected</div>
+        <div class="metric-value" id="valTreatmentRec">₹10,03,71,070</div>
+        <div class="metric-subtitle">
+          61.9% collection rate across 1,117 cases
+        </div>
+      </div>
+      <div class="metric-card accent-amber">
+        <div class="metric-title">Contacts Suppressed (R2/R3)</div>
+        <div class="metric-value" id="valSuppressed">682</div>
+        <div class="metric-subtitle">
+          26.1% blocked by quiet hours, DND & outage rails
+        </div>
+      </div>
+      <div class="metric-card accent-purple">
+        <div class="metric-title">95% Bootstrap Confidence Interval</div>
+        <div class="metric-value" style="font-size: 22px; padding-top: 6px;" id="valCi95">[₹6.69 Cr – ₹12.14 Cr]</div>
+        <div class="metric-subtitle">
+          1,000 resamples · Provably non-zero lower bound
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. The 4 Surfaces Switcher -->
+    <div class="surface-section">
+      <div class="section-header">
+        <div class="section-title">Universal Recovery Across 4 Surfaces</div>
+        <div style="font-size: 13px; color: var(--text-dim);">Click surface tab to filter case telemetry</div>
+      </div>
+      <div class="surface-tabs" id="surfaceTabsContainer">
+        <div class="surface-tab active" data-surface="">
+          <div class="surface-tab-header">
+            <span class="surface-code">ALL SURFACES</span>
+          </div>
+          <div class="surface-name">Complete Portfolio</div>
+          <div class="surface-stat">Total: <span>₹10,03,71,070</span></div>
+        </div>
+        <div class="surface-tab" data-surface="A">
+          <div class="surface-tab-header">
+            <span class="surface-code">SURFACE A</span>
+          </div>
+          <div class="surface-name">Subscription Autopay</div>
+          <div class="surface-stat">Recovered: <span>₹3,09,944</span> (40.3%)</div>
+        </div>
+        <div class="surface-tab" data-surface="B">
+          <div class="surface-tab-header">
+            <span class="surface-code">SURFACE B</span>
+          </div>
+          <div class="surface-name">Checkout Drop-Off</div>
+          <div class="surface-stat">Recovered: <span>₹8,07,659</span> (45.7%)</div>
+        </div>
+        <div class="surface-tab" data-surface="C">
+          <div class="surface-tab-header">
+            <span class="surface-code">SURFACE C</span>
+          </div>
+          <div class="surface-name">Mandate Failure</div>
+          <div class="surface-stat">Recovered: <span>₹1,43,317</span> (57.7%)</div>
+        </div>
+        <div class="surface-tab" data-surface="D">
+          <div class="surface-tab-header">
+            <span class="surface-code">SURFACE D</span>
+          </div>
+          <div class="surface-name">B2B Invoices</div>
+          <div class="surface-stat">Recovered: <span>₹9,91,10,150</span> (62.2%)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Split Grid: Incident Replay & Counterfactuals -->
+    <div class="split-grid">
+      
+      <!-- Incident Replay Simulator -->
+      <div class="panel-card">
+        <div class="panel-title">
+          <span>Injected Outage Replay & Contact Suppression</span>
+          <span class="incident-badge">Razorpay × HDFC Outage</span>
+        </div>
+        <div class="incident-box">
+          <p><strong>Incident #inc_000001:</strong> 6-hour severe degradation injected on 2026-08-19 (10:00–16:00 IST).</p>
+          <div class="incident-stats">
+            <div class="inc-stat-item">
+              <div class="inc-stat-val">26.7%</div>
+              <div class="inc-stat-lbl">Success Rate (vs 80.6% baseline)</div>
+            </div>
+            <div class="inc-stat-item">
+              <div class="inc-stat-val">-7.14</div>
+              <div class="inc-stat-lbl">Anomaly Z-Score</div>
+            </div>
+            <div class="inc-stat-item">
+              <div class="inc-stat-val">21 / 21</div>
+              <div class="inc-stat-lbl">At-Risk Items Tagged</div>
+            </div>
+          </div>
+        </div>
+        <div class="incident-action-box">
+          <div>
+            <strong>Compliance Rule Enforced:</strong>
+            <p style="font-size: 12px; margin-top: 2px;">Zero customer harassment during gateway downtime. 100% of outbound touches suppressed.</p>
+          </div>
+          <button class="btn btn-outline" style="font-size: 12px; padding: 6px 12px;" id="btnViewOutageCase">
+            View Suppressed Case
+          </button>
+        </div>
+      </div>
+
+      <!-- Counterfactual Comparison Table -->
+      <div class="panel-card">
+        <div class="panel-title">
+          <span>Counterfactual Performance Comparison</span>
+          <span style="font-size: 12px; color: var(--text-dim);">Scientific Holdout</span>
+        </div>
+        <table class="cf-table">
+          <thead>
+            <tr>
+              <th>Strategy</th>
+              <th>Collected ₹</th>
+              <th>Net Realized</th>
+              <th>Lift</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Pure Holdout Control</strong></td>
+              <td>₹76,75,986</td>
+              <td>₹76,75,986</td>
+              <td>0.0%</td>
+            </tr>
+            <tr>
+              <td><strong>Naive 3-Email Dunning</strong></td>
+              <td>₹2,99,88,105</td>
+              <td>₹2,99,87,435</td>
+              <td>+152.4%</td>
+            </tr>
+            <tr class="highlight-recoup">
+              <td><strong>Recoup Autonomous Engine</strong></td>
+              <td><strong>₹10,03,71,070</strong></td>
+              <td><strong>₹10,03,69,060</strong></td>
+              <td><span class="tag-lift">+1,207.6%</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <!-- 4. Interactive Case Explorer -->
+    <div class="case-section">
+      <div class="case-filters">
+        <input type="text" class="search-input" id="caseSearchInput" placeholder="Search case ID, customer, cause, playbook...">
+        <div class="filter-group">
+          <select class="filter-select" id="filterCohort">
+            <option value="">All Cohorts</option>
+            <option value="TREATMENT">Treatment (85%)</option>
+            <option value="HOLDOUT">Holdout Control (15%)</option>
+          </select>
+          <select class="filter-select" id="filterState">
+            <option value="">All States</option>
+            <option value="RECOVERED">Recovered</option>
+            <option value="SUPPRESSED">Suppressed</option>
+            <option value="PROMISED">Promised</option>
+            <option value="ESCALATED_TO_HUMAN">Human Escalation</option>
+            <option value="CLOSED_LOST">Closed Lost</option>
+          </select>
+        </div>
+      </div>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Risk Case ID</th>
+            <th>Surface</th>
+            <th>Customer</th>
+            <th>Exposure (₹)</th>
+            <th>Diagnosed Cause</th>
+            <th>Selected Playbook</th>
+            <th>State</th>
+            <th>Recovered (₹)</th>
+          </tr>
+        </thead>
+        <tbody id="casesTableBody">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- Case Drilldown Modal / Drawer -->
+  <div class="modal-backdrop" id="caseModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Case Decision & Audit Timeline</h2>
+        <button class="btn-close" id="btnModalClose">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="drawer-tabs">
+          <button class="drawer-tab active" data-tab="summary">Case Overview</button>
+          <button class="drawer-tab" data-tab="diagnosis">Root Cause & Evidence</button>
+          <button class="drawer-tab" data-tab="policy">Intervention Plan & EV</button>
+          <button class="drawer-tab" data-tab="gate">Gate Decisions</button>
+          <button class="drawer-tab" data-tab="comms">Dispatched Messages</button>
+          <button class="drawer-tab" data-tab="audit">SHA-256 Audit Trail</button>
+        </div>
+        <div id="tabContentArea">
+          <!-- Dynamic Content -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chain Verification Modal -->
+  <div class="modal-backdrop" id="verifyModal">
+    <div class="modal-content" style="max-width: 640px;">
+      <div class="modal-header">
+        <h2>Cryptographic Hash Chain Verification</h2>
+        <button class="btn-close" id="btnVerifyClose">&times;</button>
+      </div>
+      <div class="modal-body" id="verifyModalBody">
+        <!-- Dynamic Verification Output -->
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -49,6 +49,13 @@ bun run demo
 
 ## 📐 Architecture & Data Flow
 
+![Recoup Pipeline Architecture](assets/pipeline-flowchart.jpg)
+
+*The pipeline flows through six stages: (1) signal detection across four transaction surfaces with outage-aware anomaly detection, (2) root-cause diagnosis, (3) EV-optimized playbook selection, (4) a universal, non-bypassable compliance gate enforcing quiet hours, TRAI DLT, RBI pre-debit notice, and the 9 stopping rules, (5) mock-adapter execution with outcome resolution against a hidden ground truth, and (6) tamper-evident audit logging paired with stratified holdout measurement.*
+
+<details>
+<summary>Mermaid source (click to expand — some renderers may not display this correctly; use the image above as the source of truth)</summary>
+
 ```mermaid
 flowchart TD
     subgraph Data Layer ["Simulated Indian Economy (data/recovery.db)"]
@@ -104,6 +111,8 @@ flowchart TD
     OUT -- "State Transitions" --> AUDIT
 ```
 
+</details>
+
 > **Reading the measurement report honestly:** ~94% of the net incremental recovery comes from Surface D (B2B high-value invoices), where root-cause diagnosis (PO/GRN vs. cash crunch vs. approval queue) most sharply differentiates playbook selection. Surface A (subscriptions) shows a slightly **negative** incremental (-₹1.65L) — the agent barely outperforms the organic baseline there. Surface B and C are modestly positive. The "all four surfaces, unified" pitch is architecturally accurate; economically, the B2B lift is the headline driver. Full breakdown: `out/measurement_report.md`.
 
 > **Simulation disclosure:** All ₹ figures are properties of a simulated economy (synthetic customers, seeded PRNG outcomes, mock adapter dispatches). No real payments were attempted or collected. The lift is a property of the outcome resolution model — bounded, fatigued, and honestly calibrated — not external market validation. Full disclosure: `docs/HONESTY.md`.
@@ -135,13 +144,11 @@ flowchart TD
 
 - **[Data Dictionary](docs/DATA_DICTIONARY.md):** Comprehensive database schema, decline codes, and field definitions.
 - **[Compliance Architecture](docs/COMPLIANCE.md):** Complete regulatory framework (RBI, TRAI, DPDP) and the 9 stopping rules.
-- **[3-Minute Demo Guide](docs/DEMO_GUIDE.md):** Stage-ready click-by-click walkthrough script.
 - **[Honesty Disclosure](docs/HONESTY.md):** Simulation boundaries, ground truth isolation, naive baseline assumptions, and production migration roadmap.
-- **[State Tracker](docs/STATE.md):** Engineering trajectory and step-by-step verified milestones.
 
 ---
 
 ## 👥 Project Team & License
 
-Built with ❤️ for the Razorpay Hackathon.  
+Built with ❤️ for the Razorpay Hackathon.
 MIT License.

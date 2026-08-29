@@ -53,66 +53,6 @@ bun run demo
 
 *The pipeline flows through six stages: (1) signal detection across four transaction surfaces with outage-aware anomaly detection, (2) root-cause diagnosis, (3) EV-optimized playbook selection, (4) a universal, non-bypassable compliance gate enforcing quiet hours, TRAI DLT, RBI pre-debit notice, and the 9 stopping rules, (5) mock-adapter execution with outcome resolution against a hidden ground truth, and (6) tamper-evident audit logging paired with stratified holdout measurement.*
 
-<details>
-<summary>Mermaid source (click to expand — some renderers may not display this correctly; use the image above as the source of truth)</summary>
-
-```mermaid
-flowchart TD
-    subgraph Data Layer ["Simulated Indian Economy (data/recovery.db)"]
-        S1["Surface A: Subscriptions"]
-        S2["Surface B: Checkout Drop-off"]
-        S3["Surface C: Mandates"]
-        S4["Surface D: B2B Invoices"]
-    end
-
-    subgraph Step2 ["1. Signal Detection (engines/detect.ts)"]
-        DET["Signal Extractor & Cohort Splitter"]
-        ANOM["Sliding-Window Anomaly Detector"]
-    end
-
-    subgraph Step3 ["2. Diagnosis Engine (engines/diagnose.ts)"]
-        DIAG["Root-Cause Classifier: Rules + Keyword Matching (surfaces A–D)"]
-    end
-
-    subgraph Step4 ["3. Policy & EV Engine (engines/policy.ts)"]
-        EV["argmax EV Selection across 11 Playbooks"]
-    end
-
-    subgraph Step5 ["4. Guardrails & Compliance Gate (engines/gate.ts)"]
-        GATE{"Universal gate()"}
-        R1["Quiet Hours (08:00-19:00 IST)"]
-        R2["TRAI DLT Template Check"]
-        R3["RBI 24h Pre-Debit Notice"]
-        R4["The 9 Stopping Rules"]
-    end
-
-    subgraph Step6 ["5. Execution & Outcome Resolver (engines/execute.ts)"]
-        MOCK["Mock Adapters: WhatsApp, SMS, Voice, UPI"]
-        GT[("Hidden ground_truth")]
-        OUT["Outcome Resolver (Sole GT Reader)"]
-    end
-
-    subgraph Step7_8 ["6. Measurement & Audit Trail"]
-        AUDIT["SHA-256 Tamper-Evident Hash Chain (R4)"]
-        MEASURE["Stratified Holdout & 95% Bootstrap CI (R1)"]
-    end
-
-    Data Layer --> DET
-    Data Layer --> ANOM
-    ANOM -- "Outage Incident" --> DET
-    DET -- "Treatment (85%) / Holdout (15%)" --> DIAG
-    DIAG -- "Diagnosed Cases + Evidence" --> EV
-    EV -- "Intervention Plans & Steps" --> GATE
-    GATE -- "BLOCK (682 Suppressed)" --> AUDIT
-    GATE -- "ALLOW (1,929 Steps)" --> MOCK
-    MOCK --> OUT
-    GT -.-> OUT
-    OUT -- "Recovered Cash" --> MEASURE
-    OUT -- "State Transitions" --> AUDIT
-```
-
-</details>
-
 > **Reading the measurement report honestly:** ~94% of the net incremental recovery comes from Surface D (B2B high-value invoices), where root-cause diagnosis (PO/GRN vs. cash crunch vs. approval queue) most sharply differentiates playbook selection. Surface A (subscriptions) shows a slightly **negative** incremental (-₹1.65L) — the agent barely outperforms the organic baseline there. Surface B and C are modestly positive. The "all four surfaces, unified" pitch is architecturally accurate; economically, the B2B lift is the headline driver. Full breakdown: `out/measurement_report.md`.
 
 > **Simulation disclosure:** All ₹ figures are properties of a simulated economy (synthetic customers, seeded PRNG outcomes, mock adapter dispatches). No real payments were attempted or collected. The lift is a property of the outcome resolution model — bounded, fatigued, and honestly calibrated — not external market validation. Full disclosure: `docs/HONESTY.md`.

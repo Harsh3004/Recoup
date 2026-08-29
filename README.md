@@ -90,5 +90,5 @@ bun run demo
 
 ## 👥 Project Team & License
 
-Built with ❤️ for the Razorpay Hackathon.
+Built with ❤️.
 MIT License.

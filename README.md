@@ -58,6 +58,10 @@ bun run demo
 
 *The pipeline flows through six stages: (1) signal detection across four transaction surfaces with outage-aware anomaly detection, (2) structured LLM NLU diagnosis, (3) EV-optimized playbook selection, (4) a universal, non-bypassable compliance gate enforcing quiet hours, TRAI DLT, RBI pre-debit notice, and the 9 stopping rules via signed GatePassport tokens, (5) mock-adapter execution with causal outcome resolution against a hidden ground truth, and (6) tamper-evident audit logging paired with stratified holdout measurement.*
 
+> **Reading the measurement report honestly:** ~94% of the net incremental recovery comes from Surface D (B2B high-value invoices), where root-cause diagnosis (PO/GRN vs. cash crunch vs. approval queue) most sharply differentiates playbook selection. Surface A (subscriptions) shows a slightly **negative** incremental (-₹1.65L) — the agent barely outperforms the organic baseline there. Surface B and C are modestly positive. The "all four surfaces, unified" pitch is architecturally accurate; economically, the B2B lift is the headline driver. Full breakdown: `out/measurement_report.md`.
+
+> **Simulation disclosure:** All ₹ figures are properties of a simulated economy (synthetic customers, seeded PRNG outcomes, mock adapter dispatches). No real payments were attempted or collected. The lift is a property of the outcome resolution model — bounded, fatigued, and honestly calibrated — not external market validation. Full disclosure: `docs/HONESTY.md`.
+
 ---
 
 ## 🎯 The Four Scoring Requirements (R1 – R4)
@@ -94,5 +98,5 @@ bun run demo
 
 ## 👥 Project Team & License
 
-Built with ❤️ for the Razorpay Hackathon.  
+Built with ❤️.  
 MIT License.

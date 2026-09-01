@@ -1,7 +1,17 @@
 node_modules/
 *.log
+*.db
 *.db-wal
 *.db-shm
 .DS_Store
+.env
+
+# SQLite Databases & Dynamic Run Artifacts
 data/*.db
-out
+data/**/*.db
+data/ablation_arms/
+data/sweep_arms/
+
+# Build & Evaluation outputs (unless explicitly committed)
+out/ablation/
+out/sweep_arms/

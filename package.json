@@ -16,6 +16,8 @@
     "measure": "bun run engines/measure.ts",
     "ablate": "bun run engines/ablate.ts",
     "benchmark:llm": "BENCHMARK_STRICT=1 bun run scripts/benchmark_llm.ts",
+    "eval:diagnosis-independent": "bun run scripts/eval_diagnosis_independent.ts",
+    "eval:diag": "bun run scripts/eval_diagnose.ts",
     "sensitivity": "bun run scripts/sensitivity_sweep.ts",
     "demo": "bun run server/index.ts"
   },

@@ -2,7 +2,7 @@
 
 ## 1. Overview & Architectural Role
 
-The Recoup Compliance Gate (`engines/gate.ts`) is the **single, non-bypassable choke point** through which every outbound communication, gateway charge, and recovery action must pass before physical dispatch.
+The Recoup Compliance Gate (`engines/gate.ts`) is the **single architectural choke point** through which every outbound communication, gateway charge, and recovery action must pass before physical dispatch. `dispatchMockAdapter()` is the only customer-facing dispatch entry point exported by the `adapters` module.
 
 ```
        ┌───────────────────────┐
@@ -13,15 +13,15 @@ The Recoup Compliance Gate (`engines/gate.ts`) is the **single, non-bypassable c
        ┌───────────────────────┐
        │    Universal gate()   │◄──── RBI / TRAI Guardrails, 9 Stopping Rules
        └──────────┬────────────┘
-                  │ Mints Signed GatePassport Token
+                  │ Mints HMAC-SHA256 Signed GatePassport Token
                   ▼
        ┌───────────────────────┐
-       │  dispatchMockAdapter  │◄──── Rejects any call lacking a valid GatePassport
+       │  dispatchMockAdapter  │◄──── Rejects any call lacking valid GatePassport binding
        └──────────┬────────────┘
                   │ Physical Payload Dispatch
                   ▼
        ┌───────────────────────┐
-       │ Unified Audit Ledger  │◄──── Cryptographic SHA-256 Chaining with DB Triggers
+       │ Unified Audit Ledger  │◄──── SHA-256 Chaining with SQLite DB Triggers
        └───────────────────────┘
 ```
 
@@ -29,12 +29,12 @@ The Recoup Compliance Gate (`engines/gate.ts`) is the **single, non-bypassable c
 
 ## 2. Invariants & Proof Mechanisms
 
-### Invariant 1: Unforgeable `GatePassport` Execution Token
-- **Rule:** No adapter (`formatEmail`, `formatSms`, `formatWhatsApp`, `formatVoiceTranscript`, `formatGatewayCharge`) will format or dispatch a payload without a valid, unexpired `GatePassport`.
+### Invariant 1: Keyed `GatePassport` Execution Token (HMAC-SHA256)
+- **Rule:** Raw formatters (`formatEmail`, `formatSms`, etc.) are internal to `adapters` and not exported. `dispatchMockAdapter()` rejects any call without an unexpired, authentic `GatePassport` matching the exact risk item, channel, action, and plan step.
 - **Signature Mechanism:**
-  $$\text{Signature} = \operatorname{SHA-256}(\text{passportId} \parallel \text{riskItemId} \parallel \text{planStepId} \parallel \text{channel} \parallel \text{action} \parallel \text{issuedAt} \parallel \text{expiresAt} \parallel \text{SECRET})$$
-- **Verification:** `dispatchMockAdapter` validates the signature, risk item ID, channel, and expiry window ($4$ hours).
-- **Test:** [`test/gate_invariants.test.ts`](../test/gate_invariants.test.ts) asserts that calling any adapter directly or with a forged signature throws a fatal `SECURITY_ERROR`.
+  $$\text{Signature} = \operatorname{HMAC-SHA256}(\text{passportId} \parallel \text{riskItemId} \parallel \text{planStepId} \parallel \text{channel} \parallel \text{action} \parallel \text{issuedAt} \parallel \text{expiresAt}, \text{GATE\_PASSPORT\_SECRET})$$
+- **Verification:** `dispatchMockAdapter` validates the HMAC signature, risk item ID, channel, action, plan step ID, and expiry window ($4$ hours). A passport minted for an email reminder cannot be reused for a voice call or different action.
+- **Test:** [`test/gate_invariants.test.ts`](../test/gate_invariants.test.ts) asserts that calling without passport, with forged signature, expired timestamp, mismatched action, or mismatched step throws a fatal `SECURITY_ERROR`.
 
 ### Invariant 2: Static AST Import Isolation
 - **Rule:** Adapters can **never** be imported or executed anywhere outside `engines/execute.ts`.

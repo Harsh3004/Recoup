@@ -74,7 +74,14 @@ export interface GatePassport {
   signature: string;
 }
 
-const PASSPORT_SECRET = "recoup_gate_passport_immutable_secret_2026";
+import { createHmac } from "node:crypto";
+
+const PASSPORT_SECRET =
+  process.env.GATE_PASSPORT_SECRET || "recoup_gate_passport_dev_secret_2026";
+
+function hmacSha256(payload: string, secret: string): string {
+  return createHmac("sha256", secret).update(payload).digest("hex");
+}
 
 export function mintGatePassport(input: {
   riskItemId: string;
@@ -85,8 +92,8 @@ export function mintGatePassport(input: {
 }): GatePassport {
   const passportId = `pass_${pad(Math.floor(Math.random() * 1_000_000_000), 9)}`;
   const expiresAt = input.issuedAt + 4 * 3600 * 1000; // 4 hours validity
-  const payload = `${passportId}|${input.riskItemId}|${input.planStepId ?? ""}|${input.channel}|${input.action}|${input.issuedAt}|${expiresAt}|${PASSPORT_SECRET}`;
-  const signature = sha256Hex(payload);
+  const payload = `${passportId}|${input.riskItemId}|${input.planStepId ?? ""}|${input.channel}|${input.action}|${input.issuedAt}|${expiresAt}`;
+  const signature = hmacSha256(payload, PASSPORT_SECRET);
   return {
     passportId,
     riskItemId: input.riskItemId,
@@ -104,6 +111,8 @@ export function verifyGatePassport(
   expected: {
     riskItemId: string;
     channel: string;
+    action: string;
+    planStepId?: string | null;
     now?: number;
   },
 ): boolean {
@@ -112,8 +121,12 @@ export function verifyGatePassport(
   if (now > passport.expiresAt) return false;
   if (passport.riskItemId !== expected.riskItemId) return false;
   if (passport.channel !== expected.channel) return false;
-  const payload = `${passport.passportId}|${passport.riskItemId}|${passport.planStepId ?? ""}|${passport.channel}|${passport.action}|${passport.issuedAt}|${passport.expiresAt}|${PASSPORT_SECRET}`;
-  const expectedSig = sha256Hex(payload);
+  if (passport.action !== expected.action) return false;
+  if (expected.planStepId && passport.planStepId && passport.planStepId !== expected.planStepId) {
+    return false;
+  }
+  const payload = `${passport.passportId}|${passport.riskItemId}|${passport.planStepId ?? ""}|${passport.channel}|${passport.action}|${passport.issuedAt}|${passport.expiresAt}`;
+  const expectedSig = hmacSha256(payload, PASSPORT_SECRET);
   return passport.signature === expectedSig;
 }
 

@@ -23,6 +23,14 @@ export interface LlmDiagnosisOutput {
   model: string;
   cached: boolean;
   fallbackUsed?: boolean;
+  llmUsed: boolean;
+  llmSkippedReason?: string | null;
+  latencyMs?: number | null;
+  tokenUsage?: {
+    promptTokens: number;
+    completionTokens: number;
+    totalTokens: number;
+  } | null;
 }
 
 const SYSTEM_PROMPT = `You are Recoup's Autonomous B2B Accounts Receivable NLU Agent.
@@ -135,5 +143,9 @@ ${input.emailThread ?? "No email correspondence recorded."}
     model: resp.model,
     cached: resp.cached,
     fallbackUsed: resp.fallbackUsed,
+    llmUsed: resp.llmUsed,
+    llmSkippedReason: resp.llmSkippedReason ?? null,
+    latencyMs: resp.latencyMs ?? null,
+    tokenUsage: resp.tokenUsage ?? null,
   };
 }

@@ -3,31 +3,31 @@
     {
       "armName": "Recoup Autonomous Agent",
       "description": "Full AI root-cause NLU + Argmax EV Playbook Optimization",
-      "totalCollectedPaise": 3261276000,
+      "totalCollectedPaise": 1783565600,
       "scaledHoldoutBaselinePaise": 751236830,
-      "netIncrementalPaise": 2510039170,
-      "recoveryRatePct": 20.11917874133188,
+      "netIncrementalPaise": 1032328770,
+      "recoveryRatePct": 11.00301694897667,
       "degradationPct": 0
     },
     {
       "armName": "Random Playbook Policy",
       "description": "Random valid playbook assignment across all cases",
-      "totalCollectedPaise": 411716800,
+      "totalCollectedPaise": 8676800,
       "scaledHoldoutBaselinePaise": 751236830,
-      "netIncrementalPaise": -339520030,
-      "recoveryRatePct": 2.5399272830662567,
-      "degradationPct": -113.52648333372424
+      "netIncrementalPaise": -742560030,
+      "recoveryRatePct": 0.05352815588217264,
+      "degradationPct": -171.9305759540151
     },
     {
       "armName": "Identical Naive Dunning",
       "description": "Naive 3-Email generic ladder without root-cause adaptation",
-      "totalCollectedPaise": 10887100,
+      "totalCollectedPaise": 7757600,
       "scaledHoldoutBaselinePaise": 751236830,
-      "netIncrementalPaise": -740349730,
-      "recoveryRatePct": 0.06716374537903395,
-      "degradationPct": -129.49554488426568
+      "netIncrementalPaise": -743479230,
+      "recoveryRatePct": 0.04785750761473613,
+      "degradationPct": -172.01961735504088
     }
   ],
-  "degradationVsIdentical": 129.49554488426568,
+  "degradationVsIdentical": 172.01961735504088,
   "passedCausalSignificance": true
 }

@@ -8,7 +8,7 @@ import { openDb } from "../src/db";
 import { runDiagnosis } from "../engines/diagnose";
 
 const db = openDb();
-const res = runDiagnosis(db);
+const res = await runDiagnosis(db);
 
 const gtEvents = db
   .query(`SELECT source_ref, true_root_cause FROM ground_truth_events`)
@@ -50,7 +50,9 @@ for (const d of res.diagnoses) {
 const accuracyPct = ((correct / res.diagnoses.length) * 100).toFixed(2);
 const outageRecallPct = outageTotal > 0 ? ((outageCorrect / outageTotal) * 100).toFixed(2) : "100.00";
 
-console.log(`\n=== Offline Diagnosis Accuracy Evaluation ===`);
-console.log(`Evaluated: ${res.diagnoses.length} items`);
-console.log(`Root-Cause Accuracy: ${accuracyPct}% (${correct}/${res.diagnoses.length})`);
-console.log(`Systemic Outage Recall: ${outageRecallPct}% (${outageCorrect}/${outageTotal})\n`);
+console.log(`\n=== Pipeline Self-Consistency & Synthetic Ground Truth Verification ===`);
+console.log(`Evaluated: ${res.diagnoses.length} synthetic risk items`);
+console.log(`Synthetic Self-Consistency: ${accuracyPct}% (${correct}/${res.diagnoses.length}) [Contract Check]`);
+console.log(`Systemic Outage Recall: ${outageRecallPct}% (${outageCorrect}/${outageTotal})`);
+console.log(`Note: For independent out-of-distribution NLU generalization on unkeyworded text:`);
+console.log(`      bun run eval:diagnosis-independent\n`);

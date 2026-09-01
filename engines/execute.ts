@@ -17,14 +17,7 @@
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import type { Database } from "bun:sqlite";
-import {
-  dispatchMockAdapter,
-  formatEmail,
-  formatGatewayCharge,
-  formatSms,
-  formatVoiceTranscript,
-  formatWhatsApp,
-} from "../adapters";
+import { dispatchMockAdapter } from "../adapters";
 import { appendAudit } from "../src/audit";
 import { DEFAULT_DB_PATH, openDb } from "../src/db";
 import { formatInr } from "../src/money";
@@ -52,93 +45,166 @@ const HOUR = 3_600_000;
 const DAY = 86_400_000;
 
 /**
- * Root Cause to Playbook Fit Matrix (0.0 to 1.0)
- * Evaluates how well an action/playbook actually addresses the underlying failure cause.
- * Mismatches suffer low recovery probability and accelerate customer contact fatigue.
+/**
+ * Decoupled Causal Action-to-Friction Compatibility Model
+ *
+ * INDEPENDENCE GUARANTEE:
+ * The simulator MUST NOT read the policy engine's Expected Value heuristics (playbooks/*.ts).
+ * Instead, this independent mechanism evaluates whether the dispatched action possesses the
+ * necessary physical capability to resolve the underlying transaction defect.
  */
-export function getMessageFit(playbook: string, trueRootCause: string): number {
+export function getActionFrictionCompatibility(
+  action: string,
+  playbook: string,
+  trueRootCause: string,
+): number {
   const cause = trueRootCause.toUpperCase();
+  const act = action.toUpperCase();
   const pb = playbook.toUpperCase();
 
-  const FIT_MATRIX: Record<string, Record<string, number>> = {
-    PO_GRN_MISMATCH: {
-      HUMAN_ESCALATION: 0.88,
-      DOCUMENT_REPAIR: 0.85,
-      PROMISE_TO_PAY: 0.35,
-      DUNNING_LADDER: 0.05,
-      ONE_TAP_UPI: 0.02,
-      SMART_RETRY: 0.00,
-      CARD_UPDATER: 0.00,
-    },
-    INVOICE_NOT_RECEIVED: {
-      DUNNING_LADDER: 0.85,
-      PROMISE_TO_PAY: 0.35,
-      HUMAN_ESCALATION: 0.60,
-      ONE_TAP_UPI: 0.10,
-    },
-    APPROVAL_STUCK: {
-      HUMAN_ESCALATION: 0.85,
-      PROMISE_TO_PAY: 0.75,
-      DUNNING_LADDER: 0.15,
-      ONE_TAP_UPI: 0.05,
-    },
-    LINE_ITEM_DISPUTE: {
-      HUMAN_ESCALATION: 0.88,
-      PARTIAL_PAYMENT: 0.70,
-      PROMISE_TO_PAY: 0.25,
-      DUNNING_LADDER: 0.05,
-    },
-    CASH_CRUNCH: {
-      PARTIAL_PAYMENT: 0.85,
-      PROMISE_TO_PAY: 0.80,
-      DISCOUNT_WAIVER: 0.75,
-      HUMAN_ESCALATION: 0.65,
-      DUNNING_LADDER: 0.10,
-      SMART_RETRY: 0.02,
-    },
-    INSUFFICIENT_FUNDS: {
-      SMART_RETRY: 0.82,
-      ONE_TAP_UPI: 0.55,
-      HINGLISH_VOICE: 0.45,
-      DUNNING_LADDER: 0.30,
-      CARD_UPDATER: 0.00,
-      MANDATE_REAUTH: 0.05,
-    },
-    EXPIRED_CARD: {
-      CARD_UPDATER: 0.88,
-      ONE_TAP_UPI: 0.65,
-      DUNNING_LADDER: 0.20,
-      SMART_RETRY: 0.00,
-      HINGLISH_VOICE: 0.30,
-    },
-    ISSUER_SOFT: {
-      SMART_RETRY: 0.75,
-      ONE_TAP_UPI: 0.70,
-      DUNNING_LADDER: 0.35,
-      CARD_UPDATER: 0.10,
-    },
-    TECHNICAL: {
-      SMART_RETRY: 0.75,
-      ONE_TAP_UPI: 0.60,
-      DUNNING_LADDER: 0.30,
-    },
-    MANDATE: {
-      MANDATE_REAUTH: 0.82,
-      ONE_TAP_UPI: 0.60,
-      SMART_RETRY: 0.10,
-      DUNNING_LADDER: 0.20,
-    },
-    CHECKOUT_DROP_OFF: {
-      CART_RECOVERY: 0.82,
-      ONE_TAP_UPI: 0.78,
-      DISCOUNT_WAIVER: 0.70,
-      DUNNING_LADDER: 0.25,
-    },
-  };
+  // 1. Warehouse & Physical Intake Disputes (PO_GRN_MISMATCH)
+  // Requires physical dock verification, logistics brief, or human account manager.
+  // Automated generic dunning cannot resolve a physical pallet mismatch in stores.
+  if (cause === "PO_GRN_MISMATCH") {
+    if (act.includes("ASSIGN_ACCOUNT_MANAGER") || act.includes("DISPUTE_BRIEF") || pb === "HUMAN_ESCALATION") {
+      return 0.85;
+    }
+    if (act.includes("DOCUMENT") || act.includes("CHALLAN") || pb === "DOCUMENT_REPAIR") {
+      return 0.80;
+    }
+    if (pb === "PROMISE_TO_PAY") {
+      return 0.30;
+    }
+    return 0.04; // Generic dunning reminder is completely ignored by AP warehouse hold
+  }
 
-  const table = FIT_MATRIX[cause];
-  if (!table) return 0.40;
-  return table[pb] ?? 0.15;
+  // 2. Missing Tax Invoice Document (INVOICE_NOT_RECEIVED)
+  // Delivering the formal invoice PDF or statement directly to AP unlocks payment.
+  if (cause === "INVOICE_NOT_RECEIVED") {
+    if (act.includes("STATEMENT") || act.includes("PDF") || act.includes("INVOICE") || pb === "DUNNING_LADDER") {
+      return 0.82;
+    }
+    if (pb === "HUMAN_ESCALATION") {
+      return 0.58;
+    }
+    if (pb === "PROMISE_TO_PAY") {
+      return 0.32;
+    }
+    return 0.08;
+  }
+
+  // 3. Organizational Authorization Queue (APPROVAL_STUCK)
+  // Bill is stuck in executive/budget owner approval queue.
+  // Executive escalation or calendar-anchored PTP unblocks internal workflow.
+  if (cause === "APPROVAL_STUCK") {
+    if (act.includes("ACCOUNT_MANAGER") || pb === "HUMAN_ESCALATION") {
+      return 0.84;
+    }
+    if (pb === "PROMISE_TO_PAY") {
+      return 0.75;
+    }
+    if (pb === "DUNNING_LADDER") {
+      return 0.18;
+    }
+    return 0.06;
+  }
+
+  // 4. Line Item Pricing / Tax Variance (LINE_ITEM_DISPUTE)
+  // Requires price adjustment, debit note voucher, or account manager settlement.
+  if (cause === "LINE_ITEM_DISPUTE") {
+    if (act.includes("ACCOUNT_MANAGER") || pb === "HUMAN_ESCALATION") {
+      return 0.85;
+    }
+    if (act.includes("INSTALMENT") || pb === "PARTIAL_PAYMENT") {
+      return 0.68;
+    }
+    if (pb === "PROMISE_TO_PAY") {
+      return 0.22;
+    }
+    return 0.04;
+  }
+
+  // 5. Buyer Liquidity Deficit (CASH_CRUNCH)
+  // Demanding 100% full payment immediately fails because liquid cash is unavailable.
+  // Offering split installments, discount waiver, or future date agreement succeeds.
+  if (cause === "CASH_CRUNCH") {
+    if (act.includes("INSTALMENT") || pb === "PARTIAL_PAYMENT") {
+      return 0.82;
+    }
+    if (act.includes("PTP") || pb === "PROMISE_TO_PAY") {
+      return 0.78;
+    }
+    if (act.includes("DISCOUNT") || pb === "DISCOUNT_WAIVER") {
+      return 0.72;
+    }
+    if (pb === "HUMAN_ESCALATION") {
+      return 0.62;
+    }
+    return 0.08;
+  }
+
+  // 6. Account Balance Shortfall (INSUFFICIENT_FUNDS)
+  // Auto-debit failed due to zero/low balance.
+  // Timing retry to salary credit date or instant 1-tap UPI collects funds.
+  if (cause === "INSUFFICIENT_FUNDS") {
+    if (act.includes("SALARY") || pb === "SMART_RETRY") {
+      return 0.80;
+    }
+    if (act.includes("UPI") || pb === "ONE_TAP_UPI") {
+      return 0.52;
+    }
+    if (act.includes("VOICE") || pb === "HINGLISH_VOICE") {
+      return 0.42;
+    }
+    if (pb === "DUNNING_LADDER") {
+      return 0.28;
+    }
+    return 0.05;
+  }
+
+  // 7. Card Credentials Expired (EXPIRED_CARD)
+  // Old card token is dead. Retrying old card fails 100%. Only new card credentials work.
+  if (cause === "EXPIRED_CARD") {
+    if (act.includes("CARD_UPDATER") || pb === "CARD_UPDATER") {
+      return 0.86;
+    }
+    if (act.includes("UPI") || pb === "ONE_TAP_UPI") {
+      return 0.62;
+    }
+    if (pb === "DUNNING_LADDER") {
+      return 0.18;
+    }
+    return 0.00;
+  }
+
+  // 8. Soft Bank Decline / Transient Network Drop (ISSUER_SOFT, TECHNICAL, MANDATE)
+  if (cause.includes("MANDATE")) {
+    if (act.includes("MANDATE") || pb === "MANDATE_REAUTH") return 0.80;
+    if (pb === "ONE_TAP_UPI") return 0.58;
+    return 0.18;
+  }
+  if (cause.includes("ISSUER") || cause.includes("TECHNICAL")) {
+    if (pb === "SMART_RETRY") return 0.74;
+    if (pb === "ONE_TAP_UPI") return 0.68;
+    return 0.32;
+  }
+
+  // 9. Checkout Cart Abandonment (CHECKOUT_DROP_OFF)
+  if (cause.includes("CHECKOUT") || cause.includes("DROP_OFF")) {
+    if (pb === "CART_RECOVERY") return 0.80;
+    if (pb === "ONE_TAP_UPI") return 0.76;
+    if (pb === "DISCOUNT_WAIVER") return 0.68;
+    return 0.22;
+  }
+
+  return 0.35;
+}
+
+/**
+ * Backwards-compatibility wrapper for external callers & sensitivity sweep.
+ */
+export function getMessageFit(playbook: string, trueRootCause: string): number {
+  return getActionFrictionCompatibility("", playbook, trueRootCause);
 }
 
 export function runExecutionRunner(
@@ -247,10 +313,12 @@ export function runExecutionRunner(
            r.first_seen_at, r.cohort, r.incident_id,
            p.id AS plan_id, p.playbook, p.skipped, p.skip_reason, p.ev_paise,
            c.name AS customer_name, c.email, c.phone, c.language, c.segment,
-           c.digital_literacy
+           c.digital_literacy,
+           i.ageing_bucket
     FROM risk_items r
     JOIN customers c ON c.id = r.customer_id
     LEFT JOIN intervention_plans p ON p.risk_item_id = r.id
+    LEFT JOIN invoices i ON i.id = r.source_ref
     ORDER BY r.id ASC
   `).all() as {
     id: string;
@@ -272,6 +340,7 @@ export function runExecutionRunner(
     language: "EN" | "HI" | "HINGLISH";
     segment: "B2C" | "SMB" | "ENTERPRISE";
     digital_literacy: "LOW" | "MEDIUM" | "HIGH";
+    ageing_bucket?: string | null;
   }[];
 
   const rng = new Rng(seed + 999);
@@ -485,16 +554,54 @@ export function runExecutionRunner(
           ts: step.scheduled_at,
         });
 
-        // 5. Outcome Resolver — Causal Response Model & Shared Latent Ground Truth
+        // 5. Outcome Resolver — Decoupled Behavioral Response Model
         const trueCause = gtEv?.true_root_cause ?? "INSUFFICIENT_FUNDS";
-        const messageFit = getMessageFit(item.playbook ?? "DUNNING_LADDER", trueCause);
+        const actionCapability = getActionFrictionCompatibility(
+          step.action,
+          item.playbook ?? "DUNNING_LADDER",
+          trueCause,
+        );
+
+        // (a) Debt Ageing Hazard Rate Decay
+        // Older debts suffer structural resolution decay: e^(-0.15 * ageingLevel)
+        const ageingLevel = item.ageing_bucket === "90_PLUS" ? 3 : item.ageing_bucket === "61_90" ? 2 : item.ageing_bucket === "31_60" ? 1 : 0;
+        const ageingDecay = Math.exp(-0.15 * ageingLevel);
+
+        // (b) Customer Segment Channel Friction
+        // Enterprise accounting desks ignore automated consumer channels (SMS/WhatsApp) without human brief/invoice
+        let segmentFriction = 1.0;
+        if (item.segment === "ENTERPRISE" && (step.channel === "SMS" || step.channel === "WHATSAPP") && item.playbook !== "HUMAN_ESCALATION") {
+          segmentFriction = 0.20;
+        }
+
+        // (c) Digital Literacy Friction
+        // Low-literacy customers drop off on self-service portals/links, but respond to assisted voice/human contact
+        let literacyFriction = 1.0;
+        if (item.digital_literacy === "LOW") {
+          if (step.channel === "PAYMENT_LINK" || step.channel === "EMAIL") literacyFriction = 0.60;
+          else if (step.channel === "VOICE" || step.channel === "AGENT") literacyFriction = 1.15;
+        }
+
+        // (d) Exposure Resistance (Large checks face credit committee / authorization hurdles)
+        let exposureResistance = 1.0;
+        if (item.exposure_paise >= 10_000_000 && item.playbook !== "HUMAN_ESCALATION" && item.playbook !== "PARTIAL_PAYMENT") {
+          exposureResistance = 0.75;
+        }
+
+        // Combined Behavioral Action Relevance
+        const behavioralRelevance = Math.min(
+          1.0,
+          Math.max(0.02, actionCapability * segmentFriction * literacyFriction * ageingDecay * exposureResistance),
+        );
+
         const organic = gtEv?.would_pay_anyway === 1;
 
         if (organic) {
-          // Organic payer: accelerates timeline on first touch IF the touch is relevant (messageFit >= 0.25).
+          // Organic payer: accelerates timeline on first touch IF the touch provides required capability
+          // and appropriate channel (behavioralRelevance >= 0.20).
           // Counterproductive/spam touches (e.g. sending a generic dunning email for a PO/GRN warehouse dispute)
           // fail to accelerate the buyer AP desk.
-          if (messageFit >= 0.25) {
+          if (behavioralRelevance >= 0.20) {
             const recId = `rec_${pad(recIdx++, 8)}`;
             insertRecovery.run(
               recId, item.id, item.customer_id, item.exposure_paise,
@@ -547,7 +654,7 @@ export function runExecutionRunner(
           }
         }
 
-        // ── Non-organic path: Matrix-driven causal response function ──
+        // ── Non-organic path: Behavioral causal response model ──
 
         let channelAffinity = 1500;
         try {
@@ -561,7 +668,7 @@ export function runExecutionRunner(
 
         // Penalty for mismatched message accelerates contact fatigue
         let overTolerance = Math.max(0, sIdx + 1 - maxTolerable);
-        if (messageFit < 0.25) {
+        if (behavioralRelevance < 0.20) {
           overTolerance += 1; // spam penalty
         }
 
@@ -582,20 +689,20 @@ export function runExecutionRunner(
         const basePropensity = (gtCust?.pay_propensity_bps ?? 3000) / 10000;
         const channelFitFactor = channelAffinity / 10000;
 
-        const pConversion = basePropensity * 0.40 * (0.5 + 0.5 * channelFitFactor) * messageFit * timingMultiplier * fatigueMultiplier;
+        const pConversion = basePropensity * 0.38 * (0.5 + 0.5 * channelFitFactor) * behavioralRelevance * timingMultiplier * fatigueMultiplier;
         const effectiveBps = Math.min(2200, Math.round(pConversion * 10000));
         const touchRecovered = rng.bool(effectiveBps);
 
-        // B2B Promise to Pay & Partial Payment Resolution (ONLY for PTP/Partial/Human playbooks)
-        const isB2BResolvable = item.playbook === "PROMISE_TO_PAY" || item.playbook === "PARTIAL_PAYMENT" || item.playbook === "HUMAN_ESCALATION";
+        // B2B Promise to Pay & Partial Payment Resolution (ONLY for PTP/Partial/Human playbooks with adequate relevance)
+        const isB2BResolvable = (item.playbook === "PROMISE_TO_PAY" || item.playbook === "PARTIAL_PAYMENT" || item.playbook === "HUMAN_ESCALATION") && behavioralRelevance >= 0.22;
         if (!touchRecovered && isB2BResolvable && (item.surface === "D" || item.segment !== "B2C")) {
-          const promiseCaptureProb = Math.round(5500 * messageFit);
+          const promiseCaptureProb = Math.min(6500, Math.round(5200 * behavioralRelevance));
           const promiseLogged = rng.bool(promiseCaptureProb);
 
           if (promiseLogged) {
             const ptpId = `ptp_${pad(ptpIdx++, 8)}`;
             const dueAt = step.scheduled_at + 3 * DAY;
-            const keepRate = Math.min(7500, Math.round((gtCust?.pay_propensity_bps ?? 4000) * 1.35 * messageFit));
+            const keepRate = Math.min(7500, Math.round((gtCust?.pay_propensity_bps ?? 4000) * 1.30 * behavioralRelevance));
             const willKeep = rng.bool(keepRate);
 
             // Time value and discount realization modeling (65-85% realized)
@@ -666,7 +773,7 @@ export function runExecutionRunner(
 
         // Human Escalation Resolution
         if (item.playbook === "HUMAN_ESCALATION") {
-          const humanSuccessRate = Math.min(7500, Math.round((gtCust?.pay_propensity_bps ?? 4000) * 1.50 * messageFit));
+          const humanSuccessRate = Math.min(7500, Math.round((gtCust?.pay_propensity_bps ?? 4000) * 1.40 * behavioralRelevance));
           const humanResolved = rng.bool(humanSuccessRate);
           if (humanResolved) {
             const recId = `rec_${pad(recIdx++, 8)}`;

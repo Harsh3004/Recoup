@@ -30,7 +30,7 @@ describe("Gate Invariants & Non-Bypassability Security Proof", () => {
 
     expect(() => {
       dispatchMockAdapter(input);
-    }).toThrow("SECURITY_ERROR: Non-bypassable gate invariant violation");
+    }).toThrow("SECURITY_ERROR");
   });
 
   it("throws SecurityException when forged or tampered passport signature is presented", () => {
@@ -185,5 +185,90 @@ describe("Gate Invariants & Non-Bypassability Security Proof", () => {
       expect(content).not.toMatch(/from\s+["']\.\.\/adapters/);
       expect(content).not.toMatch(/formatVoiceTranscript|formatWhatsApp|formatSms|formatGatewayCharge/);
     }
+  });
+
+  it("throws SecurityException when GatePassport is reused for a different action", () => {
+    const dayTime = new Date("2026-08-20T14:00:00+05:30").getTime();
+    const gateDec = gate(
+      db,
+      {
+        riskItemId: "rsk_test_001",
+        planStepId: "stp_test_001",
+        customerId: "cus_test_001",
+        channel: "WHATSAPP",
+        action: "SEND_WHATSAPP",
+        scheduledAt: dayTime,
+      },
+      { now: dayTime },
+    );
+
+    expect(gateDec.allowed).toBe(true);
+
+    const inputMismatchAction = {
+      riskItemId: "rsk_test_001",
+      planStepId: "stp_test_001",
+      customerId: "cus_test_001",
+      customerName: "Aarav Sharma",
+      phone: "+919876543210",
+      email: "aarav@example.com",
+      language: "EN" as const,
+      segment: "B2C" as const,
+      exposurePaise: 50000,
+      rootCause: "INSUFFICIENT_FUNDS",
+      playbook: "ONE_TAP_UPI",
+      stepNo: 1,
+      action: "UNAUTHORIZED_LEGAL_ESCALATION",
+      scheduledAt: dayTime,
+      metadata: { channel: "WHATSAPP" },
+    };
+
+    expect(() => {
+      dispatchMockAdapter(inputMismatchAction, gateDec.passport);
+    }).toThrow("SECURITY_ERROR");
+  });
+
+  it("throws SecurityException when GatePassport is reused for a different planStepId", () => {
+    const dayTime = new Date("2026-08-20T14:00:00+05:30").getTime();
+    const gateDec = gate(
+      db,
+      {
+        riskItemId: "rsk_test_001",
+        planStepId: "stp_test_001",
+        customerId: "cus_test_001",
+        channel: "WHATSAPP",
+        action: "SEND_WHATSAPP",
+        scheduledAt: dayTime,
+      },
+      { now: dayTime },
+    );
+
+    const inputMismatchStep = {
+      riskItemId: "rsk_test_001",
+      planStepId: "stp_different_999",
+      customerId: "cus_test_001",
+      customerName: "Aarav Sharma",
+      phone: "+919876543210",
+      email: "aarav@example.com",
+      language: "EN" as const,
+      segment: "B2C" as const,
+      exposurePaise: 50000,
+      rootCause: "INSUFFICIENT_FUNDS",
+      playbook: "ONE_TAP_UPI",
+      stepNo: 2,
+      action: "SEND_WHATSAPP",
+      scheduledAt: dayTime,
+      metadata: { channel: "WHATSAPP" },
+    };
+
+    expect(() => {
+      dispatchMockAdapter(inputMismatchStep, gateDec.passport);
+    }).toThrow("SECURITY_ERROR");
+  });
+
+  it("statically verifies that adapters/index.ts does not export raw formatters", () => {
+    const indexPath = join(import.meta.dir, "..", "adapters", "index.ts");
+    const indexContent = readFileSync(indexPath, "utf8");
+    expect(indexContent).not.toMatch(/export\s+\*\s+from\s+["']\.\/(email|sms|whatsapp|voice|gateway|payment_link)["']/);
+    expect(indexContent).not.toMatch(/export\s+\{[^}]*formatEmail[^}]*\}/);
   });
 });

@@ -172,16 +172,19 @@ CREATE TABLE IF NOT EXISTS risk_items (
 );
 
 CREATE TABLE IF NOT EXISTS diagnoses (
-  id             TEXT PRIMARY KEY,
-  risk_item_id   TEXT NOT NULL REFERENCES risk_items(id),
-  root_cause     TEXT NOT NULL,
-  confidence_bps INTEGER NOT NULL CHECK (confidence_bps BETWEEN 0 AND 10000),
-  is_systemic    INTEGER NOT NULL DEFAULT 0 CHECK (is_systemic IN (0, 1)),
-  evidence_json  TEXT NOT NULL,
-  decline_code   TEXT,
-  llm_used       INTEGER NOT NULL DEFAULT 0 CHECK (llm_used IN (0, 1)),
-  model_version  TEXT,
-  diagnosed_at   INTEGER NOT NULL
+  id                  TEXT PRIMARY KEY,
+  risk_item_id        TEXT NOT NULL REFERENCES risk_items(id),
+  root_cause          TEXT NOT NULL,
+  confidence_bps      INTEGER NOT NULL CHECK (confidence_bps BETWEEN 0 AND 10000),
+  is_systemic         INTEGER NOT NULL DEFAULT 0 CHECK (is_systemic IN (0, 1)),
+  evidence_json       TEXT NOT NULL,
+  decline_code        TEXT,
+  llm_used            INTEGER NOT NULL DEFAULT 0 CHECK (llm_used IN (0, 1)),
+  model_version       TEXT,
+  diagnosed_at        INTEGER NOT NULL,
+  llm_latency_ms      INTEGER,
+  llm_token_usage     TEXT,
+  llm_skipped_reason  TEXT
 );
 
 CREATE TABLE IF NOT EXISTS intervention_plans (

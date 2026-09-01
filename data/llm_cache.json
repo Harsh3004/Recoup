@@ -1271,5 +1271,552 @@
       "totalTokens": 708
     },
     "isFallback": false
+  },
+  "5e8f0c93c8830e002498f323cc79cae0": {
+    "model": "recoup-nlu-keyword-classifier-v1",
+    "parsed": {
+      "root_cause": "INVOICE_UNPAID",
+      "confidence_bps": 9400,
+      "evidence_spans": [
+        "Invoice overdue in 61_90 bucket with standard terms"
+      ],
+      "recommended_playbook": "PROMISE_TO_PAY",
+      "rationale": "NLU classification identified INVOICE_UNPAID from AP correspondence context."
+    },
+    "content": "{\"root_cause\":\"INVOICE_UNPAID\",\"confidence_bps\":9400,\"evidence_spans\":[\"Invoice overdue in 61_90 bucket with standard terms\"],\"recommended_playbook\":\"PROMISE_TO_PAY\",\"rationale\":\"NLU classification identified INVOICE_UNPAID from AP correspondence context.\"}",
+    "cachedAt": 1788269897106,
+    "isFallback": true
+  },
+  "420e05366fc2d5249abb0e8d0cfa72fa": {
+    "model": "gemini-3.6-flash",
+    "parsed": {
+      "root_cause": "PO_GRN_MISMATCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "materials were not accepted at the receiving dock due to missing packing slip",
+        "Until inward entry is logged in ERP, payment cannot be initiated",
+        "Dock supervisor rejected unmanifested pallet load."
+      ],
+      "recommended_playbook": "HUMAN_ESCALATION",
+      "rationale": "The payment is blocked due to a missing packing slip and lack of ERP inward entry (GRN) at the receiving dock. Logistics/operations must intervene to provide delivery proof and log the inward receipt."
+    },
+    "content": "{\n  \"root_cause\": \"PO_GRN_MISMATCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"materials were not accepted at the receiving dock due to missing packing slip\",\n    \"Until inward entry is logged in ERP, payment cannot be initiated\",\n    \"Dock supervisor rejected unmanifested pallet load.\"\n  ],\n  \"recommended_playbook\": \"HUMAN_ESCALATION\",\n  \"rationale\": \"The payment is blocked due to a missing packing slip and lack of ERP inward entry (GRN) at the receiving dock. Logistics/operations must intervene to provide delivery proof and log the inward receipt.\"\n}",
+    "cachedAt": 1788270395295,
+    "inferredAt": "2026-09-01T13:46:19.409Z",
+    "tokenUsage": {
+      "promptTokens": 469,
+      "completionTokens": 152,
+      "totalTokens": 1198
+    },
+    "isFallback": false
+  },
+  "d49e415e14ad9df67f9b2f3de6626de1": {
+    "model": "gemini-3.6-flash",
+    "parsed": {
+      "root_cause": "PO_GRN_MISMATCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "Gate security signoff pending on evening delivery.",
+        "Physical count at gate 3 is pending because your driver unloaded after 6 PM.",
+        "Our security supervisor hasn't signed off on the inbound manifest yet."
+      ],
+      "recommended_playbook": "HUMAN_ESCALATION",
+      "rationale": "The buyer AP desk is holding payment because physical verification and security supervisor signoff on the inbound manifest are pending at Gate 3 due to an late evening delivery."
+    },
+    "content": "{\n  \"root_cause\": \"PO_GRN_MISMATCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"Gate security signoff pending on evening delivery.\",\n    \"Physical count at gate 3 is pending because your driver unloaded after 6 PM.\",\n    \"Our security supervisor hasn't signed off on the inbound manifest yet.\"\n  ],\n  \"recommended_playbook\": \"HUMAN_ESCALATION\",\n  \"rationale\": \"The buyer AP desk is holding payment because physical verification and security supervisor signoff on the inbound manifest are pending at Gate 3 due to an late evening delivery.\"\n}",
+    "cachedAt": 1788270426297,
+    "inferredAt": "2026-09-01T13:46:35.321Z",
+    "tokenUsage": {
+      "promptTokens": 461,
+      "completionTokens": 148,
+      "totalTokens": 1059
+    },
+    "isFallback": false
+  },
+  "091912ea56814cd80e87cf5b96b2883b": {
+    "model": "gemini-3.6-flash",
+    "parsed": {
+      "root_cause": "PO_GRN_MISMATCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "Intake register mismatch with warehouse manifest.",
+        "Stock intake register does not show these cartons.",
+        "Please coordinate with logistics to get the intake memo validated so we can process the wire."
+      ],
+      "recommended_playbook": "HUMAN_ESCALATION",
+      "rationale": "The buyer's AP department is withholding payment due to a mismatch between the warehouse stock intake register and the invoice manifest, indicating a pending GRN/intake validation from logistics."
+    },
+    "content": "{\n  \"root_cause\": \"PO_GRN_MISMATCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"Intake register mismatch with warehouse manifest.\",\n    \"Stock intake register does not show these cartons.\",\n    \"Please coordinate with logistics to get the intake memo validated so we can process the wire.\"\n  ],\n  \"recommended_playbook\": \"HUMAN_ESCALATION\",\n  \"rationale\": \"The buyer's AP department is withholding payment due to a mismatch between the warehouse stock intake register and the invoice manifest, indicating a pending GRN/intake validation from logistics.\"\n}",
+    "cachedAt": 1788270476795,
+    "inferredAt": "2026-09-01T13:47:06.322Z",
+    "tokenUsage": {
+      "promptTokens": 454,
+      "completionTokens": 146,
+      "totalTokens": 1129
+    },
+    "isFallback": false
+  },
+  "9567b18482dc229adf8f6f9297c995ed": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "PO_GRN_MISMATCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "warehouse manager bol raha hai ki boxes receive hi nahi hue",
+        "Unloading verification slip bhej do"
+      ],
+      "recommended_playbook": "HUMAN_ESCALATION",
+      "rationale": "The buyer's warehouse manager has stated that the goods have not been received ('boxes receive hi nahi hue') and requested the unloading verification slip/delivery challan before releasing payment, which directly matches the PO_GRN_MISMATCH root cause."
+    },
+    "content": "{\n  \"root_cause\": \"PO_GRN_MISMATCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"warehouse manager bol raha hai ki boxes receive hi nahi hue\",\n    \"Unloading verification slip bhej do\"\n  ],\n  \"recommended_playbook\": \"HUMAN_ESCALATION\",\n  \"rationale\": \"The buyer's warehouse manager has stated that the goods have not been received ('boxes receive hi nahi hue') and requested the unloading verification slip/delivery challan before releasing payment, which directly matches the PO_GRN_MISMATCH root cause.\"\n}",
+    "cachedAt": 1788270579439,
+    "inferredAt": "2026-09-01T13:49:26.271Z",
+    "tokenUsage": {
+      "promptTokens": 458,
+      "completionTokens": 143,
+      "totalTokens": 601
+    },
+    "isFallback": false
+  },
+  "315744d48f136c901d9e54835a926c91": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "INVOICE_NOT_RECEIVED",
+      "confidence_bps": 9800,
+      "evidence_spans": [
+        "We searched our shared finance mailbox and found zero emails from your domain for June billing",
+        "Could you attach the PDF billing document directly in this thread?"
+      ],
+      "recommended_playbook": "DUNNING_LADDER",
+      "rationale": "The buyer's Accounts Payable desk explicitly stated they never received the invoice PDF in their shared mailbox and requested a resend directly in the email thread, perfectly matching the INVOICE_NOT_RECEIVED root cause."
+    },
+    "content": "{\n  \"root_cause\": \"INVOICE_NOT_RECEIVED\",\n  \"confidence_bps\": 9800,\n  \"evidence_spans\": [\n    \"We searched our shared finance mailbox and found zero emails from your domain for June billing\",\n    \"Could you attach the PDF billing document directly in this thread?\"\n  ],\n  \"recommended_playbook\": \"DUNNING_LADDER\",\n  \"rationale\": \"The buyer's Accounts Payable desk explicitly stated they never received the invoice PDF in their shared mailbox and requested a resend directly in the email thread, perfectly matching the INVOICE_NOT_RECEIVED root cause.\"\n}",
+    "cachedAt": 1788270593816,
+    "inferredAt": "2026-09-01T13:49:40.645Z",
+    "tokenUsage": {
+      "promptTokens": 462,
+      "completionTokens": 145,
+      "totalTokens": 607
+    },
+    "isFallback": false
+  },
+  "14d0a8247edaf92cbf07265b091c2b50": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "INVOICE_NOT_RECEIVED",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "Our centralized accounting portal has no bill on file for this billing cycle.",
+        "Please email the tax document along with your GSTIN certificate to our treasury desk."
+      ],
+      "recommended_playbook": "DUNNING_LADDER",
+      "rationale": "The buyer's accounts payable desk states that the portal has no bill on file and requests the invoice along with tax documents and GSTIN certificate to be emailed to their treasury desk."
+    },
+    "content": "{\n  \"root_cause\": \"INVOICE_NOT_RECEIVED\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"Our centralized accounting portal has no bill on file for this billing cycle.\",\n    \"Please email the tax document along with your GSTIN certificate to our treasury desk.\"\n  ],\n  \"recommended_playbook\": \"DUNNING_LADDER\",\n  \"rationale\": \"The buyer's accounts payable desk states that the portal has no bill on file and requests the invoice along with tax documents and GSTIN certificate to be emailed to their treasury desk.\"\n}",
+    "cachedAt": 1788270608590,
+    "inferredAt": "2026-09-01T13:49:55.026Z",
+    "tokenUsage": {
+      "promptTokens": 456,
+      "completionTokens": 139,
+      "totalTokens": 595
+    },
+    "isFallback": false
+  },
+  "72c75d146810debf9af61c791ea07eed": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "INVOICE_NOT_RECEIVED",
+      "confidence_bps": 9800,
+      "evidence_spans": [
+        "The previous attachment was a corrupt 0-byte file that our antivirus quarantined. Kindly re-attach a fresh PDF copy so our team can punch it in."
+      ],
+      "recommended_playbook": "DUNNING_LADDER",
+      "rationale": "The buyer's accounts payable team explicitly stated that the previous invoice attachment was corrupt and quarantined by their antivirus, and they requested a fresh PDF copy to process the payment."
+    },
+    "content": "{\n  \"root_cause\": \"INVOICE_NOT_RECEIVED\",\n  \"confidence_bps\": 9800,\n  \"evidence_spans\": [\n    \"The previous attachment was a corrupt 0-byte file that our antivirus quarantined. Kindly re-attach a fresh PDF copy so our team can punch it in.\"\n  ],\n  \"recommended_playbook\": \"DUNNING_LADDER\",\n  \"rationale\": \"The buyer's accounts payable team explicitly stated that the previous invoice attachment was corrupt and quarantined by their antivirus, and they requested a fresh PDF copy to process the payment.\"\n}",
+    "cachedAt": 1788270619383,
+    "inferredAt": "2026-09-01T13:50:18.065Z",
+    "tokenUsage": {
+      "promptTokens": 460,
+      "completionTokens": 136,
+      "totalTokens": 596
+    },
+    "isFallback": false
+  },
+  "452ec8a2d0a1cf65b24f8629922442dd": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "INVOICE_NOT_RECEIVED",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "Mail bounce hua hoga aapka shayad, humare records me bill nahi dikh raha hai.",
+        "Ek baar accounts desk ko copy forward kar dijiye."
+      ],
+      "recommended_playbook": "DUNNING_LADDER",
+      "rationale": "The buyer explicitly stated that the bill/invoice is not showing in their records, likely due to a bounced email, and requested a copy to be forwarded to their accounts desk."
+    },
+    "content": "{\n  \"root_cause\": \"INVOICE_NOT_RECEIVED\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"Mail bounce hua hoga aapka shayad, humare records me bill nahi dikh raha hai.\",\n    \"Ek baar accounts desk ko copy forward kar dijiye.\"\n  ],\n  \"recommended_playbook\": \"DUNNING_LADDER\",\n  \"rationale\": \"The buyer explicitly stated that the bill/invoice is not showing in their records, likely due to a bounced email, and requested a copy to be forwarded to their accounts desk.\"\n}",
+    "cachedAt": 1788270621729,
+    "inferredAt": "2026-09-01T13:50:20.589Z",
+    "tokenUsage": {
+      "promptTokens": 461,
+      "completionTokens": 140,
+      "totalTokens": 601
+    },
+    "isFallback": false
+  },
+  "973fcc121ed020237064a79d2adef7f9": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "APPROVAL_STUCK",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "Pending VP executive authorization",
+        "The VP of Marketing is currently on international leave until Monday",
+        "Her digital signature is the final requirement for the payment release"
+      ],
+      "recommended_playbook": "HUMAN_ESCALATION",
+      "rationale": "The AP email and dispute notes explicitly confirm that the invoice has been verified and is only awaiting final digital sign-off from the VP of Marketing, who is currently on leave. This clearly aligns with the APPROVAL_STUCK root cause where internal ERP approval queues or managerial sign-offs are pending."
+    },
+    "content": "{\n  \"root_cause\": \"APPROVAL_STUCK\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"Pending VP executive authorization\",\n    \"The VP of Marketing is currently on international leave until Monday\",\n    \"Her digital signature is the final requirement for the payment release\"\n  ],\n  \"recommended_playbook\": \"HUMAN_ESCALATION\",\n  \"rationale\": \"The AP email and dispute notes explicitly confirm that the invoice has been verified and is only awaiting final digital sign-off from the VP of Marketing, who is currently on leave. This clearly aligns with the APPROVAL_STUCK root cause where internal ERP approval queues or managerial sign-offs are pending.\"\n}",
+    "cachedAt": 1788270624170,
+    "inferredAt": "2026-09-01T13:50:22.934Z",
+    "tokenUsage": {
+      "promptTokens": 453,
+      "completionTokens": 162,
+      "totalTokens": 615
+    },
+    "isFallback": false
+  },
+  "ace589f1686ef086416d5b7ec1e780a1": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "APPROVAL_STUCK",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "parked in the department head's pending authorization tray",
+        "passed initial audit"
+      ],
+      "recommended_playbook": "DUNNING_LADDER",
+      "rationale": "The buyer's accounts payable desk confirmed that the invoice has passed initial audit and is currently awaiting managerial sign-off in the internal authorization queue before releasing payment via RTGS."
+    },
+    "content": "{\n  \"root_cause\": \"APPROVAL_STUCK\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"parked in the department head's pending authorization tray\",\n    \"passed initial audit\"\n  ],\n  \"recommended_playbook\": \"DUNNING_LADDER\",\n  \"rationale\": \"The buyer's accounts payable desk confirmed that the invoice has passed initial audit and is currently awaiting managerial sign-off in the internal authorization queue before releasing payment via RTGS.\"\n}",
+    "cachedAt": 1788270626489,
+    "inferredAt": "2026-09-01T13:50:25.375Z",
+    "tokenUsage": {
+      "promptTokens": 458,
+      "completionTokens": 121,
+      "totalTokens": 579
+    },
+    "isFallback": false
+  },
+  "f3cb34130bc8310877d18f76dc7ef6ad": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "APPROVAL_STUCK",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "Director portal backlog delay",
+        "waiting on the regional director to clear his internal portal backlog before finance can generate the disbursement batch"
+      ],
+      "recommended_playbook": "HUMAN_ESCALATION",
+      "rationale": "The buyer has acknowledged the invoice and liability, but payment is delayed because it is awaiting managerial approval and sign-off in the internal portal queue due to a director's backlog."
+    },
+    "content": "{\n  \"root_cause\": \"APPROVAL_STUCK\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"Director portal backlog delay\",\n    \"waiting on the regional director to clear his internal portal backlog before finance can generate the disbursement batch\"\n  ],\n  \"recommended_playbook\": \"HUMAN_ESCALATION\",\n  \"rationale\": \"The buyer has acknowledged the invoice and liability, but payment is delayed because it is awaiting managerial approval and sign-off in the internal portal queue due to a director's backlog.\"\n}",
+    "cachedAt": 1788270628999,
+    "inferredAt": "2026-09-01T13:50:27.694Z",
+    "tokenUsage": {
+      "promptTokens": 448,
+      "completionTokens": 130,
+      "totalTokens": 578
+    },
+    "isFallback": false
+  },
+  "c220afaf2ac416ffa1af807acd704f7c": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "APPROVAL_STUCK",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "bill verify ho chuka hai, bas senior management ka sign-off bacha hai",
+        "Unke desk se pass hote hi NEFT kar denge."
+      ],
+      "recommended_playbook": "PROMISE_TO_PAY",
+      "rationale": "The buyer's AP contact has confirmed that the invoice has been verified and is currently awaiting managerial sign-off before releasing the NEFT payment, which maps directly to the APPROVAL_STUCK root cause."
+    },
+    "content": "{\n  \"root_cause\": \"APPROVAL_STUCK\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"bill verify ho chuka hai, bas senior management ka sign-off bacha hai\",\n    \"Unke desk se pass hote hi NEFT kar denge.\"\n  ],\n  \"recommended_playbook\": \"PROMISE_TO_PAY\",\n  \"rationale\": \"The buyer's AP contact has confirmed that the invoice has been verified and is currently awaiting managerial sign-off before releasing the NEFT payment, which maps directly to the APPROVAL_STUCK root cause.\"\n}",
+    "cachedAt": 1788270631407,
+    "inferredAt": "2026-09-01T13:50:30.205Z",
+    "tokenUsage": {
+      "promptTokens": 463,
+      "completionTokens": 144,
+      "totalTokens": 607
+    },
+    "isFallback": false
+  },
+  "0b4918ea3fb4f6fe2942d9d37cb09f11": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "LINE_ITEM_DISPUTE",
+      "confidence_bps": 9800,
+      "evidence_spans": [
+        "Unit price variance against approved master quote.",
+        "Your quote clearly agreed on 450 per unit, but the billing states 520 per unit across all 200 pieces.",
+        "We are holding the billing until an adjusted debit adjustment is passed."
+      ],
+      "recommended_playbook": "HUMAN_ESCALATION",
+      "rationale": "The buyer explicitly disputes the unit price (450 vs 520 per unit) and is withholding payment pending a price correction and credit/debit adjustment."
+    },
+    "content": "{\n  \"root_cause\": \"LINE_ITEM_DISPUTE\",\n  \"confidence_bps\": 9800,\n  \"evidence_spans\": [\n    \"Unit price variance against approved master quote.\",\n    \"Your quote clearly agreed on 450 per unit, but the billing states 520 per unit across all 200 pieces.\",\n    \"We are holding the billing until an adjusted debit adjustment is passed.\"\n  ],\n  \"recommended_playbook\": \"HUMAN_ESCALATION\",\n  \"rationale\": \"The buyer explicitly disputes the unit price (450 vs 520 per unit) and is withholding payment pending a price correction and credit/debit adjustment.\"\n}",
+    "cachedAt": 1788270633902,
+    "inferredAt": "2026-09-01T13:50:32.613Z",
+    "tokenUsage": {
+      "promptTokens": 476,
+      "completionTokens": 161,
+      "totalTokens": 637
+    },
+    "isFallback": false
+  },
+  "e0a77248095974385409fd3ec3ed3c2f": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "LINE_ITEM_DISPUTE",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "Partial delivery defect short-count",
+        "Our inspection team only counted 84 working units instead of the billed 100",
+        "We will pay for the 84 accepted pieces once the revised breakdown is provided"
+      ],
+      "recommended_playbook": "HUMAN_ESCALATION",
+      "rationale": "The buyer explicitly disputes the billed quantity, noting a short-count of 84 units delivered versus 100 billed, and requests a revised breakdown/credit note before paying for the accepted items."
+    },
+    "content": "{\n  \"root_cause\": \"LINE_ITEM_DISPUTE\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"Partial delivery defect short-count\",\n    \"Our inspection team only counted 84 working units instead of the billed 100\",\n    \"We will pay for the 84 accepted pieces once the revised breakdown is provided\"\n  ],\n  \"recommended_playbook\": \"HUMAN_ESCALATION\",\n  \"rationale\": \"The buyer explicitly disputes the billed quantity, noting a short-count of 84 units delivered versus 100 billed, and requests a revised breakdown/credit note before paying for the accepted items.\"\n}",
+    "cachedAt": 1788270636530,
+    "inferredAt": "2026-09-01T13:50:35.106Z",
+    "tokenUsage": {
+      "promptTokens": 462,
+      "completionTokens": 160,
+      "totalTokens": 622
+    },
+    "isFallback": false
+  },
+  "5495ad60e3327fbde75ee36bffae1c90": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "LINE_ITEM_DISPUTE",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "GST tax slab mismatch on intrastate delivery.",
+        "You billed 18% IGST instead of 5% CGST/SGST for intrastate supply within Maharashtra. Correct the tax calculation and issue an amended voucher."
+      ],
+      "recommended_playbook": "HUMAN_ESCALATION",
+      "rationale": "The buyer explicitly pointed out a tax rate and slab discrepancy (IGST vs CGST/SGST) on the invoice, requiring a corrected tax calculation and amended voucher before payment can proceed."
+    },
+    "content": "{\n  \"root_cause\": \"LINE_ITEM_DISPUTE\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"GST tax slab mismatch on intrastate delivery.\",\n    \"You billed 18% IGST instead of 5% CGST/SGST for intrastate supply within Maharashtra. Correct the tax calculation and issue an amended voucher.\"\n  ],\n  \"recommended_playbook\": \"HUMAN_ESCALATION\",\n  \"rationale\": \"The buyer explicitly pointed out a tax rate and slab discrepancy (IGST vs CGST/SGST) on the invoice, requiring a corrected tax calculation and amended voucher before payment can proceed.\"\n}",
+    "cachedAt": 1788270640333,
+    "inferredAt": "2026-09-01T13:50:37.736Z",
+    "tokenUsage": {
+      "promptTokens": 469,
+      "completionTokens": 157,
+      "totalTokens": 626
+    },
+    "isFallback": false
+  },
+  "a48876eb99a27e9d69aa49e5788401f0": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "LINE_ITEM_DISPUTE",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "Billed charges me pricing galat lagayi hai",
+        "agreed price se 15% zyada hai",
+        "Pehle correct bill ya adjusted voucher bhejo tabhi balance release hoga"
+      ],
+      "recommended_playbook": "HUMAN_ESCALATION",
+      "rationale": "The buyer explicitly states there is a pricing discrepancy where the billed amount is 15% higher than the agreed price and refuses to release the balance until a corrected bill or credit note/adjusted voucher is provided."
+    },
+    "content": "{\n  \"root_cause\": \"LINE_ITEM_DISPUTE\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"Billed charges me pricing galat lagayi hai\",\n    \"agreed price se 15% zyada hai\",\n    \"Pehle correct bill ya adjusted voucher bhejo tabhi balance release hoga\"\n  ],\n  \"recommended_playbook\": \"HUMAN_ESCALATION\",\n  \"rationale\": \"The buyer explicitly states there is a pricing discrepancy where the billed amount is 15% higher than the agreed price and refuses to release the balance until a corrected bill or credit note/adjusted voucher is provided.\"\n}",
+    "cachedAt": 1788270642756,
+    "inferredAt": "2026-09-01T13:50:41.538Z",
+    "tokenUsage": {
+      "promptTokens": 464,
+      "completionTokens": 156,
+      "totalTokens": 620
+    },
+    "isFallback": false
+  },
+  "b18243a61685a2f60c63cdd995b24faf": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "delayed receivable cycle from our hospital clients this quarter and our treasury funds are exhausted",
+        "Would it be acceptable to wire 30% this Friday and the rest on the 25th?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer explicitly acknowledges liability for invoice INV-IND-2026-017 and requests an installment/staggered payment plan due to a temporary liquidity crunch from delayed downstream receivables."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"delayed receivable cycle from our hospital clients this quarter and our treasury funds are exhausted\",\n    \"Would it be acceptable to wire 30% this Friday and the rest on the 25th?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer explicitly acknowledges liability for invoice INV-IND-2026-017 and requests an installment/staggered payment plan due to a temporary liquidity crunch from delayed downstream receivables.\"\n}",
+    "cachedAt": 1788270646221,
+    "inferredAt": "2026-09-01T13:50:43.963Z",
+    "tokenUsage": {
+      "promptTokens": 475,
+      "completionTokens": 148,
+      "totalTokens": 623
+    },
+    "isFallback": false
+  },
+  "31a5566010a26777b543620cd8c9aac5": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "Our working capital limits are exhausted with SBI until our next trade loan sanction next fortnight",
+        "We request your patience for 10 banking days."
+      ],
+      "recommended_playbook": "PROMISE_TO_PAY",
+      "rationale": "The buyer explicitly acknowledges liability for the invoice but states their working capital limits are exhausted due to pending credit line renewal, requesting a short extension of 10 banking days."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"Our working capital limits are exhausted with SBI until our next trade loan sanction next fortnight\",\n    \"We request your patience for 10 banking days.\"\n  ],\n  \"recommended_playbook\": \"PROMISE_TO_PAY\",\n  \"rationale\": \"The buyer explicitly acknowledges liability for the invoice but states their working capital limits are exhausted due to pending credit line renewal, requesting a short extension of 10 banking days.\"\n}",
+    "cachedAt": 1788270648641,
+    "inferredAt": "2026-09-01T13:50:47.426Z",
+    "tokenUsage": {
+      "promptTokens": 455,
+      "completionTokens": 134,
+      "totalTokens": 589
+    },
+    "isFallback": false
+  },
+  "b4f42bdf13aed9f3c427d96c1e29642e": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "Insufficient bank balance requesting two tranches.",
+        "Due to slow recoveries from market distributors, our operational bank account has insufficient balance to honor the full amount today. Can we pay in two tranches?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer explicitly acknowledges liability for the invoice but states they are experiencing a cash crunch due to slow market recoveries, specifically requesting to pay in two tranches."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"Insufficient bank balance requesting two tranches.\",\n    \"Due to slow recoveries from market distributors, our operational bank account has insufficient balance to honor the full amount today. Can we pay in two tranches?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer explicitly acknowledges liability for the invoice but states they are experiencing a cash crunch due to slow market recoveries, specifically requesting to pay in two tranches.\"\n}",
+    "cachedAt": 1788270651029,
+    "inferredAt": "2026-09-01T13:50:49.850Z",
+    "tokenUsage": {
+      "promptTokens": 460,
+      "completionTokens": 139,
+      "totalTokens": 599
+    },
+    "isFallback": false
+  },
+  "830c516517771dff1e2104d0e6a8b687": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "Market payments phasi hui hain",
+        "bank account me fund balance tight hai",
+        "Thoda samay de dijiye ya staggered schedule bana dijiye"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer explicitly acknowledges liability for the invoice but states that market payments are stuck and fund balance is tight, requesting additional time or a staggered payment schedule, which directly maps to a cash crunch root cause."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"Market payments phasi hui hain\",\n    \"bank account me fund balance tight hai\",\n    \"Thoda samay de dijiye ya staggered schedule bana dijiye\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer explicitly acknowledges liability for the invoice but states that market payments are stuck and fund balance is tight, requesting additional time or a staggered payment schedule, which directly maps to a cash crunch root cause.\"\n}",
+    "cachedAt": 1788270653408,
+    "inferredAt": "2026-09-01T13:50:52.234Z",
+    "tokenUsage": {
+      "promptTokens": 466,
+      "completionTokens": 144,
+      "totalTokens": 610
+    },
+    "isFallback": false
+  },
+  "040b65aa8058c1b9aa8f57bcfcc725a5": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "INVOICE_UNPAID",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "This has been queued for our standard Friday vendor payout run."
+      ],
+      "recommended_playbook": "PROMISE_TO_PAY",
+      "rationale": "The AP desk explicitly confirmed that the invoice is undisputed and has been queued for the upcoming Friday payment batch, indicating an impending payment without any operational hurdles or disputes."
+    },
+    "content": "{\n  \"root_cause\": \"INVOICE_UNPAID\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"This has been queued for our standard Friday vendor payout run.\"\n  ],\n  \"recommended_playbook\": \"PROMISE_TO_PAY\",\n  \"rationale\": \"The AP desk explicitly confirmed that the invoice is undisputed and has been queued for the upcoming Friday payment batch, indicating an impending payment without any operational hurdles or disputes.\"\n}",
+    "cachedAt": 1788270655819,
+    "inferredAt": "2026-09-01T13:50:54.613Z",
+    "tokenUsage": {
+      "promptTokens": 455,
+      "completionTokens": 115,
+      "totalTokens": 570
+    },
+    "isFallback": false
+  },
+  "9a0f0ed3b915bf1a940a0cb6ecc51f4c": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "INVOICE_UNPAID",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "Payment run was delayed due to month-end bank reconciliation. It is lined up for batch processing tomorrow morning."
+      ],
+      "recommended_playbook": "PROMISE_TO_PAY",
+      "rationale": "The buyer explicitly stated that the payment was delayed due to month-end bank reconciliation and is scheduled for batch processing the following morning, indicating an acknowledgment of the invoice and an impending payment without any active dispute or cash crunch."
+    },
+    "content": "{\n  \"root_cause\": \"INVOICE_UNPAID\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"Payment run was delayed due to month-end bank reconciliation. It is lined up for batch processing tomorrow morning.\"\n  ],\n  \"recommended_playbook\": \"PROMISE_TO_PAY\",\n  \"rationale\": \"The buyer explicitly stated that the payment was delayed due to month-end bank reconciliation and is scheduled for batch processing the following morning, indicating an acknowledgment of the invoice and an impending payment without any active dispute or cash crunch.\"\n}",
+    "cachedAt": 1788270658096,
+    "inferredAt": "2026-09-01T13:50:57.027Z",
+    "tokenUsage": {
+      "promptTokens": 452,
+      "completionTokens": 137,
+      "totalTokens": 589
+    },
+    "isFallback": false
+  },
+  "d9f30bbeac73191a1ae6a1f69024fb21": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "INVOICE_UNPAID",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "Our vendor banking cycle runs on the 10th and 25th of every month. Your payment will be remitted in the upcoming cycle."
+      ],
+      "recommended_playbook": "PROMISE_TO_PAY",
+      "rationale": "The buyer has acknowledged the invoice and explicitly stated that payment will be processed in their scheduled bi-monthly vendor banking cycle without raising any disputes."
+    },
+    "content": "{\n  \"root_cause\": \"INVOICE_UNPAID\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"Our vendor banking cycle runs on the 10th and 25th of every month. Your payment will be remitted in the upcoming cycle.\"\n  ],\n  \"recommended_playbook\": \"PROMISE_TO_PAY\",\n  \"rationale\": \"The buyer has acknowledged the invoice and explicitly stated that payment will be processed in their scheduled bi-monthly vendor banking cycle without raising any disputes.\"\n}",
+    "cachedAt": 1788270660545,
+    "inferredAt": "2026-09-01T13:50:59.300Z",
+    "tokenUsage": {
+      "promptTokens": 456,
+      "completionTokens": 130,
+      "totalTokens": 586
+    },
+    "isFallback": false
+  },
+  "8818ab3b33051713988ad8461a1892b0": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "Payment schedule me lined up hai.",
+        "Monday ko treasury batch execute hoga to UTR update ho jayega."
+      ],
+      "recommended_playbook": "PROMISE_TO_PAY",
+      "rationale": "The buyer acknowledges liability and provides a specific timeline (Monday treasury batch) for payment execution, aligning with a promise to pay scenario."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"Payment schedule me lined up hai.\",\n    \"Monday ko treasury batch execute hoga to UTR update ho jayega.\"\n  ],\n  \"recommended_playbook\": \"PROMISE_TO_PAY\",\n  \"rationale\": \"The buyer acknowledges liability and provides a specific timeline (Monday treasury batch) for payment execution, aligning with a promise to pay scenario.\"\n}",
+    "cachedAt": 1788270662810,
+    "inferredAt": "2026-09-01T13:51:01.751Z",
+    "tokenUsage": {
+      "promptTokens": 450,
+      "completionTokens": 119,
+      "totalTokens": 569
+    },
+    "isFallback": false
   }
 }

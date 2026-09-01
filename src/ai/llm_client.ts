@@ -35,6 +35,9 @@ export interface LlmResponse<T = Record<string, unknown>> {
   model: string;
   promptHash: string;
   fallbackUsed?: boolean;
+  llmUsed: boolean;
+  llmSkippedReason?: string | null;
+  latencyMs?: number;
   tokenUsage?: LlmCacheEntry["tokenUsage"];
 }
 
@@ -45,10 +48,10 @@ const STRICT_MODE = process.env.BENCHMARK_STRICT === "1";
 
 /**
  * Gemini model preference order for this API key (free-tier).
- * gemini-3.7-flash returns 503 (overloaded) on free tier — excluded.
- * gemini-3.6-flash is confirmed working.
+ * gemini-3.5-flash-lite is fast, reliable, and within free-tier limits.
+ * gemini-3.6-flash is secondary fallback.
  */
-const GEMINI_MODELS = ["gemini-3.6-flash", "gemini-3.5-flash-lite"];
+const GEMINI_MODELS = ["gemini-3.5-flash-lite", "gemini-3.6-flash"];
 
 function getPromptHash(systemPrompt: string, userPrompt: string): string {
   return createHash("sha256").update(`${systemPrompt}\n---\n${userPrompt}`).digest("hex").slice(0, 32);
@@ -100,15 +103,22 @@ async function callGemini<T>(
       },
     };
 
-    const resp = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
+    let resp: Response;
+    try {
+      resp = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(12000),
+      });
+    } catch (fetchErr) {
+      console.warn(`[WARN] Gemini ${model} fetch failed or timed out: ${(fetchErr as Error).message}`);
+      return null;
+    }
 
     if (resp.status === 429) {
-      console.warn(`[WARN] Gemini ${model} rate-limited (429) — backing off 5s...`);
-      await sleep(5000);
+      console.warn(`[WARN] Gemini ${model} rate-limited (429) — backing off 3s...`);
+      await sleep(3000);
       return null;
     }
 
@@ -253,18 +263,27 @@ async function callOpenRouter<T>(
   return null;
 }
 
+export function hasRuntimeApiKey(): boolean {
+  return Boolean(
+    process.env.GEMINI_API_KEY ||
+    process.env.OPENAI_API_KEY ||
+    process.env.OPENROUTER_API_KEY
+  );
+}
+
 /**
  * Universal LLM Client with deterministic prompt-hash caching.
  *
  * Priority order:
- *   1. Real cache hit (isFallback !== true)
- *   2. Live Gemini API (GEMINI_API_KEY) — tries gemini-2.0-flash → gemini-1.5-flash → gemini-1.5-flash-8b
+ *   1. Real cache hit (isFallback !== true) when API key is present or in benchmark replay
+ *   2. Live Gemini API (GEMINI_API_KEY) — gemini-3.6-flash → gemini-3.5-flash-lite
  *   3. OpenAI API (OPENAI_API_KEY) — gpt-4o-mini
  *   4. OpenRouter free tier (OPENROUTER_API_KEY) — on persistent rate limits
  *   5. Offline keyword-classifier fallback — only when BENCHMARK_STRICT !== "1"
  *
- * In BENCHMARK_STRICT mode (set automatically by bun run benchmark:llm), a cache miss
- * with no API key throws an error rather than silently scoring keyword-classifier output.
+ * HONEST RUNTIME INVARIANT:
+ *   If no API key is present at runtime (and not in benchmark strict cache-replay),
+ *   llmUsed MUST be false and llmSkippedReason MUST be "no_api_key".
  */
 export async function callStructuredLlm<T extends Record<string, unknown>>(
   req: LlmRequest,
@@ -272,8 +291,9 @@ export async function callStructuredLlm<T extends Record<string, unknown>>(
 ): Promise<LlmResponse<T>> {
   const promptHash = getPromptHash(req.systemPrompt, req.userPrompt);
   const cache = loadCache();
+  const apiKeyPresent = hasRuntimeApiKey();
 
-  // 1. Real cache hit
+  // 1. Real cache hit (isFallback !== true) — allow deterministic replay from real LLM inference
   const cached = cache[promptHash];
   if (cached && !cached.isFallback) {
     return {
@@ -283,6 +303,36 @@ export async function callStructuredLlm<T extends Record<string, unknown>>(
       model: cached.model,
       promptHash,
       tokenUsage: cached.tokenUsage,
+      llmUsed: true,
+      llmSkippedReason: null,
+      latencyMs: 1,
+    };
+  }
+
+  // 2. If no real cache entry and no API key present at runtime:
+  if (!apiKeyPresent) {
+    // In benchmark strict mode with a cache miss, throw rather than self-scoring fallback
+    if (STRICT_MODE) {
+      throw new Error(
+        `LLM_CACHE_MISS [${promptHash}]: No real cache entry and no API key set (GEMINI_API_KEY / OPENAI_API_KEY / OPENROUTER_API_KEY).\n` +
+        `In BENCHMARK_STRICT mode the offline classifier is suppressed to prevent self-scoring.`
+      );
+    }
+
+    // In live execution path without an API key:
+    // Honest disclosure: llmUsed is FALSE, llmSkippedReason is "no_api_key"
+    const parsed = fallbackGenerator();
+    const content = JSON.stringify(parsed);
+    return {
+      content,
+      parsed,
+      cached: false,
+      model: "recoup-nlu-keyword-classifier-v1",
+      promptHash,
+      fallbackUsed: true,
+      llmUsed: false,
+      llmSkippedReason: "no_api_key",
+      latencyMs: 0,
     };
   }
 
@@ -295,6 +345,7 @@ export async function callStructuredLlm<T extends Record<string, unknown>>(
       try {
         const result = await callGemini<T>(req, model, geminiKey, liveStart);
         if (result) {
+          const latencyMs = Math.max(1, Date.now() - liveStart);
           const entry: LlmCacheEntry<T> = {
             model: result.model,
             parsed: result.parsed,
@@ -313,9 +364,11 @@ export async function callStructuredLlm<T extends Record<string, unknown>>(
             model: result.model,
             promptHash,
             tokenUsage: result.tokenUsage,
+            llmUsed: true,
+            llmSkippedReason: null,
+            latencyMs,
           };
         }
-        // null = 404 (model unavailable) or parse error — try next model immediately, no sleep
       } catch {
         // network error — try next
       }
@@ -345,6 +398,7 @@ export async function callStructuredLlm<T extends Record<string, unknown>>(
       });
 
       if (resp.ok) {
+        const latencyMs = Math.max(1, Date.now() - liveStart);
         const data = (await resp.json()) as {
           choices: Array<{ message: { content: string } }>;
           model: string;
@@ -359,7 +413,17 @@ export async function callStructuredLlm<T extends Record<string, unknown>>(
         const entry: LlmCacheEntry<T> = { model: data.model, parsed, content, cachedAt: Date.now(), inferredAt: new Date(liveStart).toISOString(), tokenUsage, isFallback: false };
         cache[promptHash] = entry as LlmCacheEntry;
         saveCache(cache);
-        return { content, parsed, cached: false, model: data.model, promptHash, tokenUsage };
+        return {
+          content,
+          parsed,
+          cached: false,
+          model: data.model,
+          promptHash,
+          tokenUsage,
+          llmUsed: true,
+          llmSkippedReason: null,
+          latencyMs,
+        };
       }
     } catch {}
   }
@@ -368,6 +432,7 @@ export async function callStructuredLlm<T extends Record<string, unknown>>(
   try {
     const orResult = await callOpenRouter<T>(req, liveStart);
     if (orResult) {
+      const latencyMs = Math.max(1, Date.now() - liveStart);
       const entry: LlmCacheEntry<T> = {
         model: orResult.model,
         parsed: orResult.parsed,
@@ -379,7 +444,17 @@ export async function callStructuredLlm<T extends Record<string, unknown>>(
       };
       cache[promptHash] = entry as LlmCacheEntry;
       saveCache(cache);
-      return { content: orResult.content, parsed: orResult.parsed, cached: false, model: orResult.model, promptHash, tokenUsage: orResult.tokenUsage };
+      return {
+        content: orResult.content,
+        parsed: orResult.parsed,
+        cached: false,
+        model: orResult.model,
+        promptHash,
+        tokenUsage: orResult.tokenUsage,
+        llmUsed: true,
+        llmSkippedReason: null,
+        latencyMs,
+      };
     }
   } catch {}
 
@@ -392,6 +467,7 @@ export async function callStructuredLlm<T extends Record<string, unknown>>(
     );
   }
 
+  const latencyMs = Math.max(1, Date.now() - liveStart);
   console.warn(
     `[WARN] LLM_FALLBACK_USED [${promptHash.slice(0, 12)}…]: All live providers unavailable. ` +
     `Using offline keyword classifier. This result is NOT LLM inference.`
@@ -409,5 +485,15 @@ export async function callStructuredLlm<T extends Record<string, unknown>>(
   cache[promptHash] = entry as LlmCacheEntry;
   saveCache(cache);
 
-  return { content, parsed, cached: false, model: "recoup-nlu-keyword-classifier-v1", promptHash, fallbackUsed: true };
+  return {
+    content,
+    parsed,
+    cached: false,
+    model: "recoup-nlu-keyword-classifier-v1",
+    promptHash,
+    fallbackUsed: true,
+    llmUsed: false,
+    llmSkippedReason: "providers_unavailable",
+    latencyMs,
+  };
 }

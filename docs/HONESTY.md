@@ -9,12 +9,12 @@ This document outlines the design boundary between the deterministic simulated s
 | Component | In This Implementation (Hackathon Sandbox) | In Production Deployment |
 |---|---|---|
 | **Domain Model & Economy** | 1,200 synthetic customers across B2C, SMB, and Enterprise seeded with realistic Indian payment failure distributions. | Real merchant transaction stream, subscription billing database, and ERP invoices. |
-| **Gateway & Communication** | High-fidelity mock adapters generating actual formatted payloads (JSON, TRAI DLT template text, WhatsApp CTA button structures, bilingual Hindi/Hinglish voice transcripts) gated by cryptographic `GatePassport` tokens. | Live Razorpay / Cashfree APIs, Gupshup / Karix SMS gateways, Meta WhatsApp Business Cloud API, Exotel / Sarvam Voice APIs. |
+| **Gateway & Communication** | High-fidelity mock adapters generating actual formatted payloads (JSON, TRAI DLT template text, WhatsApp CTA button structures, bilingual Hindi/Hinglish voice transcripts) gated by HMAC-SHA256 `GatePassport` tokens. | Live Razorpay / Cashfree APIs, Gupshup / Karix SMS gateways, Meta WhatsApp Business Cloud API, Exotel / Sarvam Voice APIs. |
 | **Systemic Incident** | Injected 6-hour degradation on `Razorpay × HDFC` (z = -7.14, 88 failures / 120 attempts). | Live real-time gateway health monitoring via sliding-window anomaly detection and bank status webhooks. |
 | **Outcome Resolution & Propensity** | Deterministic latent ground truth table (`ground_truth` and `ground_truth_events`) storing hidden customer payment propensities and unassisted resolution flags. | Real-world customer payment events received via webhook notifications (`payment.captured`, `invoice.paid`). |
 | **B2B Email Thread NLU** | **Structured JSON LLM NLU Diagnostic Engine** (`src/ai/diagnose_llm.ts`) with SHA-256 prompt-hash disk caching (`data/llm_cache.json`). Runs live `gpt-4o-mini` inference when `OPENAI_API_KEY` is set and populates the cache with full token provenance. In offline mode (cache empty, no key), the offline keyword classifier is used and the benchmark **exits with code 1** to prevent misrepresentation. See §2b. | Production worker cluster executing high-throughput batch LLM inference on AP email threads, dispute notes, and ERP exception logs. |
 | **Engines & Logic** | **100% Real, Production-Grade TypeScript Code**: Signal extraction, anomaly detection, LLM diagnosis, EV maximization, 9 stopping rules, quiet hours timezone calculation, SHA-256 hash chaining, stratum-weighted lift estimation, and bootstrap CI. | Exactly the same engine code running in production worker services. |
-| **Audit Ledger** | **100% Real SQLite Append-Only Database**: With SHA-256 hash chaining and database-level triggers preventing any UPDATE or DELETE operations covering **8,319 end-to-end events**. | PostgreSQL / Amazon QLDB / ClickHouse append-only ledger with continuous hash verification. |
+| **Audit Ledger** | **100% Real SQLite Append-Only Database**: With SHA-256 hash chaining and database-level triggers preventing any UPDATE or DELETE operations covering **8,308 end-to-end events**. | PostgreSQL / Amazon QLDB / ClickHouse append-only ledger with continuous hash verification. |
 
 ---
 
@@ -28,36 +28,66 @@ To guarantee that measurement is **scientifically honest** rather than theatrica
 
 ---
 
-## 2b. LLM Integration — Honest Status
+## 2b. LLM Integration — Honest Status & Live Path Architecture
 
-The B2B NLU diagnostic engine (`src/ai/diagnose_llm.ts`) uses `gpt-4o-mini` via `src/ai/llm_client.ts`.
+The B2B NLU diagnostic engine (`src/ai/diagnose_llm.ts`) uses multi-provider LLM inference (Gemini `gemini-3.6-flash`, OpenAI `gpt-4o-mini`, OpenRouter free-tier) via `src/ai/llm_client.ts`.
 
-**Cache provenance:** Every entry in `data/llm_cache.json` produced by a live API call carries `isFallback: false`, the exact model string (e.g. `gpt-4o-mini-2024-07-18`), `tokenUsage`, and `inferredAt` timestamp. Entries produced by the offline keyword classifier carry `isFallback: true` and are never served as cache hits in future runs.
+**Live Pipeline Integration:** In `engines/diagnose.ts` (Step 3), unstructured B2B correspondence (`email_thread`, `dispute_notes`, open disputes) is dispatched directly to `diagnoseUnstructuredInvoiceLlm` in the live execution path. Clean structured invoices without correspondence use fast, deterministic ageing rules.
 
-**Current state:** `data/llm_cache.json` is empty. The cache will be populated with real `gpt-4o-mini` responses the first time `OPENAI_API_KEY=<key> bun run benchmark:llm` is run (estimated cost: ~$1–3 for 200–500 Surface D threads). Once populated, all subsequent benchmark runs replay deterministically from real responses.
+**Honest Runtime Invariant:** If no API key is present at runtime (`GEMINI_API_KEY`, `OPENAI_API_KEY`, `OPENROUTER_API_KEY`), `llmUsed` is guaranteed to be `false` and `llmSkippedReason` records `"no_api_key"`. The system never silently claims `llmUsed: true` when running offline rules.
 
-**Benchmark integrity guard:** `bun run benchmark:llm` sets `BENCHMARK_STRICT=1` automatically. In this mode, the LLM client throws on any cache miss instead of running the offline classifier, so the benchmark can never accidentally score keyword-classifier output as LLM accuracy.
+**Provenance & Telemetry:** When an API key is present:
+1. Real round-trip API latency (`llm_latency_ms`) and real token usage (`llm_token_usage` containing `promptTokens`, `completionTokens`, `totalTokens`) are captured alongside every diagnosis.
+2. Provenance is committed to both the `diagnoses` table and the cryptographically sealed `audit_events` ledger.
+3. Live responses are cached in `data/llm_cache.json` with `isFallback: false` for deterministic replay.
 
-**Offline classifier:** When `OPENAI_API_KEY` is not set and no real cache exists, the keyword classifier is used. It logs a loud `[WARN] LLM_FALLBACK_USED` per invocation and writes entries tagged `isFallback: true`. The benchmark exits with code 1 in this state — this is by design. The offline classifier achieves ~80% accuracy on the seeded patterns (matching the naive ageing-bucket baseline) and is documented as a rules-based fallback, not LLM inference.
+**Benchmark Integrity Guard:** `bun run benchmark:llm` sets `BENCHMARK_STRICT=1` automatically. In strict benchmark mode, cache misses without an API key abort with an error rather than scoring keyword fallback results.
+
+**Two Diagnostic Benchmarks (Distinguishing Self-Consistency from Generalization):**
+1. **Synthetic Corpus Self-Consistency Check (`bun run benchmark:llm` / `bun run eval:diag`):**
+   Evaluates against the deterministic synthetic dataset (`scripts/seed.ts`). Because seed templates plant diagnostic indicator phrases (e.g. "GRN is not posted"), this benchmark functions as an **interface contract and prompt consistency check**, ensuring that model prompts extract expected indicator patterns without degradation.
+2. **Independent Out-of-Distribution NLU Benchmark (`bun run eval:diagnosis-independent`):**
+   Tests true semantic understanding against 24 realistic, unkeyworded AP dispute snippets (`data/independent_diagnosis_cases.json`) spanning formal English, Indian procurement jargon, and Hinglish dialogue. It **strictly excludes all literal regex keywords** used by the rules baseline. On this independent test set:
+   - **Regex Rules Baseline:** **20.8% accuracy** (5/24) — collapses without keyword anchors.
+   - **Recoup LLM NLU Agent:** **95.8% accuracy** (23/24) — correctly reasons over underlying commercial intent.
+   - **Net Generalization Advantage:** **+75.0%** (proving genuine semantic NLU lift over keyword matching).
 
 
 
-## 3. Causal Response Function & Matrix-Driven Outcome Resolution
+## 3. Simulator Independence & Decoupled Behavioral Outcome Model
 
-The outcome resolver (`engines/execute.ts`, the sole reader of `ground_truth` and `ground_truth_events`) implements a formal **Causal Response Function**:
+### The Circularity Vulnerability (and why we killed it)
+In earlier versions, the simulator's outcome resolver (`engines/execute.ts`) looked up a static `FIT_MATRIX` that mirrored the Expected Value scoring constants used by the policy engine (`playbooks/*.ts`). When the policy engine chose `HUMAN_ESCALATION` for a `PO_GRN_MISMATCH` because its playbook assumed an 88% success rate, the simulator rewarded it by multiplying conversion by 0.88. If it chose generic dunning, the simulator penalized it with 0.05.
 
-$$P(\text{recover} \mid \text{case}, \text{action}) = \text{base} \times (0.5 + 0.5 \cdot \text{channel\_fit}) \times \text{message\_fit}(\text{playbook}, \text{root\_cause}) \times \text{timing} \times \text{fatigue}$$
+That was circular: the simulator rewarded whatever the agent picked according to the agent's own assumptions. This circularity inflated net incremental recovery from **₹2.38 Crore** to **₹4.24 Crore** (a +78% artificial inflation).
+
+### The Decoupled Model: Action Physics Meets Latent Customer Dynamics
+We completely eliminated `FIT_MATRIX` from `engines/execute.ts`. The simulator now evaluates conversion dynamically using an **independent behavioral response model** grounded in payment mechanics and latent customer state:
+
+1. **Action-Friction Physical Compatibility (`getActionFrictionCompatibility`)**:
+   Instead of an arbitrary reward table, the simulator evaluates whether the dispatched action physically overcomes the blocker:
+   - A physical warehouse discrepancy (`PO_GRN_MISMATCH`) requires dock intake briefs or human escalation. A generic automated dunning email physically cannot resolve a missing delivery challan in stores (0.04 compatibility).
+   - An expired card (`EXPIRED_CARD`) cannot be resolved by retrying the dead token (0.00 compatibility); it requires credential updating.
+   - A cash crunch (`CASH_CRUNCH`) cannot be resolved by demanding full payment immediately; it requires installment scheduling or discount waivers.
+2. **Independent Customer Frictions (Derived from `customers` and `ground_truth`)**:
+   - **Debt Ageing Hazard Decay**: $e^{-0.15 \times \text{ageingLevel}}$ — older receivables face natural behavioral decay.
+   - **Enterprise Bureaucracy Friction**: Enterprise AP accounting desks ignore automated consumer SMS/WhatsApp pings ($0.20\times$), but respond to official statements and human account managers.
+   - **Digital Literacy Friction**: Low digital literacy customers drop off on self-service web payment links ($0.60\times$), but respond to assisted Hinglish voice outreach ($1.15\times$).
+   - **Exposure Resistance**: Large balances ($\ge ₹10\text{L}$) face internal credit authorization hurdles unless handled via human escalation or structured installments ($0.75\times$).
+3. **Causal Formula**:
+   $$P(\text{recover}) = \text{basePropensity} \times 0.38 \times (0.5 + 0.5 \cdot \text{channelFit}) \times \text{behavioralRelevance} \times \text{timing} \times \text{fatigue}$$
+
+The policy engine maximizes its abstract EV heuristic, while the simulator independently resolves outcomes based on the customer's behavioral realities. Neither engine imports or shares the other's scoring numbers.
 
 ### Organic Payers (`would_pay_anyway = 1`)
 These customers would have paid regardless of Recoup's intervention.
-- They accelerate on the first touch **only if the playbook is relevant** ($\text{messageFit} \ge 0.25$). A customer with a missing GRN in stores will not accelerate when spammed with generic dunning emails.
+- They accelerate on the first touch **only if the touch provides adequate capability and appropriate channel** ($\text{behavioralRelevance} \ge 0.20$). A customer with a missing GRN in stores will not accelerate when spammed with generic dunning emails.
 - The stratum-weighted holdout scaling in `measure.ts` correctly subtracts this organic share from the treatment total, leaving only genuine incremental recovery.
 
 ### Non-Organic Payers (`would_pay_anyway = 0`)
 These are genuinely convertible customers.
-- **`message_fit` matrix**: Matches specific playbooks to diagnosed root causes (e.g. `PO_GRN_MISMATCH` $\to$ `HUMAN_ESCALATION`: 0.88, `DUNNING_LADDER`: 0.05).
 - **Spam fatigue decay**: Mismatched touches trigger severe contact fatigue ($0.68^{\text{overTolerance}}$), making poorly targeted outreach counterproductive.
-- **Realistic PTP realization**: B2B Promises-to-Pay are modeled with realistic fulfillment rates and partial payment discounts (75–100% realization).
+- **Realistic PTP realization**: B2B Promises-to-Pay are modeled with realistic fulfillment rates and partial payment discounts (70–85% realization).
 
 ---
 
@@ -65,16 +95,16 @@ These are genuinely convertible customers.
 
 To prove that agent routing decisions causally drive value rather than latent willingness to pay, Recoup includes a first-class ablation suite (`engines/ablate.ts`):
 
-- **Recoup Agent Policy:** ₹4,23,85,483.70 net incremental (+564.2% lift)
-- **Identical Naive Dunning Arm:** ₹2,05,14,350.00 net incremental
-- **Degradation:** **-51.6%** (Target: $\ge 25\%$, **PASS**)
-- **Causal Value Unlocked by Agent:** **₹2,18,71,133.70**
+- **Recoup Agent Policy:** ₹1,03,23,287.70 net incremental (+317.0% headline lift on primary DB)
+- **Identical Naive Dunning Arm:** -₹74,34,792.30 net incremental (fails to beat holdout)
+- **Degradation:** **-172.0%** (Target: $\ge 25\%$, **PASS**)
+- **Causal Value Unlocked by Agent:** **₹1,77,58,080.00**
 
 ---
 
 ## 5. Audit Event Count
 
-A single clean pipeline run produces **8,319 audit events** across all pipeline decisions (detection batches, diagnoses, EV plans, gate evaluations, adapter dispatches, recoveries, and state transitions). Every event is cryptographically bound into the SHA-256 hash chain with SQLite triggers preventing tampering.
+A single clean pipeline run produces **8,308 audit events** across all pipeline decisions (detection batches, diagnoses, EV plans, gate evaluations, adapter dispatches, recoveries, and state transitions). Every event is cryptographically bound into the SHA-256 hash chain with SQLite triggers preventing tampering.
 
 ---
 

@@ -58,9 +58,14 @@ function getCacheProvenance(): { totalEntries: number; realEntries: number; fall
 
 async function runBenchmark() {
   const db = openDb();
-  console.log(`\n======================================================`);
-  console.log(`   RECOUP LLM DIAGNOSIS BENCHMARK (Surface D NLU)     `);
-  console.log(`======================================================\n`);
+  console.log(`\n======================================================================`);
+  console.log(`   RECOUP DIAGNOSIS BENCHMARK — SEEDED CORPUS SELF-CONSISTENCY CHECK  `);
+  console.log(`======================================================================\n`);
+  console.log(`[DISCLOSURE] This benchmark verifies interface contract self-consistency against`);
+  console.log(`             the synthetic seeded corpus (scripts/seed.ts). It validates that model`);
+  console.log(`             prompts extract expected indicator patterns without degradation.`);
+  console.log(`             For true out-of-distribution generalization on unkeyworded AP text,`);
+  console.log(`             run: bun run eval:diagnosis-independent\n`);
 
   const cacheInfo = getCacheProvenance();
 
@@ -69,11 +74,11 @@ async function runBenchmark() {
     console.log(`       Real LLM calls will populate data/llm_cache.json with token provenance.\n`);
   } else if (cacheInfo.realEntries > 0) {
     console.log(`[MODE] CACHE REPLAY — ${cacheInfo.realEntries} real LLM responses in cache.`);
-    console.log(`       Accuracy reflects genuine LLM performance (deterministic cache replay).`);
+    console.log(`       Self-consistency reflects genuine LLM outputs (deterministic cache replay).`);
     console.log(`       Models: ${cacheInfo.models.join(", ")}\n`);
   } else {
     console.error(`[ERROR] OFFLINE MODE — No API key found (GEMINI_API_KEY / OPENAI_API_KEY / OPENROUTER_API_KEY) and no real-LLM cache entries.`);
-    console.error(`        The benchmark cannot produce a valid LLM accuracy figure in this state.`);
+    console.error(`        The benchmark cannot produce a valid figure in this state.`);
     console.error(`        To populate the cache, run: GEMINI_API_KEY=<key> bun run benchmark:llm\n`);
     process.exit(1);
   }
@@ -182,13 +187,13 @@ async function runBenchmark() {
   console.log(`Total B2B Cases Evaluated: ${totalEvaluated}`);
   console.log(`Total B2B Exposure:        ${formatInr(totalExposurePaise)}\n`);
 
-  console.log(`| Model / Approach               | Accuracy (%) | Correct Cases | Correctly Classified ₹ |`);
-  console.log(`|--------------------------------|-------------:|--------------:|-----------------------:|`);
-  console.log(`| Naive Rules Baseline           |       ${rulesAcc}% |     ${rulesCorrect}/${totalEvaluated} | ${formatInr(rulesCorrectExposurePaise).padStart(22, " ")} |`);
-  console.log(`| Recoup LLM NLU Diagnostic Agent|       ${llmAcc}% |     ${llmCorrect}/${totalEvaluated} | ${formatInr(llmCorrectExposurePaise).padStart(22, " ")} |\n`);
+  console.log(`| Model / Approach               | Self-Consistency (%) | Consistent Cases | Exposure ₹ |`);
+  console.log(`|--------------------------------|---------------------:|-----------------:|-----------:|`);
+  console.log(`| Naive Rules Baseline           |                ${rulesAcc}% | ${rulesCorrect}/${totalEvaluated} | ${formatInr(rulesCorrectExposurePaise).padStart(10, " ")} |`);
+  console.log(`| Recoup LLM NLU Diagnostic Agent|                ${llmAcc}% | ${llmCorrect}/${totalEvaluated} | ${formatInr(llmCorrectExposurePaise).padStart(10, " ")} |\n`);
 
-  console.log(`🎯 Performance Delta: +${deltaAcc}% accuracy gain`);
-  console.log(`💰 Diagnostic Value Unlocked: ${valueUnlocked} correctly routed to specialized playbooks.\n`);
+  console.log(`🎯 Synthetic Self-Consistency Delta: +${deltaAcc}% (Contract Validation)`);
+  console.log(`   (Note: For out-of-distribution generalization on unkeyworded text, run: bun run eval:diagnosis-independent)\n`);
 
   // Provenance summary
   console.log(`── Inference Provenance ──────────────────────────────────────────`);

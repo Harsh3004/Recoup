@@ -356,6 +356,24 @@ export function runPolicyEngine(
         surface: r.surface,
         exposurePaise: r.exposure_paise,
       });
+
+      appendAudit(db, {
+        actor: "AGENT",
+        action: "PLAN_COMMITTED",
+        entityType: "intervention_plan",
+        entityId: planId,
+        inputs: {
+          riskItemId: r.risk_item_id,
+          playbook: bestPlaybook.name,
+          evPaise: bestEV.netEvPaise,
+          stepsCount: steps.length,
+        },
+        decision: bestPlaybook.name,
+        reasonCodes: [bestEV.rationale.slice(0, 100)],
+        policyVersion: POLICY_VERSION,
+        modelVersion: MODEL_VERSION,
+        ts: asOf,
+      });
     }
   });
   policyTx();

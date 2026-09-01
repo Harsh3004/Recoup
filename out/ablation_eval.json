@@ -1,0 +1,33 @@
+{
+  "arms": [
+    {
+      "armName": "Recoup Autonomous Agent",
+      "description": "Full AI root-cause NLU + Argmax EV Playbook Optimization",
+      "totalCollectedPaise": 3261276000,
+      "scaledHoldoutBaselinePaise": 751236830,
+      "netIncrementalPaise": 2510039170,
+      "recoveryRatePct": 20.11917874133188,
+      "degradationPct": 0
+    },
+    {
+      "armName": "Random Playbook Policy",
+      "description": "Random valid playbook assignment across all cases",
+      "totalCollectedPaise": 411716800,
+      "scaledHoldoutBaselinePaise": 751236830,
+      "netIncrementalPaise": -339520030,
+      "recoveryRatePct": 2.5399272830662567,
+      "degradationPct": -113.52648333372424
+    },
+    {
+      "armName": "Identical Naive Dunning",
+      "description": "Naive 3-Email generic ladder without root-cause adaptation",
+      "totalCollectedPaise": 10887100,
+      "scaledHoldoutBaselinePaise": 751236830,
+      "netIncrementalPaise": -740349730,
+      "recoveryRatePct": 0.06716374537903395,
+      "degradationPct": -129.49554488426568
+    }
+  ],
+  "degradationVsIdentical": 129.49554488426568,
+  "passedCausalSignificance": true
+}

@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import type { Database } from "bun:sqlite";
+import type { Database, Statement } from "bun:sqlite";
 
 const GENESIS_PREV = "0".repeat(64);
 
@@ -18,7 +18,7 @@ export type AuditInput = {
   ts: number;
 };
 
-function canonical(value: unknown): string {
+export function canonical(value: unknown): string {
   if (value === null || value === undefined) return "null";
   if (typeof value !== "object") return JSON.stringify(value);
   if (Array.isArray(value)) return `[${value.map(canonical).join(",")}]`;
@@ -39,21 +39,50 @@ export function computeEventHash(prevHash: string, payload: Record<string, unkno
   return sha256Hex(`${prevHash}|${canonical(payload)}`);
 }
 
+// Cached statements per database instance for high-throughput batch logging
+const stmtCache = new WeakMap<
+  Database,
+  {
+    insertStmt: Statement;
+    maxSeqStmt: Statement;
+    lastHashStmt: Statement;
+  }
+>();
+
+function getStatements(db: Database) {
+  let stmts = stmtCache.get(db);
+  if (!stmts) {
+    stmts = {
+      insertStmt: db.prepare(`
+        INSERT INTO audit_events (
+          seq, id, prev_hash, hash, actor, action, entity_type, entity_id,
+          inputs_digest, decision, reason_codes, policy_version, model_version, ts
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `),
+      maxSeqStmt: db.prepare("SELECT COALESCE(MAX(seq), 0) AS m FROM audit_events"),
+      lastHashStmt: db.prepare("SELECT hash FROM audit_events ORDER BY seq DESC LIMIT 1"),
+    };
+    stmtCache.set(db, stmts);
+  }
+  return stmts;
+}
+
 function nextSeq(db: Database): number {
-  const row = db.query("SELECT COALESCE(MAX(seq), 0) AS m FROM audit_events").get() as { m: number };
+  const stmts = getStatements(db);
+  const row = stmts.maxSeqStmt.get() as { m: number };
   return row.m + 1;
 }
 
 function lastHash(db: Database): string {
-  const row = db.query("SELECT hash FROM audit_events ORDER BY seq DESC LIMIT 1").get() as
-    | { hash: string }
-    | undefined;
+  const stmts = getStatements(db);
+  const row = stmts.lastHashStmt.get() as { hash: string } | undefined;
   return row?.hash ?? GENESIS_PREV;
 }
 
 /**
- * Append-only audit write. Every state change and gate decision must go through here.
- * Hash-chain verification (verify_chain) is completed in Step 7; the chain is live from seed.
+ * Append-only audit write.
+ * Every lifecycle event (diagnosis, gate decision, comms dispatch, recovery, state change)
+ * is cryptographically chained via SHA-256 and committed to the immutable ledger.
  */
 export function appendAudit(db: Database, input: AuditInput): { seq: number; id: string; hash: string } {
   const seq = nextSeq(db);
@@ -81,12 +110,9 @@ export function appendAudit(db: Database, input: AuditInput): { seq: number; id:
     ts: input.ts,
   };
   const hash = computeEventHash(prevHash, payload);
-  db.query(
-    `INSERT INTO audit_events (
-       seq, id, prev_hash, hash, actor, action, entity_type, entity_id,
-       inputs_digest, decision, reason_codes, policy_version, model_version, ts
-     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-  ).run(
+
+  const stmts = getStatements(db);
+  stmts.insertStmt.run(
     seq,
     id,
     prevHash,
@@ -102,5 +128,6 @@ export function appendAudit(db: Database, input: AuditInput): { seq: number; id:
     payload.model_version,
     payload.ts,
   );
+
   return { seq, id, hash };
 }

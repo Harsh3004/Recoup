@@ -26,7 +26,7 @@
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import type { Database } from "bun:sqlite";
-import { appendAudit } from "../src/audit";
+import { appendAudit, sha256Hex } from "../src/audit";
 import { DEFAULT_DB_PATH, openDb } from "../src/db";
 import { formatInr } from "../src/money";
 import { MODEL_VERSION, POLICY_VERSION } from "../src/sim/constants";
@@ -63,6 +63,60 @@ export interface GateInput {
   templateId?: string | null;
 }
 
+export interface GatePassport {
+  passportId: string;
+  riskItemId: string;
+  planStepId: string | null;
+  channel: string;
+  action: string;
+  issuedAt: number;
+  expiresAt: number;
+  signature: string;
+}
+
+const PASSPORT_SECRET = "recoup_gate_passport_immutable_secret_2026";
+
+export function mintGatePassport(input: {
+  riskItemId: string;
+  planStepId: string | null;
+  channel: string;
+  action: string;
+  issuedAt: number;
+}): GatePassport {
+  const passportId = `pass_${pad(Math.floor(Math.random() * 1_000_000_000), 9)}`;
+  const expiresAt = input.issuedAt + 4 * 3600 * 1000; // 4 hours validity
+  const payload = `${passportId}|${input.riskItemId}|${input.planStepId ?? ""}|${input.channel}|${input.action}|${input.issuedAt}|${expiresAt}|${PASSPORT_SECRET}`;
+  const signature = sha256Hex(payload);
+  return {
+    passportId,
+    riskItemId: input.riskItemId,
+    planStepId: input.planStepId,
+    channel: input.channel,
+    action: input.action,
+    issuedAt: input.issuedAt,
+    expiresAt,
+    signature,
+  };
+}
+
+export function verifyGatePassport(
+  passport: GatePassport | undefined | null,
+  expected: {
+    riskItemId: string;
+    channel: string;
+    now?: number;
+  },
+): boolean {
+  if (!passport) return false;
+  const now = expected.now ?? Date.now();
+  if (now > passport.expiresAt) return false;
+  if (passport.riskItemId !== expected.riskItemId) return false;
+  if (passport.channel !== expected.channel) return false;
+  const payload = `${passport.passportId}|${passport.riskItemId}|${passport.planStepId ?? ""}|${passport.channel}|${passport.action}|${passport.issuedAt}|${passport.expiresAt}|${PASSPORT_SECRET}`;
+  const expectedSig = sha256Hex(payload);
+  return passport.signature === expectedSig;
+}
+
 export interface GateDecisionResult {
   id: string;
   riskItemId: string;
@@ -71,6 +125,7 @@ export interface GateDecisionResult {
   reasonCode: GateDecisionReason;
   details: string;
   decidedAt: number;
+  passport?: GatePassport;
 }
 
 export interface GateBatchResult {
@@ -446,7 +501,15 @@ export function gate(
     }
   }
 
-  // ALL CHECKS PASSED -> ALLOWED
+  // ALL CHECKS PASSED -> ALLOWED (Mint cryptographic execution passport)
+  const passport = mintGatePassport({
+    riskItemId: input.riskItemId,
+    planStepId: input.planStepId ?? null,
+    channel: input.channel,
+    action: input.action,
+    issuedAt: decidedAt,
+  });
+
   return {
     id: decisionId,
     riskItemId: input.riskItemId,
@@ -455,6 +518,7 @@ export function gate(
     reasonCode: "ALLOWED",
     details: `All 9 stopping rules and compliance rails passed (Timezone: ${cust.timezone}, Local Hour: ${localHour}:00).`,
     decidedAt,
+    passport,
   };
 }
 
@@ -581,6 +645,24 @@ export function runGateEngine(
           stoppingRulesFired[d.reasonCode as StoppingRule]++;
         }
       }
+
+      // Log gate evaluation directly into the immutable cryptographic audit chain
+      appendAudit(db, {
+        actor: "AGENT",
+        action: d.allowed ? "GATE_ALLOWED" : "GATE_BLOCKED",
+        entityType: "risk_item",
+        entityId: d.riskItemId,
+        inputs: {
+          planStepId: d.planStepId,
+          channel: sp.playbook,
+          reasonCode: d.reasonCode,
+        },
+        decision: d.allowed ? "ALLOW" : "BLOCK",
+        reasonCodes: [d.reasonCode],
+        policyVersion: POLICY_VERSION,
+        modelVersion: MODEL_VERSION,
+        ts: d.decidedAt,
+      });
     }
 
     // 2. Evaluate All Planned Steps through Gate
@@ -621,6 +703,25 @@ export function runGateEngine(
         // Update step status to BLOCKED in database
         db.query(`UPDATE plan_steps SET status = 'BLOCKED' WHERE id = ?`).run(st.plan_step_id);
       }
+
+      // Log step gate decision into cryptographic audit chain
+      appendAudit(db, {
+        actor: "AGENT",
+        action: d.allowed ? "GATE_ALLOWED" : "GATE_BLOCKED",
+        entityType: "plan_step",
+        entityId: st.plan_step_id,
+        inputs: {
+          riskItemId: d.riskItemId,
+          channel: st.channel,
+          action: st.action,
+          scheduledAt: st.scheduled_at,
+        },
+        decision: d.allowed ? "ALLOW" : "BLOCK",
+        reasonCodes: [d.reasonCode],
+        policyVersion: POLICY_VERSION,
+        modelVersion: MODEL_VERSION,
+        ts: d.decidedAt,
+      });
     }
   });
   gateTx();

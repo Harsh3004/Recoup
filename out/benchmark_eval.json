@@ -1,0 +1,75 @@
+{
+  "meta": {
+    "timestamp": "2026-08-29T13:38:30.561Z",
+    "policyVersion": "policy-v0-seed",
+    "modelVersion": "none"
+  },
+  "cohorts": {
+    "totalCases": 1314,
+    "treatmentCases": 1117,
+    "holdoutCases": 197,
+    "treatmentExposureInr": 162097869,
+    "holdoutExposureInr": 24374794
+  },
+  "results": {
+    "treatmentRecoveredInr": 45898158,
+    "holdoutRecoveredInr": 1346094,
+    "counterfactualBaselineInr": 7512368.3,
+    "incrementalRecoveredInr": 38385789.7,
+    "incrementalLiftPct": 510.9678887814912,
+    "ci95": {
+      "lowerInr": 19420317.18,
+      "medianInr": 37250942.96,
+      "upperInr": 60286634.79,
+      "lowerLiftPct": 186.41071399853297,
+      "medianLiftPct": 523.3279099747641,
+      "upperLiftPct": 1324.6866924519702
+    },
+    "sensitivityBandInr": {
+      "minusOneSeInr": 41023794.88,
+      "plusOneSeInr": 35747784.52
+    },
+    "permutationPValue": 0.018
+  },
+  "counterfactualComparison": {
+    "pureHoldoutBaselineInr": 7512368.3,
+    "naiveDunningBaselineInr": 29988105.77,
+    "recoupGrossRecoveredInr": 45898158,
+    "incrementalOverHoldoutInr": 38385789.7,
+    "incrementalOverNaiveInr": 15910052.23
+  },
+  "bySurface": [
+    {
+      "surface": "Surface D",
+      "treatmentCases": 236,
+      "holdoutCases": 41,
+      "treatmentRecoveredInr": 44865000,
+      "incrementalInr": 38252682.93,
+      "recoveryRatePct": 28.2
+    },
+    {
+      "surface": "Surface B",
+      "treatmentCases": 323,
+      "holdoutCases": 57,
+      "treatmentRecoveredInr": 633976,
+      "incrementalInr": 86122.67,
+      "recoveryRatePct": 35.9
+    },
+    {
+      "surface": "Surface A",
+      "treatmentCases": 400,
+      "holdoutCases": 71,
+      "treatmentRecoveredInr": 278647,
+      "incrementalInr": -245144.55,
+      "recoveryRatePct": 36.2
+    },
+    {
+      "surface": "Surface C",
+      "treatmentCases": 158,
+      "holdoutCases": 28,
+      "treatmentRecoveredInr": 120535,
+      "incrementalInr": 77135.79,
+      "recoveryRatePct": 48.5
+    }
+  ]
+}

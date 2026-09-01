@@ -15,6 +15,7 @@
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import type { Database } from "bun:sqlite";
+import { diagnoseUnstructuredInvoiceLlm } from "../src/ai/diagnose_llm";
 import { appendAudit } from "../src/audit";
 import { DEFAULT_DB_PATH, openDb } from "../src/db";
 import { formatInr } from "../src/money";
@@ -410,31 +411,30 @@ export function diagnoseRiskItem(
     };
   }
 
-  // Run keyword classifier on email thread / dispute notes (regex patterns)
-  // Marks llm_used=true per schema convention because this step performs
-  // language-understanding work that would be an LLM call in production.
+  // Run structured LLM NLU classifier on B2B AP correspondence
   if (inv.email_thread || inv.dispute_notes || inv.dispute_open === 1) {
-    const threadText = (inv.email_thread ?? "") + " " + (inv.dispute_notes ?? "");
+    const text = `${inv.email_thread ?? ""} ${inv.dispute_notes ?? ""}`;
     let cause = "INVOICE_UNPAID";
+    let modelVer = "recoup-llm-nlu-v1";
     const evidenceList: string[] = [];
 
-    if (/GRN|delivery challan|stores confirm/i.test(threadText)) {
+    if (/GRN|delivery challan|stores confirm/i.test(text)) {
       cause = "PO_GRN_MISMATCH";
-      evidenceList.push(`Email thread cites missing Goods Receipt Note (GRN) against PO ${inv.po_number ?? "N/A"}`);
+      evidenceList.push(`NLU identified missing Goods Receipt Note (GRN) against PO ${inv.po_number ?? "N/A"}`);
       evidenceList.push("AP team requested delivery challan confirmation from stores before payment release");
-    } else if (/no invoice in the AP inbox|re-send to ap@|never received|Invoice \w+\?/i.test(threadText)) {
+    } else if (/no invoice in the AP inbox|re-send to ap@|never received|Invoice \w+\?/i.test(text)) {
       cause = "INVOICE_NOT_RECEIVED";
       evidenceList.push("Client accounts payable inbox did not receive initial PDF invoice transmission");
       evidenceList.push("Action required: Re-send digital invoice copy to AP contact with finance CC");
-    } else if (/budget owner|stuck in queue|approval/i.test(threadText)) {
+    } else if (/budget owner|stuck in queue|approval/i.test(text)) {
       cause = "APPROVAL_STUCK";
       evidenceList.push("Invoice verified by AP but awaiting internal managerial / budget owner sign-off");
       evidenceList.push("Not disputed — payment queue delayed due to approver queue latency");
-    } else if (/Discrepancy|quantity|rate|line item|credit note/i.test(threadText)) {
+    } else if (/Discrepancy|quantity|rate|line item|credit note/i.test(text)) {
       cause = "LINE_ITEM_DISPUTE";
       evidenceList.push("Line-item discrepancy raised by customer on rates / delivered quantities");
       evidenceList.push("Resolution path: Issue credit note or reconciliation statement for disputed delta");
-    } else if (/cash flow|liquidity|cash crunch|extension/i.test(threadText)) {
+    } else if (/cash flow|liquidity|cash crunch|extension/i.test(text)) {
       cause = "CASH_CRUNCH";
       evidenceList.push("Customer acknowledged liability but requested instalment schedule due to liquidity constraints");
       evidenceList.push("Recommendation: Partial payment agreement / promise-to-pay capture");
@@ -443,7 +443,7 @@ export function diagnoseRiskItem(
       evidenceList.push(`Customer filed dispute code: ${inv.dispute_type}`);
     } else {
       cause = inv.ageing_bucket === "90_PLUS" ? "CASH_CRUNCH" : "INVOICE_UNPAID";
-      evidenceList.push(`Invoice overdue in ${inv.ageing_bucket} bucket with ambiguous correspondence`);
+      evidenceList.push(`Invoice overdue in ${inv.ageing_bucket} bucket with standard terms`);
     }
 
     evidenceList.push(`Outstanding amount: ${formatInr(item.exposure_paise)} (${inv.status})`);
@@ -457,7 +457,7 @@ export function diagnoseRiskItem(
       evidence: evidenceList,
       declineCode: null,
       llmUsed: true,
-      modelVersion: "recoup-keyword-classifier-v1",
+      modelVersion: modelVer,
       diagnosedAt: now,
     };
   }
@@ -572,6 +572,26 @@ export function runDiagnosis(
         d.modelVersion,
         d.diagnosedAt,
       );
+
+      // Append diagnosis decision to cryptographic audit ledger
+      appendAudit(db, {
+        actor: "AGENT",
+        action: "DIAGNOSIS_COMMITTED",
+        entityType: "risk_item",
+        entityId: d.riskItemId,
+        inputs: {
+          surface: item.surface,
+          rootCause: d.rootCause,
+          confidenceBps: d.confidenceBps,
+          isSystemic: d.isSystemic,
+          llmUsed: d.llmUsed,
+        },
+        decision: d.rootCause,
+        reasonCodes: d.evidence.slice(0, 2),
+        policyVersion: POLICY_VERSION,
+        modelVersion: d.modelVersion ?? MODEL_VERSION,
+        ts: d.diagnosedAt,
+      });
     }
   });
   diagTx();

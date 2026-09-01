@@ -1,0 +1,1275 @@
+{
+  "2204746ae6b95c4232e7bc0496017c27": {
+    "model": "gemini-3.6-flash",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "Is mahine collections weak hain.",
+        "Do dates mein split kar sakte hain?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The customer acknowledges the debt for invoice inv_000001 but cites weak monthly collections and requests to split the payment across two dates due to cash flow constraints."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"Is mahine collections weak hain.\",\n    \"Do dates mein split kar sakte hain?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The customer acknowledges the debt for invoice inv_000001 but cites weak monthly collections and requests to split the payment across two dates due to cash flow constraints.\"\n}",
+    "cachedAt": 1788010943872,
+    "inferredAt": "2026-08-29T13:42:18.465Z",
+    "tokenUsage": {
+      "promptTokens": 488,
+      "completionTokens": 120,
+      "totalTokens": 1262
+    },
+    "isFallback": false
+  },
+  "e029b6e0725fdcaa563b82e385c2c2a1": {
+    "model": "gemini-3.6-flash",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9600,
+      "evidence_spans": [
+        "Is mahine collections weak hain.",
+        "Do dates mein split kar sakte hain?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The customer CFO acknowledges receipt of the invoice and accepts liability, but cites weak collections (liquidity constraints) and requests to split the payment into two installments."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9600,\n  \"evidence_spans\": [\n    \"Is mahine collections weak hain.\",\n    \"Do dates mein split kar sakte hain?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The customer CFO acknowledges receipt of the invoice and accepts liability, but cites weak collections (liquidity constraints) and requests to split the payment into two installments.\"\n}",
+    "cachedAt": 1788010963211,
+    "inferredAt": "2026-08-29T13:42:23.902Z",
+    "tokenUsage": {
+      "promptTokens": 489,
+      "completionTokens": 116,
+      "totalTokens": 1169
+    },
+    "isFallback": false
+  },
+  "2e974755ceaa1f67041885b0658f4921": {
+    "model": "gemini-3.6-flash",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "Is mahine collections weak hain.",
+        "Do dates mein split kar sakte hain?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The customer explicitly acknowledges invoice inv_000003 but cites weak collections this month and requests to split the outstanding payment into two installments."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"Is mahine collections weak hain.\",\n    \"Do dates mein split kar sakte hain?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The customer explicitly acknowledges invoice inv_000003 but cites weak collections this month and requests to split the outstanding payment into two installments.\"\n}",
+    "cachedAt": 1788010970365,
+    "inferredAt": "2026-08-29T13:42:43.235Z",
+    "tokenUsage": {
+      "promptTokens": 490,
+      "completionTokens": 115,
+      "totalTokens": 1265
+    },
+    "isFallback": false
+  },
+  "2e69f84466611da32b4a24662705fef4": {
+    "model": "gemini-3.6-flash",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9600,
+      "evidence_spans": [
+        "Is mahine collections weak hain.",
+        "Do dates mein split kar sakte hain?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The customer acknowledges invoice inv_000004 but explicitly cites weak cash collections for the current month and requests to split the payment across two installment dates, indicating a temporary cash flow constraint."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9600,\n  \"evidence_spans\": [\n    \"Is mahine collections weak hain.\",\n    \"Do dates mein split kar sakte hain?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The customer acknowledges invoice inv_000004 but explicitly cites weak cash collections for the current month and requests to split the payment across two installment dates, indicating a temporary cash flow constraint.\"\n}",
+    "cachedAt": 1788010996349,
+    "inferredAt": "2026-08-29T13:42:50.389Z",
+    "tokenUsage": {
+      "promptTokens": 489,
+      "completionTokens": 125,
+      "totalTokens": 1551
+    },
+    "isFallback": false
+  },
+  "e2120fe9761760e7655ddb36b874de87": {
+    "model": "gemini-3.6-flash",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9600,
+      "evidence_spans": [
+        "We acknowledge inv_000005 for ₹2,50,000.00.",
+        "Collections from our retailers slipped this month.",
+        "Can we split across two dates?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer acknowledges full liability for the invoice but requests an installment arrangement ('split across two dates') due to delayed collections from their own retailers."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9600,\n  \"evidence_spans\": [\n    \"We acknowledge inv_000005 for ₹2,50,000.00.\",\n    \"Collections from our retailers slipped this month.\",\n    \"Can we split across two dates?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer acknowledges full liability for the invoice but requests an installment arrangement ('split across two dates') due to delayed collections from their own retailers.\"\n}",
+    "cachedAt": 1788011018179,
+    "inferredAt": "2026-08-29T13:43:16.381Z",
+    "tokenUsage": {
+      "promptTokens": 488,
+      "completionTokens": 140,
+      "totalTokens": 1256
+    },
+    "isFallback": false
+  },
+  "8536ae487ced5733137e23d920615822": {
+    "model": "gemini-3.6-flash",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9700,
+      "evidence_spans": [
+        "We acknowledge inv_000006 for ₹5,00,000.00.",
+        "Collections from our retailers slipped this month.",
+        "Can we split across two dates?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer explicitly acknowledged liability for the full amount of invoice inv_000006 but cited cash flow issues resulting from delayed retailer collections. They requested a split payment plan across two separate dates."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9700,\n  \"evidence_spans\": [\n    \"We acknowledge inv_000006 for ₹5,00,000.00.\",\n    \"Collections from our retailers slipped this month.\",\n    \"Can we split across two dates?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer explicitly acknowledged liability for the full amount of invoice inv_000006 but cited cash flow issues resulting from delayed retailer collections. They requested a split payment plan across two separate dates.\"\n}",
+    "cachedAt": 1788011326455,
+    "inferredAt": "2026-08-29T13:48:12.645Z",
+    "tokenUsage": {
+      "promptTokens": 488,
+      "completionTokens": 153,
+      "totalTokens": 1415
+    },
+    "isFallback": false
+  },
+  "344b411ec76835c0ec552143e2ba3653": {
+    "model": "gemini-3.6-flash",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9600,
+      "evidence_spans": [
+        "Is mahine collections weak hain.",
+        "Do dates mein split kar sakte hain?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The customer acknowledges the invoice liability but cites weak monthly collections and requests to split the payment into two installments due to cash flow constraints."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9600,\n  \"evidence_spans\": [\n    \"Is mahine collections weak hain.\",\n    \"Do dates mein split kar sakte hain?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The customer acknowledges the invoice liability but cites weak monthly collections and requests to split the payment into two installments due to cash flow constraints.\"\n}",
+    "cachedAt": 1788011416254,
+    "inferredAt": "2026-08-29T13:50:09.745Z",
+    "tokenUsage": {
+      "promptTokens": 489,
+      "completionTokens": 111,
+      "totalTokens": 1191
+    },
+    "isFallback": false
+  },
+  "a6674036ae482f0be9d96ef86cc6a5d9": {
+    "model": "gemini-3.6-flash",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "Is mahine collections weak hain.",
+        "Do dates mein split kar sakte hain?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer acknowledges receipt of the invoice but explicitly cites weak collections (liquidity constraints) and requests to split the payment into two installments."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"Is mahine collections weak hain.\",\n    \"Do dates mein split kar sakte hain?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer acknowledges receipt of the invoice but explicitly cites weak collections (liquidity constraints) and requests to split the payment into two installments.\"\n}",
+    "cachedAt": 1788011421372,
+    "inferredAt": "2026-08-29T13:50:16.287Z",
+    "tokenUsage": {
+      "promptTokens": 488,
+      "completionTokens": 112,
+      "totalTokens": 984
+    },
+    "isFallback": false
+  },
+  "05d6c109fbb4b272a4e56e680d5703f9": {
+    "model": "gemini-3.6-flash",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9600,
+      "evidence_spans": [
+        "We acknowledge inv_000011 for ₹5,00,000.00",
+        "Collections from our retailers slipped this month. Can we split across two dates?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The customer clearly acknowledges the invoice liability but cites delayed collections from retailers, requesting to split the payment across two dates due to temporary liquidity constraints."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9600,\n  \"evidence_spans\": [\n    \"We acknowledge inv_000011 for ₹5,00,000.00\",\n    \"Collections from our retailers slipped this month. Can we split across two dates?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The customer clearly acknowledges the invoice liability but cites delayed collections from retailers, requesting to split the payment across two dates due to temporary liquidity constraints.\"\n}",
+    "cachedAt": 1788011426388,
+    "inferredAt": "2026-08-29T13:50:21.397Z",
+    "tokenUsage": {
+      "promptTokens": 486,
+      "completionTokens": 137,
+      "totalTokens": 1131
+    },
+    "isFallback": false
+  },
+  "426c7dbc137f36f597295b0fa1a58307": {
+    "model": "gemini-3.6-flash",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "Is mahine collections weak hain. Do dates mein split kar sakte hain?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer's CFO explicitly acknowledged receipt of the invoice but requested splitting the payment into two dates due to weak collections, indicating a temporary liquidity constraint."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"Is mahine collections weak hain. Do dates mein split kar sakte hain?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer's CFO explicitly acknowledged receipt of the invoice but requested splitting the payment into two dates due to weak collections, indicating a temporary liquidity constraint.\"\n}",
+    "cachedAt": 1788011433761,
+    "inferredAt": "2026-08-29T13:50:26.444Z",
+    "tokenUsage": {
+      "promptTokens": 489,
+      "completionTokens": 112,
+      "totalTokens": 1195
+    },
+    "isFallback": false
+  },
+  "02ece5b9ce34adde7e5a3616e4527958": {
+    "model": "gemini-3.6-flash",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "Is mahine collections weak hain. Do dates mein split kar sakte hain?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer CFO acknowledges the invoice liability but cites weak internal collections and requests a split payment schedule across two dates."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"Is mahine collections weak hain. Do dates mein split kar sakte hain?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer CFO acknowledges the invoice liability but cites weak internal collections and requests a split payment schedule across two dates.\"\n}",
+    "cachedAt": 1788011439662,
+    "inferredAt": "2026-08-29T13:50:33.781Z",
+    "tokenUsage": {
+      "promptTokens": 485,
+      "completionTokens": 104,
+      "totalTokens": 1183
+    },
+    "isFallback": false
+  },
+  "1549c380edc8d080f26a9b0027ecad40": {
+    "model": "gemini-3.6-flash",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "Is mahine collections weak hain.",
+        "Do dates mein split kar sakte hain?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer acknowledges receipt of invoice inv_000015 but cites weak collections this month and requests an installment plan to split the payment across two dates."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"Is mahine collections weak hain.\",\n    \"Do dates mein split kar sakte hain?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer acknowledges receipt of invoice inv_000015 but cites weak collections this month and requests an installment plan to split the payment across two dates.\"\n}",
+    "cachedAt": 1788011445327,
+    "inferredAt": "2026-08-29T13:50:39.685Z",
+    "tokenUsage": {
+      "promptTokens": 484,
+      "completionTokens": 118,
+      "totalTokens": 1115
+    },
+    "isFallback": false
+  },
+  "81b464ade3e6279a8f92263c41e9ca40": {
+    "model": "gemini-3.6-flash",
+    "parsed": {
+      "root_cause": "INVOICE_NOT_RECEIVED",
+      "confidence_bps": 9800,
+      "evidence_spans": [
+        "We have no invoice in the AP inbox for ₹1,50,000.00.",
+        "Please re-send to ap@ and cc finance."
+      ],
+      "recommended_playbook": "DUNNING_LADDER",
+      "rationale": "The buyer AP desk confirmed that invoice inv_000016 was not received in their inbox and requested a copy to be resent to ap@ and cc finance."
+    },
+    "content": "{\n  \"root_cause\": \"INVOICE_NOT_RECEIVED\",\n  \"confidence_bps\": 9800,\n  \"evidence_spans\": [\n    \"We have no invoice in the AP inbox for ₹1,50,000.00.\",\n    \"Please re-send to ap@ and cc finance.\"\n  ],\n  \"recommended_playbook\": \"DUNNING_LADDER\",\n  \"rationale\": \"The buyer AP desk confirmed that invoice inv_000016 was not received in their inbox and requested a copy to be resent to ap@ and cc finance.\"\n}",
+    "cachedAt": 1788011449314,
+    "inferredAt": "2026-08-29T13:50:45.355Z",
+    "tokenUsage": {
+      "promptTokens": 515,
+      "completionTokens": 141,
+      "totalTokens": 1133
+    },
+    "isFallback": false
+  },
+  "4e12f57a19b62daeebf484d9254ebcce": {
+    "model": "gemini-3.6-flash",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9700,
+      "evidence_spans": [
+        "We acknowledge inv_000018 for ₹2,50,000.00.",
+        "Collections from our retailers slipped this month.",
+        "Can we split across two dates?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer explicitly acknowledged liability for invoice inv_000018 but cited cash flow constraints caused by delayed retail collections, requesting an installment schedule across two dates."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9700,\n  \"evidence_spans\": [\n    \"We acknowledge inv_000018 for ₹2,50,000.00.\",\n    \"Collections from our retailers slipped this month.\",\n    \"Can we split across two dates?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer explicitly acknowledged liability for invoice inv_000018 but cited cash flow constraints caused by delayed retail collections, requesting an installment schedule across two dates.\"\n}",
+    "cachedAt": 1788011455132,
+    "inferredAt": "2026-08-29T13:50:49.339Z",
+    "tokenUsage": {
+      "promptTokens": 486,
+      "completionTokens": 146,
+      "totalTokens": 1062
+    },
+    "isFallback": false
+  },
+  "4fc08c385b4cbdb4f797b8cd81d4599e": {
+    "model": "gemini-3.6-flash",
+    "parsed": {
+      "root_cause": "APPROVAL_STUCK",
+      "confidence_bps": 9750,
+      "evidence_spans": [
+        "Invoice inv_000019 (₹25,000.00) is with the budget owner since last week.",
+        "Not rejected — just stuck in queue."
+      ],
+      "recommended_playbook": "DUNNING_LADDER",
+      "rationale": "The buyer AP department confirmed that invoice inv_000019 is not rejected but remains pending sign-off in the budget owner's internal approval queue."
+    },
+    "content": "{\n  \"root_cause\": \"APPROVAL_STUCK\",\n  \"confidence_bps\": 9750,\n  \"evidence_spans\": [\n    \"Invoice inv_000019 (₹25,000.00) is with the budget owner since last week.\",\n    \"Not rejected — just stuck in queue.\"\n  ],\n  \"recommended_playbook\": \"DUNNING_LADDER\",\n  \"rationale\": \"The buyer AP department confirmed that invoice inv_000019 is not rejected but remains pending sign-off in the budget owner's internal approval queue.\"\n}",
+    "cachedAt": 1788011461036,
+    "inferredAt": "2026-08-29T13:50:55.156Z",
+    "tokenUsage": {
+      "promptTokens": 516,
+      "completionTokens": 142,
+      "totalTokens": 1255
+    },
+    "isFallback": false
+  },
+  "ef53b8a5ec2d72600f494751e7746431": {
+    "model": "gemini-3.6-flash",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9600,
+      "evidence_spans": [
+        "Is mahine collections weak hain. Do dates mein split kar sakte hain?",
+        "CASH_CRUNCH on inv_000021"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer acknowledges the invoice amount but requests a payment split across two dates due to weak collections this month."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9600,\n  \"evidence_spans\": [\n    \"Is mahine collections weak hain. Do dates mein split kar sakte hain?\",\n    \"CASH_CRUNCH on inv_000021\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer acknowledges the invoice amount but requests a payment split across two dates due to weak collections this month.\"\n}",
+    "cachedAt": 1788011470038,
+    "inferredAt": "2026-08-29T13:51:01.058Z",
+    "tokenUsage": {
+      "promptTokens": 518,
+      "completionTokens": 121,
+      "totalTokens": 1361
+    },
+    "isFallback": false
+  },
+  "5f9c877f1316b42efa97f350f2e32794": {
+    "model": "gemini-3.6-flash",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9700,
+      "evidence_spans": [
+        "We acknowledge inv_000022 for ₹5,00,000.00.",
+        "Collections from our retailers slipped this month.",
+        "Can we split across two dates?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer explicitly acknowledges liability for the outstanding amount of ₹5,00,000.00 but cites liquidity/cash flow difficulties due to delayed retail collections, requesting to split the payment into installments."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9700,\n  \"evidence_spans\": [\n    \"We acknowledge inv_000022 for ₹5,00,000.00.\",\n    \"Collections from our retailers slipped this month.\",\n    \"Can we split across two dates?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer explicitly acknowledges liability for the outstanding amount of ₹5,00,000.00 but cites liquidity/cash flow difficulties due to delayed retail collections, requesting to split the payment into installments.\"\n}",
+    "cachedAt": 1788011479098,
+    "inferredAt": "2026-08-29T13:51:10.064Z",
+    "tokenUsage": {
+      "promptTokens": 490,
+      "completionTokens": 155,
+      "totalTokens": 1125
+    },
+    "isFallback": false
+  },
+  "01351c103f4b0bbea579148d3596dc2e": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "Is mahine collections weak hain.",
+        "Do dates mein split kar sakte hain?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer acknowledges receipt of the invoice and their liability, but explicitly states that collections are weak this month and requests a split payment schedule due to liquidity constraints."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"Is mahine collections weak hain.\",\n    \"Do dates mein split kar sakte hain?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer acknowledges receipt of the invoice and their liability, but explicitly states that collections are weak this month and requests a split payment schedule due to liquidity constraints.\"\n}",
+    "cachedAt": 1788011485616,
+    "inferredAt": "2026-08-29T13:51:19.127Z",
+    "tokenUsage": {
+      "promptTokens": 485,
+      "completionTokens": 116,
+      "totalTokens": 601
+    },
+    "isFallback": false
+  },
+  "8e997dd57f19146d60024905605b55f1": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "We acknowledge inv_000024 for ₹75,000.00",
+        "Collections from our retailers slipped this month",
+        "Can we split across two dates?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer explicitly acknowledges the invoice liability and confirms the amount due, but is requesting a payment split across two dates due to a temporary cash flow shortage resulting from slipped collections from their retailers."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"We acknowledge inv_000024 for ₹75,000.00\",\n    \"Collections from our retailers slipped this month\",\n    \"Can we split across two dates?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer explicitly acknowledges the invoice liability and confirms the amount due, but is requesting a payment split across two dates due to a temporary cash flow shortage resulting from slipped collections from their retailers.\"\n}",
+    "cachedAt": 1788011492200,
+    "inferredAt": "2026-08-29T13:51:25.724Z",
+    "tokenUsage": {
+      "promptTokens": 484,
+      "completionTokens": 147,
+      "totalTokens": 631
+    },
+    "isFallback": false
+  },
+  "ad8c25ba14ff5016ccc228a611a907ff": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "Collections from our retailers slipped this month",
+        "Can we split across two dates?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer explicitly acknowledges liability for the invoice but requests an installment schedule or split payment due to a temporary cash flow slip from their retailers."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"Collections from our retailers slipped this month\",\n    \"Can we split across two dates?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer explicitly acknowledges liability for the invoice but requests an installment schedule or split payment due to a temporary cash flow slip from their retailers.\"\n}",
+    "cachedAt": 1788011498534,
+    "inferredAt": "2026-08-29T13:51:32.215Z",
+    "tokenUsage": {
+      "promptTokens": 489,
+      "completionTokens": 112,
+      "totalTokens": 601
+    },
+    "isFallback": false
+  },
+  "cb3ad5f1508a0a29052f95f708fda660": {
+    "model": "gemini-3.6-flash",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "We acknowledge inv_000026 for ₹40,000.00.",
+        "Collections from our retailers slipped this month.",
+        "Can we split across two dates?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer explicitly acknowledges the debt liability but cites liquidity constraints due to delayed retailer collections, requesting to split the outstanding balance across multiple dates."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"We acknowledge inv_000026 for ₹40,000.00.\",\n    \"Collections from our retailers slipped this month.\",\n    \"Can we split across two dates?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer explicitly acknowledges the debt liability but cites liquidity constraints due to delayed retailer collections, requesting to split the outstanding balance across multiple dates.\"\n}",
+    "cachedAt": 1788011504042,
+    "inferredAt": "2026-08-29T13:51:38.546Z",
+    "tokenUsage": {
+      "promptTokens": 485,
+      "completionTokens": 137,
+      "totalTokens": 999
+    },
+    "isFallback": false
+  },
+  "c3235718aee5c21d2753e8a96c78e554": {
+    "model": "gemini-3.6-flash",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9600,
+      "evidence_spans": [
+        "We acknowledge inv_000027 for ₹5,00,000.00.",
+        "Collections from our retailers slipped this month.",
+        "Can we split across two dates?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer explicitly acknowledges full liability for invoice inv_000027 but requests splitting the payment across two dates due to temporary cash flow issues caused by delayed retail collections."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9600,\n  \"evidence_spans\": [\n    \"We acknowledge inv_000027 for ₹5,00,000.00.\",\n    \"Collections from our retailers slipped this month.\",\n    \"Can we split across two dates?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer explicitly acknowledges full liability for invoice inv_000027 but requests splitting the payment across two dates due to temporary cash flow issues caused by delayed retail collections.\"\n}",
+    "cachedAt": 1788011508771,
+    "inferredAt": "2026-08-29T13:51:44.054Z",
+    "tokenUsage": {
+      "promptTokens": 488,
+      "completionTokens": 148,
+      "totalTokens": 1101
+    },
+    "isFallback": false
+  },
+  "f1b29bf7de7bbd87da24f58d9c5766fa": {
+    "model": "gemini-3.6-flash",
+    "parsed": {
+      "root_cause": "LINE_ITEM_DISPUTE",
+      "confidence_bps": 9600,
+      "evidence_spans": [
+        "Line 3 (freight) does not match the PO PO-00028.",
+        "Holding the delta; rest can be paid once you issue a credit note."
+      ],
+      "recommended_playbook": "HUMAN_ESCALATION",
+      "rationale": "The buyer identified a freight charge discrepancy on Line 3 compared to PO-00028 and is withholding payment until a credit note is issued."
+    },
+    "content": "{\n  \"root_cause\": \"LINE_ITEM_DISPUTE\",\n  \"confidence_bps\": 9600,\n  \"evidence_spans\": [\n    \"Line 3 (freight) does not match the PO PO-00028.\",\n    \"Holding the delta; rest can be paid once you issue a credit note.\"\n  ],\n  \"recommended_playbook\": \"HUMAN_ESCALATION\",\n  \"rationale\": \"The buyer identified a freight charge discrepancy on Line 3 compared to PO-00028 and is withholding payment until a credit note is issued.\"\n}",
+    "cachedAt": 1788011514800,
+    "inferredAt": "2026-08-29T13:51:48.781Z",
+    "tokenUsage": {
+      "promptTokens": 523,
+      "completionTokens": 139,
+      "totalTokens": 1470
+    },
+    "isFallback": false
+  },
+  "7b39564948c8a69ff8afe44fffa829bf": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "LINE_ITEM_DISPUTE",
+      "confidence_bps": 9800,
+      "evidence_spans": [
+        "Line 3 (freight) does not match the PO PO-00029",
+        "Holding the delta; rest can be paid once you issue a credit note"
+      ],
+      "recommended_playbook": "HUMAN_ESCALATION",
+      "rationale": "The buyer explicitly stated a discrepancy on line 3 (freight) compared to the PO and requested a credit note for the delta before releasing payment, which clearly classifies this as a line item dispute."
+    },
+    "content": "{\n  \"root_cause\": \"LINE_ITEM_DISPUTE\",\n  \"confidence_bps\": 9800,\n  \"evidence_spans\": [\n    \"Line 3 (freight) does not match the PO PO-00029\",\n    \"Holding the delta; rest can be paid once you issue a credit note\"\n  ],\n  \"recommended_playbook\": \"HUMAN_ESCALATION\",\n  \"rationale\": \"The buyer explicitly stated a discrepancy on line 3 (freight) compared to the PO and requested a credit note for the delta before releasing payment, which clearly classifies this as a line item dispute.\"\n}",
+    "cachedAt": 1788011521482,
+    "inferredAt": "2026-08-29T13:51:54.811Z",
+    "tokenUsage": {
+      "promptTokens": 523,
+      "completionTokens": 148,
+      "totalTokens": 671
+    },
+    "isFallback": false
+  },
+  "25ecc14d47c494eec7eed98702d80cef": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "Is mahine collections weak hain. Do dates mein split kar sakte hain?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer's CFO explicitly acknowledges the invoice and liability but states that collections are weak this month and requests to split the payment across two dates, indicating a temporary cash flow constraint."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"Is mahine collections weak hain. Do dates mein split kar sakte hain?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer's CFO explicitly acknowledges the invoice and liability but states that collections are weak this month and requests to split the payment across two dates, indicating a temporary cash flow constraint.\"\n}",
+    "cachedAt": 1788011527764,
+    "inferredAt": "2026-08-29T13:52:01.495Z",
+    "tokenUsage": {
+      "promptTokens": 486,
+      "completionTokens": 118,
+      "totalTokens": 604
+    },
+    "isFallback": false
+  },
+  "60216c31d5dfd8f2a753ea6a390d839b": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "Is mahine collections weak hain.",
+        "Do dates mein split kar sakte hain?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer acknowledges the invoice liability ('note kiya') but explicitly states that cash flow/collections are weak this month and requests to split the payment across two dates, indicating liquidity constraints."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"Is mahine collections weak hain.\",\n    \"Do dates mein split kar sakte hain?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer acknowledges the invoice liability ('note kiya') but explicitly states that cash flow/collections are weak this month and requests to split the payment across two dates, indicating liquidity constraints.\"\n}",
+    "cachedAt": 1788011534351,
+    "inferredAt": "2026-08-29T13:52:07.775Z",
+    "tokenUsage": {
+      "promptTokens": 491,
+      "completionTokens": 121,
+      "totalTokens": 612
+    },
+    "isFallback": false
+  },
+  "1ed028397de2f4f70dc26778153a2a7c": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "Is mahine collections weak hain. Do dates mein split kar sakte hain?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer's CFO explicitly acknowledges the invoice liability but states that collections are weak this month and requests to split the payment across two dates, indicating a temporary cash flow constraint."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"Is mahine collections weak hain. Do dates mein split kar sakte hain?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer's CFO explicitly acknowledges the invoice liability but states that collections are weak this month and requests to split the payment across two dates, indicating a temporary cash flow constraint.\"\n}",
+    "cachedAt": 1788011540602,
+    "inferredAt": "2026-08-29T13:52:14.366Z",
+    "tokenUsage": {
+      "promptTokens": 490,
+      "completionTokens": 117,
+      "totalTokens": 607
+    },
+    "isFallback": false
+  },
+  "ac669b7069f2d834fbf5439a568ff0f7": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "Is mahine collections weak hain. Do dates mein split kar sakte hain?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer's CFO explicitly acknowledges the invoice liability but states that collections are weak this month and requests to split the payment across two dates, indicating a temporary cash flow constraint."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"Is mahine collections weak hain. Do dates mein split kar sakte hain?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer's CFO explicitly acknowledges the invoice liability but states that collections are weak this month and requests to split the payment across two dates, indicating a temporary cash flow constraint.\"\n}",
+    "cachedAt": 1788011546894,
+    "inferredAt": "2026-08-29T13:52:20.614Z",
+    "tokenUsage": {
+      "promptTokens": 486,
+      "completionTokens": 117,
+      "totalTokens": 603
+    },
+    "isFallback": false
+  },
+  "5010edeafcee29d3d9799e4c4b28c701": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "Is mahine collections weak hain.",
+        "Do dates mein split kar sakte hain?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer acknowledges receipt and liability of the invoice but explicitly states that collections are weak this month and requests to split the payment across two dates due to liquidity issues."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"Is mahine collections weak hain.\",\n    \"Do dates mein split kar sakte hain?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer acknowledges receipt and liability of the invoice but explicitly states that collections are weak this month and requests to split the payment across two dates due to liquidity issues.\"\n}",
+    "cachedAt": 1788011553118,
+    "inferredAt": "2026-08-29T13:52:26.907Z",
+    "tokenUsage": {
+      "promptTokens": 489,
+      "completionTokens": 117,
+      "totalTokens": 606
+    },
+    "isFallback": false
+  },
+  "25100ded5fb4447fd96a2686af42eee1": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "Is mahine collections weak hain. Do dates mein split kar sakte hain?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer's CFO explicitly acknowledges the invoice liability but states that collections are weak this month and requests to split the payment across two dates, indicating a temporary cash flow constraint."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"Is mahine collections weak hain. Do dates mein split kar sakte hain?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer's CFO explicitly acknowledges the invoice liability but states that collections are weak this month and requests to split the payment across two dates, indicating a temporary cash flow constraint.\"\n}",
+    "cachedAt": 1788011559354,
+    "inferredAt": "2026-08-29T13:52:33.131Z",
+    "tokenUsage": {
+      "promptTokens": 487,
+      "completionTokens": 117,
+      "totalTokens": 604
+    },
+    "isFallback": false
+  },
+  "3f08468719b6a9a083a2c48f59703ed0": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "Is mahine collections weak hain.",
+        "Do dates mein split kar sakte hain?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer acknowledges the invoice liability ('note kiya') but explicitly states that cash collections are weak this month ('Is mahine collections weak hain') and requests to split the payment across two dates ('Do dates mein split kar sakte hain?'). This clearly indicates a cash crunch and liquidity issue rather than a dispute or operational delay."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"Is mahine collections weak hain.\",\n    \"Do dates mein split kar sakte hain?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer acknowledges the invoice liability ('note kiya') but explicitly states that cash collections are weak this month ('Is mahine collections weak hain') and requests to split the payment across two dates ('Do dates mein split kar sakte hain?'). This clearly indicates a cash crunch and liquidity issue rather than a dispute or operational delay.\"\n}",
+    "cachedAt": 1788011565835,
+    "inferredAt": "2026-08-29T13:52:39.367Z",
+    "tokenUsage": {
+      "promptTokens": 485,
+      "completionTokens": 149,
+      "totalTokens": 634
+    },
+    "isFallback": false
+  },
+  "e9dd3731e162a71fd2b636c9449c67bb": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "Is mahine collections weak hain.",
+        "Do dates mein split kar sakte hain?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer CFO explicitly acknowledges liability for the invoice but requests a split payment schedule across two dates due to weak collections and cash flow constraints."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"Is mahine collections weak hain.\",\n    \"Do dates mein split kar sakte hain?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer CFO explicitly acknowledges liability for the invoice but requests a split payment schedule across two dates due to weak collections and cash flow constraints.\"\n}",
+    "cachedAt": 1788011572133,
+    "inferredAt": "2026-08-29T13:52:45.846Z",
+    "tokenUsage": {
+      "promptTokens": 487,
+      "completionTokens": 112,
+      "totalTokens": 599
+    },
+    "isFallback": false
+  },
+  "ec97be84b1a593175e9c18b73d97b369": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "LINE_ITEM_DISPUTE",
+      "confidence_bps": 9800,
+      "evidence_spans": [
+        "Line 3 (freight) does not match the PO PO-00040",
+        "Holding the delta; rest can be paid once you issue a credit note"
+      ],
+      "recommended_playbook": "HUMAN_ESCALATION",
+      "rationale": "The buyer explicitly stated a line item discrepancy regarding freight on Line 3 compared to PO-00040 and requested a credit note before releasing payment."
+    },
+    "content": "{\n  \"root_cause\": \"LINE_ITEM_DISPUTE\",\n  \"confidence_bps\": 9800,\n  \"evidence_spans\": [\n    \"Line 3 (freight) does not match the PO PO-00040\",\n    \"Holding the delta; rest can be paid once you issue a credit note\"\n  ],\n  \"recommended_playbook\": \"HUMAN_ESCALATION\",\n  \"rationale\": \"The buyer explicitly stated a line item discrepancy regarding freight on Line 3 compared to PO-00040 and requested a credit note before releasing payment.\"\n}",
+    "cachedAt": 1788011578327,
+    "inferredAt": "2026-08-29T13:52:52.147Z",
+    "tokenUsage": {
+      "promptTokens": 521,
+      "completionTokens": 140,
+      "totalTokens": 661
+    },
+    "isFallback": false
+  },
+  "c44a1d99980053f4d2826dad7a6bbb0d": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "INVOICE_NOT_RECEIVED",
+      "confidence_bps": 9800,
+      "evidence_spans": [
+        "We have no invoice in the AP inbox for ₹5,00,000.00. Please re-send to ap@ and cc finance."
+      ],
+      "recommended_playbook": "DUNNING_LADDER",
+      "rationale": "The AP desk explicitly stated they have no invoice in their inbox for the specified amount and requested a re-send to the AP email address, clearly indicating an INVOICE_NOT_RECEIVED root cause."
+    },
+    "content": "{\n  \"root_cause\": \"INVOICE_NOT_RECEIVED\",\n  \"confidence_bps\": 9800,\n  \"evidence_spans\": [\n    \"We have no invoice in the AP inbox for ₹5,00,000.00. Please re-send to ap@ and cc finance.\"\n  ],\n  \"recommended_playbook\": \"DUNNING_LADDER\",\n  \"rationale\": \"The AP desk explicitly stated they have no invoice in their inbox for the specified amount and requested a re-send to the AP email address, clearly indicating an INVOICE_NOT_RECEIVED root cause.\"\n}",
+    "cachedAt": 1788011584707,
+    "inferredAt": "2026-08-29T13:52:58.341Z",
+    "tokenUsage": {
+      "promptTokens": 516,
+      "completionTokens": 144,
+      "totalTokens": 660
+    },
+    "isFallback": false
+  },
+  "bb43cf1cd18bf848f27f709894b616ff": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "Is mahine collections weak hain.",
+        "Do dates mein split kar sakte hain?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer acknowledges receipt and liability for the invoice but explicitly states that collections are weak this month and requests to split the payment across two dates due to liquidity constraints."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"Is mahine collections weak hain.\",\n    \"Do dates mein split kar sakte hain?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer acknowledges receipt and liability for the invoice but explicitly states that collections are weak this month and requests to split the payment across two dates due to liquidity constraints.\"\n}",
+    "cachedAt": 1788011591113,
+    "inferredAt": "2026-08-29T13:53:04.719Z",
+    "tokenUsage": {
+      "promptTokens": 490,
+      "completionTokens": 117,
+      "totalTokens": 607
+    },
+    "isFallback": false
+  },
+  "dd8ee3b7d250121a3183dbf689d5b0ae": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "LINE_ITEM_DISPUTE",
+      "confidence_bps": 9800,
+      "evidence_spans": [
+        "Line 3 (freight) does not match the PO PO-00044.",
+        "Holding the delta; rest can be paid once you issue a credit note."
+      ],
+      "recommended_playbook": "HUMAN_ESCALATION",
+      "rationale": "The buyer explicitly states there is a line item discrepancy on Line 3 regarding freight compared to the PO and is withholding payment until a credit note is issued."
+    },
+    "content": "{\n  \"root_cause\": \"LINE_ITEM_DISPUTE\",\n  \"confidence_bps\": 9800,\n  \"evidence_spans\": [\n    \"Line 3 (freight) does not match the PO PO-00044.\",\n    \"Holding the delta; rest can be paid once you issue a credit note.\"\n  ],\n  \"recommended_playbook\": \"HUMAN_ESCALATION\",\n  \"rationale\": \"The buyer explicitly states there is a line item discrepancy on Line 3 regarding freight compared to the PO and is withholding payment until a credit note is issued.\"\n}",
+    "cachedAt": 1788011597836,
+    "inferredAt": "2026-08-29T13:53:11.128Z",
+    "tokenUsage": {
+      "promptTokens": 521,
+      "completionTokens": 139,
+      "totalTokens": 660
+    },
+    "isFallback": false
+  },
+  "5820df5918cceaa459042ee19211d9d0": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "Is mahine collections weak hain.",
+        "Do dates mein split kar sakte hain?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer acknowledges the invoice liability ('note kiya') but explicitly states that cash collections are weak this month and requests to split the payment across two dates, indicating temporary liquidity constraints."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"Is mahine collections weak hain.\",\n    \"Do dates mein split kar sakte hain?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer acknowledges the invoice liability ('note kiya') but explicitly states that cash collections are weak this month and requests to split the payment across two dates, indicating temporary liquidity constraints.\"\n}",
+    "cachedAt": 1788011605518,
+    "inferredAt": "2026-08-29T13:53:17.852Z",
+    "tokenUsage": {
+      "promptTokens": 490,
+      "completionTokens": 120,
+      "totalTokens": 610
+    },
+    "isFallback": false
+  },
+  "e3e9b28790ba5a4a81d160ae08c599b7": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "Collections from our retailers slipped this month",
+        "Can we split across two dates?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer explicitly acknowledges liability for the invoice but requests an installment schedule due to a temporary cash flow slip from their own retailers."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"Collections from our retailers slipped this month\",\n    \"Can we split across two dates?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer explicitly acknowledges liability for the invoice but requests an installment schedule due to a temporary cash flow slip from their own retailers.\"\n}",
+    "cachedAt": 1788011611749,
+    "inferredAt": "2026-08-29T13:53:25.529Z",
+    "tokenUsage": {
+      "promptTokens": 488,
+      "completionTokens": 110,
+      "totalTokens": 598
+    },
+    "isFallback": false
+  },
+  "8dc633a9edbb2a1ac2ccb9f7e7742135": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "APPROVAL_STUCK",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "Invoice inv_000047 (₹40,000.00) is with the budget owner since last week. Not rejected — just stuck in queue."
+      ],
+      "recommended_playbook": "HUMAN_ESCALATION",
+      "rationale": "The AP email thread explicitly states that the invoice has been verified but is stuck in the internal queue awaiting the budget owner's sign-off. This directly matches the APPROVAL_STUCK root cause."
+    },
+    "content": "{\n  \"root_cause\": \"APPROVAL_STUCK\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"Invoice inv_000047 (₹40,000.00) is with the budget owner since last week. Not rejected — just stuck in queue.\"\n  ],\n  \"recommended_playbook\": \"HUMAN_ESCALATION\",\n  \"rationale\": \"The AP email thread explicitly states that the invoice has been verified but is stuck in the internal queue awaiting the budget owner's sign-off. This directly matches the APPROVAL_STUCK root cause.\"\n}",
+    "cachedAt": 1788011618574,
+    "inferredAt": "2026-08-29T13:53:31.762Z",
+    "tokenUsage": {
+      "promptTokens": 518,
+      "completionTokens": 146,
+      "totalTokens": 664
+    },
+    "isFallback": false
+  },
+  "85927c4e51caa515055aadd9526273e4": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "We acknowledge inv_000048 for ₹75,000.00.",
+        "Collections from our retailers slipped this month. Can we split across two dates?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer explicitly acknowledges liability for the invoice but requests an installment arrangement due to slipped collections and liquidity constraints."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"We acknowledge inv_000048 for ₹75,000.00.\",\n    \"Collections from our retailers slipped this month. Can we split across two dates?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer explicitly acknowledges liability for the invoice but requests an installment arrangement due to slipped collections and liquidity constraints.\"\n}",
+    "cachedAt": 1788011624820,
+    "inferredAt": "2026-08-29T13:53:38.585Z",
+    "tokenUsage": {
+      "promptTokens": 484,
+      "completionTokens": 128,
+      "totalTokens": 612
+    },
+    "isFallback": false
+  },
+  "a40f93dbbfa1959287a5ed8678c6e288": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "Is mahine collections weak hain.",
+        "Do dates mein split kar sakte hain?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer acknowledges the liability for invoice inv_000049 but explicitly states that collections are weak this month and requests to split the payment across two dates due to liquidity constraints."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"Is mahine collections weak hain.\",\n    \"Do dates mein split kar sakte hain?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer acknowledges the liability for invoice inv_000049 but explicitly states that collections are weak this month and requests to split the payment across two dates due to liquidity constraints.\"\n}",
+    "cachedAt": 1788011631142,
+    "inferredAt": "2026-08-29T13:53:44.833Z",
+    "tokenUsage": {
+      "promptTokens": 487,
+      "completionTokens": 123,
+      "totalTokens": 610
+    },
+    "isFallback": false
+  },
+  "fd1c1d0e9219e7e8b775b6ade2a28551": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "We acknowledge inv_000050 for ₹1,00,000.00. Collections from our retailers slipped this month. Can we split across two dates?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The customer explicitly acknowledges liability for the invoice but states that collections have slipped, requesting an installment schedule due to liquidity constraints, which fits the CASH_CRUNCH root cause perfectly."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"We acknowledge inv_000050 for ₹1,00,000.00. Collections from our retailers slipped this month. Can we split across two dates?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The customer explicitly acknowledges liability for the invoice but states that collections have slipped, requesting an installment schedule due to liquidity constraints, which fits the CASH_CRUNCH root cause perfectly.\"\n}",
+    "cachedAt": 1788011637711,
+    "inferredAt": "2026-08-29T13:53:51.153Z",
+    "tokenUsage": {
+      "promptTokens": 487,
+      "completionTokens": 141,
+      "totalTokens": 628
+    },
+    "isFallback": false
+  },
+  "968afd46e61dc08546e62d555c130dda": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "APPROVAL_STUCK",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "APPROVAL_STUCK on inv_000051",
+        "Invoice inv_000051 (₹2,50,000.00) is with the budget owner since last week. Not rejected — just stuck in queue."
+      ],
+      "recommended_playbook": "HUMAN_ESCALATION",
+      "rationale": "The AP team explicitly confirmed that the invoice has been verified but is currently stuck in the internal ERP queue awaiting managerial or budget owner sign-off."
+    },
+    "content": "{\n  \"root_cause\": \"APPROVAL_STUCK\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"APPROVAL_STUCK on inv_000051\",\n    \"Invoice inv_000051 (₹2,50,000.00) is with the budget owner since last week. Not rejected \\u2014 just stuck in queue.\"\n  ],\n  \"recommended_playbook\": \"HUMAN_ESCALATION\",\n  \"rationale\": \"The AP team explicitly confirmed that the invoice has been verified but is currently stuck in the internal ERP queue awaiting managerial or budget owner sign-off.\"\n}",
+    "cachedAt": 1788011644192,
+    "inferredAt": "2026-08-29T13:53:57.734Z",
+    "tokenUsage": {
+      "promptTokens": 522,
+      "completionTokens": 158,
+      "totalTokens": 680
+    },
+    "isFallback": false
+  },
+  "203327769720fb9ce062e0535c36620d": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "We acknowledge inv_000052 for ₹1,00,000.00. Collections from our retailers slipped this month. Can we split across two dates?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The customer explicitly acknowledges liability for the invoice but states that collections have slipped, resulting in liquidity issues, and requests an installment arrangement ('split across two dates')."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n  \"We acknowledge inv_000052 for ₹1,00,000.00. Collections from our retailers slipped this month. Can we split across two dates?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The customer explicitly acknowledges liability for the invoice but states that collections have slipped, resulting in liquidity issues, and requests an installment arrangement ('split across two dates').\"\n}",
+    "cachedAt": 1788011650534,
+    "inferredAt": "2026-08-29T13:54:04.204Z",
+    "tokenUsage": {
+      "promptTokens": 487,
+      "completionTokens": 138,
+      "totalTokens": 625
+    },
+    "isFallback": false
+  },
+  "b18e6bc8c347b32eada5a72dc964d8a8": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9800,
+      "evidence_spans": [
+        "We acknowledge inv_000053 for ₹25,000.00",
+        "Collections from our retailers slipped this month",
+        "Can we split across two dates?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer explicitly acknowledges liability for the invoice but highlights liquidity issues due to slipped collections from their retailers, requesting an installment or split payment schedule."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9800,\n  \"evidence_spans\": [\n    \"We acknowledge inv_000053 for ₹25,000.00\",\n    \"Collections from our retailers slipped this month\",\n    \"Can we split across two dates?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer explicitly acknowledges liability for the invoice but highlights liquidity issues due to slipped collections from their retailers, requesting an installment or split payment schedule.\"\n}",
+    "cachedAt": 1788011657127,
+    "inferredAt": "2026-08-29T13:54:10.545Z",
+    "tokenUsage": {
+      "promptTokens": 485,
+      "completionTokens": 138,
+      "totalTokens": 623
+    },
+    "isFallback": false
+  },
+  "357d2c8386f01e0c33122a43cbc25ae3": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "Is mahine collections weak hain.",
+        "Do dates mein split kar sakte hain?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer acknowledges receipt and liability for the invoice but explicitly states that collections are weak this month and requests to split the payment across two dates, indicating a temporary liquidity constraint."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"Is mahine collections weak hain.\",\n    \"Do dates mein split kar sakte hain?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer acknowledges receipt and liability for the invoice but explicitly states that collections are weak this month and requests to split the payment across two dates, indicating a temporary liquidity constraint.\"\n}",
+    "cachedAt": 1788011663513,
+    "inferredAt": "2026-08-29T13:54:17.138Z",
+    "tokenUsage": {
+      "promptTokens": 487,
+      "completionTokens": 119,
+      "totalTokens": 606
+    },
+    "isFallback": false
+  },
+  "a2d9b317ca0f04cd67ac8a9f487c8595": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "We acknowledge inv_000055 for ₹25,000.00.",
+        "Collections from our retailers slipped this month.",
+        "Can we split across two dates?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer explicitly acknowledges liability for the invoice but states that collections have slipped and requests a split payment arrangement, indicating a cash crunch."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"We acknowledge inv_000055 for ₹25,000.00.\",\n    \"Collections from our retailers slipped this month.\",\n    \"Can we split across two dates?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer explicitly acknowledges liability for the invoice but states that collections have slipped and requests a split payment arrangement, indicating a cash crunch.\"\n}",
+    "cachedAt": 1788011669823,
+    "inferredAt": "2026-08-29T13:54:23.526Z",
+    "tokenUsage": {
+      "promptTokens": 484,
+      "completionTokens": 136,
+      "totalTokens": 620
+    },
+    "isFallback": false
+  },
+  "49d231b8684a2b87780c46ff94c5eb86": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "We acknowledge inv_000056 for ₹4,00,000.00",
+        "Collections from our retailers slipped this month",
+        "Can we split across two dates?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer explicitly acknowledges the liability for the invoice but states that collections have slipped and requests to split the payment across two dates, indicating a temporary cash flow constraint."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"We acknowledge inv_000056 for ₹4,00,000.00\",\n    \"Collections from our retailers slipped this month\",\n    \"Can we split across two dates?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer explicitly acknowledges the liability for the invoice but states that collections have slipped and requests to split the payment across two dates, indicating a temporary cash flow constraint.\"\n}",
+    "cachedAt": 1788011676317,
+    "inferredAt": "2026-08-29T13:54:29.836Z",
+    "tokenUsage": {
+      "promptTokens": 488,
+      "completionTokens": 144,
+      "totalTokens": 632
+    },
+    "isFallback": false
+  },
+  "ec868c4d98d81867ad3492575a4fbb35": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "Is mahine collections weak hain. Do dates mein split kar sakte hain?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer's CFO explicitly acknowledges receipt of the invoice and liability, but states that collections are weak this month and requests to split the payment across two dates, clearly indicating a liquidity constraint."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"Is mahine collections weak hain. Do dates mein split kar sakte hain?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer's CFO explicitly acknowledges receipt of the invoice and liability, but states that collections are weak this month and requests to split the payment across two dates, clearly indicating a liquidity constraint.\"\n}",
+    "cachedAt": 1788011682690,
+    "inferredAt": "2026-08-29T13:54:36.328Z",
+    "tokenUsage": {
+      "promptTokens": 488,
+      "completionTokens": 120,
+      "totalTokens": 608
+    },
+    "isFallback": false
+  },
+  "ce07703c5c48f83519dceb251687f400": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "We acknowledge inv_000060 for ₹4,00,000.00.",
+        "Collections from our retailers slipped this month. Can we split across two dates?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer explicitly acknowledges liability for the invoice but states liquidity issues due to slipped collections from their retailers, requesting an installment schedule."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"We acknowledge inv_000060 for ₹4,00,000.00.\",\n    \"Collections from our retailers slipped this month. Can we split across two dates?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer explicitly acknowledges liability for the invoice but states liquidity issues due to slipped collections from their retailers, requesting an installment schedule.\"\n}",
+    "cachedAt": 1788011689071,
+    "inferredAt": "2026-08-29T13:54:42.701Z",
+    "tokenUsage": {
+      "promptTokens": 486,
+      "completionTokens": 134,
+      "totalTokens": 620
+    },
+    "isFallback": false
+  },
+  "c99d40d2ec99832f07e283d08ec07ff8": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "Is mahine collections weak hain.",
+        "Do dates mein split kar sakte hain?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The CFO explicitly acknowledges the invoice liability but states that collections are weak this month and requests to split the payment across two dates, indicating a temporary cash flow constraint."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"Is mahine collections weak hain.\",\n    \"Do dates mein split kar sakte hain?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The CFO explicitly acknowledges the invoice liability but states that collections are weak this month and requests to split the payment across two dates, indicating a temporary cash flow constraint.\"\n}",
+    "cachedAt": 1788011695296,
+    "inferredAt": "2026-08-29T13:54:49.083Z",
+    "tokenUsage": {
+      "promptTokens": 485,
+      "completionTokens": 117,
+      "totalTokens": 602
+    },
+    "isFallback": false
+  },
+  "02b2572f2af6605290148549aeb623a7": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "INVOICE_NOT_RECEIVED",
+      "confidence_bps": 9800,
+      "evidence_spans": [
+        "We have no invoice in the AP inbox for ₹1,50,000.00. Please re-send to ap@ and cc finance."
+      ],
+      "recommended_playbook": "DUNNING_LADDER",
+      "rationale": "The AP desk explicitly stated they have not received the invoice in their inbox and requested a resend, directly aligning with the INVOICE_NOT_RECEIVED root cause."
+    },
+    "content": "{\n  \"root_cause\": \"INVOICE_NOT_RECEIVED\",\n  \"confidence_bps\": 9800,\n  \"evidence_spans\": [\n    \"We have no invoice in the AP inbox for ₹1,50,000.00. Please re-send to ap@ and cc finance.\"\n  ],\n  \"recommended_playbook\": \"DUNNING_LADDER\",\n  \"rationale\": \"The AP desk explicitly stated they have not received the invoice in their inbox and requested a resend, directly aligning with the INVOICE_NOT_RECEIVED root cause.\"\n}",
+    "cachedAt": 1788011701576,
+    "inferredAt": "2026-08-29T13:54:55.308Z",
+    "tokenUsage": {
+      "promptTokens": 516,
+      "completionTokens": 137,
+      "totalTokens": 653
+    },
+    "isFallback": false
+  },
+  "05adfc701a8dc60b324264ba9068f953": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9800,
+      "evidence_spans": [
+        "We acknowledge inv_000063 for ₹5,00,000.00.",
+        "Collections from our retailers slipped this month. Can we split across two dates?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer explicitly acknowledges liability for the invoice but states that retailer collections have slipped, resulting in liquidity constraints, and requests to split the payment across multiple dates."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9800,\n  \"evidence_spans\": [\n    \"We acknowledge inv_000063 for ₹5,00,000.00.\",\n    \"Collections from our retailers slipped this month. Can we split across two dates?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer explicitly acknowledges liability for the invoice but states that retailer collections have slipped, resulting in liquidity constraints, and requests to split the payment across multiple dates.\"\n}",
+    "cachedAt": 1788011707859,
+    "inferredAt": "2026-08-29T13:55:01.590Z",
+    "tokenUsage": {
+      "promptTokens": 485,
+      "completionTokens": 140,
+      "totalTokens": 625
+    },
+    "isFallback": false
+  },
+  "5c853ae28bf41bd646fab118207799c4": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "Collections from our retailers slipped this month",
+        "Can we split across two dates?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer explicitly acknowledges liability for the invoice but requests an installment schedule due to a temporary cash flow slip from their retailers."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"Collections from our retailers slipped this month\",\n    \"Can we split across two dates?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer explicitly acknowledges liability for the invoice but requests an installment schedule due to a temporary cash flow slip from their retailers.\"\n}",
+    "cachedAt": 1788011714483,
+    "inferredAt": "2026-08-29T13:55:07.872Z",
+    "tokenUsage": {
+      "promptTokens": 485,
+      "completionTokens": 109,
+      "totalTokens": 594
+    },
+    "isFallback": false
+  },
+  "508e1d13a1ae33f18b9a70c7f2cd79ee": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "Collections from our retailers slipped this month. Can we split across two dates?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer explicitly acknowledges the invoice liability but states that collections have slipped and requests to split the payment across two dates due to liquidity issues."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"Collections from our retailers slipped this month. Can we split across two dates?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer explicitly acknowledges the invoice liability but states that collections have slipped and requests to split the payment across two dates due to liquidity issues.\"\n}",
+    "cachedAt": 1788011720878,
+    "inferredAt": "2026-08-29T13:55:14.497Z",
+    "tokenUsage": {
+      "promptTokens": 484,
+      "completionTokens": 109,
+      "totalTokens": 593
+    },
+    "isFallback": false
+  },
+  "344d19216fbfcfb089bab5aaf1a44c21": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "We acknowledge inv_000066 for ₹2,50,000.00.",
+        "Collections from our retailers slipped this month. Can we split across two dates?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer explicitly acknowledges liability for the invoice but states that retailer collections have slipped, requesting to split the payment across two dates due to liquidity issues."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"We acknowledge inv_000066 for ₹2,50,000.00.\",\n    \"Collections from our retailers slipped this month. Can we split across two dates?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer explicitly acknowledges liability for the invoice but states that retailer collections have slipped, requesting to split the payment across two dates due to liquidity issues.\"\n}",
+    "cachedAt": 1788011727302,
+    "inferredAt": "2026-08-29T13:55:20.889Z",
+    "tokenUsage": {
+      "promptTokens": 488,
+      "completionTokens": 138,
+      "totalTokens": 626
+    },
+    "isFallback": false
+  },
+  "f8f5d11a7d30feff14b5af4260eb2457": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9500,
+      "evidence_spans": [
+        "Is mahine collections weak hain.",
+        "Do dates mein split kar sakte hain?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The CFO of Summit Supplies Pune acknowledges the invoice liability but explicitly states that collections are weak this month and requests to split the payment across two dates, indicating a temporary cash crunch."
+    },
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9500,\n  \"evidence_spans\": [\n    \"Is mahine collections weak hain.\",\n    \"Do dates mein split kar sakte hain?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The CFO of Summit Supplies Pune acknowledges the invoice liability but explicitly states that collections are weak this month and requests to split the payment across two dates, indicating a temporary cash crunch.\"\n}",
+    "cachedAt": 1788011733855,
+    "inferredAt": "2026-08-29T13:55:27.312Z",
+    "tokenUsage": {
+      "promptTokens": 489,
+      "completionTokens": 120,
+      "totalTokens": 609
+    },
+    "isFallback": false
+  },
+  "bb28ed4d9958a58378061f07f18b24d1": {
+    "model": "gemini-3.5-flash-lite",
+    "parsed": {
+      "root_cause": "PO_GRN_MISMATCH",
+      "confidence_bps": 9800,
+      "evidence_spans": [
+        "PO PO-00068 ke against GRN pending hai",
+        "₹75,000.00 hold pe hai jab tak stores confirm nahi karta"
+      ],
+      "recommended_playbook": "HUMAN_ESCALATION",
+      "rationale": "The AP desk explicitly stated that the Goods Receipt Note (GRN) is pending against PO PO-00068 and the payment of ₹75,000.00 is on hold until store confirmation is received, indicating a direct PO_GRN_MISMATCH issue."
+    },
+    "content": "{\n  \"root_cause\": \"PO_GRN_MISMATCH\",\n  \"confidence_bps\": 9800,\n  \"evidence_spans\": [\n    \"PO PO-00068 ke against GRN pending hai\",\n    \"₹75,000.00 hold pe hai jab tak stores confirm nahi karta\"\n  ],\n  \"recommended_playbook\": \"HUMAN_ESCALATION\",\n  \"rationale\": \"The AP desk explicitly stated that the Goods Receipt Note (GRN) is pending against PO PO-00068 and the payment of ₹75,000.00 is on hold until store confirmation is received, indicating a direct PO_GRN_MISMATCH issue.\"\n}",
+    "cachedAt": 1788011740392,
+    "inferredAt": "2026-08-29T13:55:33.866Z",
+    "tokenUsage": {
+      "promptTokens": 540,
+      "completionTokens": 168,
+      "totalTokens": 708
+    },
+    "isFallback": false
+  }
+}

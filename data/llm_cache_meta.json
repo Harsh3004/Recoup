@@ -1,0 +1,19 @@
+{
+  "_description": "Provenance record for data/llm_cache.json. Updated automatically when bun run benchmark:llm populates the cache.",
+  "status": "PENDING_LIVE_RUN",
+  "cacheFile": "data/llm_cache.json",
+  "totalEntries": 0,
+  "realLlmEntries": 0,
+  "fallbackEntries": 0,
+  "generatedAt": null,
+  "model": null,
+  "apiProvider": null,
+  "seedUsed": 42,
+  "note": "Cache is empty. Run `OPENAI_API_KEY=<key> bun run benchmark:llm` to populate with real gpt-4o-mini inference. Estimated cost: ~$1-3 USD for 200-500 Surface D threads. Once populated, all subsequent bun run benchmark:llm runs replay from cache deterministically.",
+  "howToVerify": [
+    "1. Check this file — realLlmEntries must be > 0",
+    "2. Open data/llm_cache.json — every entry must have isFallback: false and a tokenUsage block",
+    "3. Run bun run benchmark:llm — it will report cache hit count, live call count, fallback count",
+    "4. Fallback count must be 0 for the accuracy figure to be a valid LLM benchmark result"
+  ]
+}

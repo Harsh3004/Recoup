@@ -14,6 +14,9 @@
     "execute": "bun run engines/execute.ts",
     "verify": "bun run engines/audit.ts --verify",
     "measure": "bun run engines/measure.ts",
+    "ablate": "bun run engines/ablate.ts",
+    "benchmark:llm": "BENCHMARK_STRICT=1 bun run scripts/benchmark_llm.ts",
+    "sensitivity": "bun run scripts/sensitivity_sweep.ts",
     "demo": "bun run server/index.ts"
   },
   "devDependencies": {

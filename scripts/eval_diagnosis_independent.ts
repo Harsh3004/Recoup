@@ -17,7 +17,15 @@
  * 3. The LLM Classifier achieves ~95.8% by comprehending contextual causality and multi-sentence
  *    dialogue without requiring endless synonym list maintenance.
  *
- * Usage: bun run eval:diagnosis-independent
+ * REPRODUCIBILITY CONTRACT (mirrors benchmark:llm strict-mode guard):
+ * - LIVE mode   (API key set): Calls the LLM and populates data/llm_cache.json.
+ * - CACHE-REPLAY (cache hit for all 24 cases): Reports real LLM accuracy deterministically.
+ * - OFFLINE mode (no key, no cache): Aborts with [FATAL] — the offline classifier scores
+ *   are NOT attributable to LLM and must never be published as LLM accuracy.
+ *
+ * Usage:
+ *   bun run eval:diagnosis-independent          # requires API key or warm cache
+ *   OPENROUTER_API_KEY=<key> bun run eval:diagnosis-independent   # live mode
  */
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -25,6 +33,80 @@ import { join } from "node:path";
 import { diagnoseUnstructuredInvoiceLlm } from "../src/ai/diagnose_llm";
 import { getAiConfig } from "../src/ai/config";
 import { formatInr } from "../src/money";
+
+// ── Strict-mode guard (same contract as benchmark:llm) ─────────────────────
+const CACHE_FILE = join(import.meta.dir, "..", "data", "llm_cache.json");
+const HAS_API_KEY = !!(
+  process.env.OPENROUTER_API_KEY ??
+  process.env.GEMINI_API_KEY ??
+  process.env.OPENAI_API_KEY
+);
+
+import { createHash } from "node:crypto";
+
+/**
+ * Reproduces the same cache-key hash used by llm_client.ts:
+ * sha256(systemPrompt + "\n---\n" + userPrompt).slice(0, 32)
+ *
+ * We don't import llm_client directly to avoid side effects, but the
+ * formula is a single stable line so it's safe to duplicate here.
+ */
+function cacheKeyFor(systemPrompt: string, userPrompt: string): string {
+  return createHash("sha256")
+    .update(`${systemPrompt}\n---\n${userPrompt}`)
+    .digest("hex")
+    .slice(0, 32);
+}
+
+const INDEPENDENT_SYSTEM_PROMPT = `You are Recoup's Autonomous B2B Accounts Receivable NLU Agent.
+Your task is to analyze unstructured correspondence (email threads, AP dispute notes, PO numbers, ageing) between a merchant and a buyer AP desk to determine the exact root cause of non-payment.
+
+Available Root Causes:
+1. PO_GRN_MISMATCH: Missing Goods Receipt Note (GRN), delivery challan missing, stores confirmation pending.
+2. INVOICE_NOT_RECEIVED: AP inbox never received the PDF, requested resend to AP contact.
+3. APPROVAL_STUCK: Invoice verified by AP but awaiting managerial / budget owner sign-off in internal ERP queue.
+4. LINE_ITEM_DISPUTE: Discrepancy in unit rates, delivered quantities, discount terms, or awaiting credit note.
+5. CASH_CRUNCH: Buyer explicitly acknowledges liability but requests installment schedule, payment holiday, or extension due to liquidity.
+6. INVOICE_UNPAID: General overdue invoice with no specific dispute raised.
+
+Output MUST strictly be valid JSON matching this schema:
+{
+  "root_cause": string,
+  "confidence_bps": number (between 5000 and 9900),
+  "evidence_spans": string[],
+  "recommended_playbook": string ("PROMISE_TO_PAY" | "PARTIAL_PAYMENT" | "HUMAN_ESCALATION" | "DUNNING_LADDER"),
+  "rationale": string
+}`;
+
+function buildUserPromptFor(c: IndependentCase): string {
+  return `Analyze B2B Invoice Case:
+- Customer: ${c.customerName} (${c.segment})
+- Invoice: ${c.invoiceNumber}
+- Outstanding Amount: ₹${(c.exposurePaise / 100).toFixed(2)}
+- Ageing Bucket: ${c.ageingBucket}
+- PO Number: ${c.poNumber ?? "N/A"}
+- Dispute Open: ${c.disputeOpen ? "YES" : "NO"}
+- Dispute Notes: ${c.disputeNotes ?? "None"}
+- AP Email Thread:
+"""
+${c.emailThread ?? "No email correspondence recorded."}
+"""`;
+}
+
+function countIndependentCacheHits(cases: IndependentCase[]): number {
+  if (!existsSync(CACHE_FILE)) return 0;
+  try {
+    const cache = JSON.parse(readFileSync(CACHE_FILE, "utf8")) as Record<string, { isFallback?: boolean }>;
+    return cases.filter((c) => {
+      const key = cacheKeyFor(INDEPENDENT_SYSTEM_PROMPT, buildUserPromptFor(c));
+      const entry = cache[key];
+      return entry && !entry.isFallback;
+    }).length;
+  } catch {
+    return 0;
+  }
+}
+
 
 interface IndependentCase {
   id: string;
@@ -95,11 +177,30 @@ async function runIndependentEvaluation() {
   const cases = JSON.parse(readFileSync(casesPath, "utf8")) as IndependentCase[];
   const config = getAiConfig();
 
+  // ── Preflight: abort if we have neither a live key nor cached LLM responses ──
+  const cacheHits = countIndependentCacheHits(cases);
+  if (!HAS_API_KEY && cacheHits === 0) {
+    console.error(`\n[FATAL] LLM_CACHE_MISS — Cannot produce a valid LLM accuracy figure.`);
+    console.error(`        No API key found (OPENROUTER_API_KEY / GEMINI_API_KEY / OPENAI_API_KEY)`);
+    console.error(`        and no real-LLM cache entries for the 24 independent cases.`);
+    console.error(`        The offline classifier would score ~20.8% and is NOT attributable to LLM.`);
+    console.error(``);
+    console.error(`        To populate the cache and run a valid benchmark:`);
+    console.error(`          OPENROUTER_API_KEY=<key> bun run eval:diagnosis-independent`);
+    console.error(``);
+    console.error(`        The Fair Domain Rules Baseline (75.0%) is always reproducible:`);
+    console.error(`          The rules engine runs without any API key.`);
+    process.exit(1);
+  }
+
+  // Determine run mode for display
+  const runMode = HAS_API_KEY ? "LIVE INFERENCE" : `CACHE REPLAY (${cacheHits}/24 independent cases cached)`;
   console.log(`\n======================================================================`);
   console.log(`   AP CORRESPONDENCE DIAGNOSIS BENCHMARK (SANITY CHECK)               `);
   console.log(`======================================================================\n`);
   console.log(`Test Set: 24 Author-Written AP Snippets (Sanity check of messy phrasing)`);
   console.log(`Active Provider: ${config.activeProvider} (${config.activeModel})`);
+  console.log(`Run Mode: [${runMode}]`);
   console.log(`Baselines: Narrow Seed Regex vs Fair Domain Rules vs LLM Classifier\n`);
 
   let narrowCorrect = 0;
@@ -190,8 +291,13 @@ async function runIndependentEvaluation() {
   console.log(`3. LLM NLU Classifier (${config.activeModel}): ${llmAccPct}% (${llmCorrect}/${total})`);
   console.log(`   Lift Over Fair Rules Baseline:         +${liftOverFair}%\n`);
 
+  // ── Post-run guard: reject results if any case used offline fallback ────────
   if (llmFallbackCount > 0) {
-    console.log(`[NOTICE] ${llmFallbackCount} cases executed via offline fallback.`);
+    console.error(`\n[FATAL] Benchmark invalid: ${llmFallbackCount}/${cases.length} cases used the keyword classifier fallback.`);
+    console.error(`        Accuracy figures from this run do NOT reflect LLM performance.`);
+    console.error(`        Populate the cache with real API calls before reporting accuracy.`);
+    console.error(`          OPENROUTER_API_KEY=<key> bun run eval:diagnosis-independent`);
+    process.exit(1);
   }
 
   // Generate Detailed Report

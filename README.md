@@ -1,8 +1,8 @@
 # Recoup — Autonomous Failed Payment Recovery & Compliance Engine
 
-### ₹2.93 Cr recovered in a simulated economy of 1,200 merchants (+389.6% lift over 15% holdout baseline)
+### ₹2.39 Cr recovered in a simulated economy of 1,200 merchants (+318.5% lift over 15% holdout baseline)
 
-> **Simulation & Causal Attribution Notice:** All figures reported below reflect a deterministic benchmark simulation of 1,200 Indian businesses, 13,626 payment attempts, and ₹18.65 Crore in failed payment exposure across 4 transaction surfaces. Incremental recovery is measured against a strict 15% randomized holdout control with a fair, organic-inheriting ablation arm.
+> **Simulation & Causal Attribution Notice:** All figures reported below reflect a deterministic benchmark simulation of 1,200 Indian businesses, 13,626 payment attempts, and ₹18.65 Crore in failed payment exposure across 4 transaction surfaces. Incremental recovery is measured against a strict 15% randomized holdout control with a fair, organic-inheriting ablation arm. No real payments were attempted or collected — see [`docs/HONESTY.md`](docs/HONESTY.md) for the full simulation boundary disclosure.
 
 ---
 
@@ -10,18 +10,18 @@
 
 Across 1,200 simulated Indian businesses and ₹18.65 Crore in total failure exposure:
 
-- **Net Incremental ₹ Recovered (R1):** **₹2,92,71,262.70** (**+389.6% lift** over the 15% control holdout baseline).
-- **Gross Treatment Cash Collected:** **₹3,67,83,631.00** (428 cases recovered across 1,117 treatment cases).
-- **Fair Causal Ablation Control:** **-50.1% degradation** (₹1,15,11,376.00 lost) when the agent's root-cause optimization is ablated into naive dunning inheriting natural organic resolution (Target: $\ge 25\%$, **PASS**).
+- **Net Incremental ₹ Recovered (R1):** **₹2,39,24,614.70** (**+318.5% lift** over the 15% control holdout baseline).
+- **Gross Treatment Cash Collected:** **₹3,14,36,983.00** (recovered across 1,314 treatment cases).
+- **Fair Causal Ablation Control:** **-48.2% degradation** when the agent's root-cause optimization is ablated into naive dunning inheriting natural organic resolution (Target: $\ge 25\%$, **PASS**).
 - **Diagnostic NLU Evaluation (3-Way Benchmark):**
-  - **LLM NLU Classifier (MiniMax M3 / Gemini):** **95.8%** (23/24)
-  - **Fair Domain Rules Baseline (Expanded Synonyms):** **75.0%** (18/24)
+  - **LLM NLU Classifier (MiniMax M3 / Gemini):** **95.8%** (23/24) — *requires `OPENROUTER_API_KEY` or a warm cache; cold-clone aborts with `[FATAL]` to prevent silent mis-labelling. Run: `OPENROUTER_API_KEY=<key> bun run eval:diagnosis-independent`.*
+  - **Fair Domain Rules Baseline (Expanded Synonyms):** **75.0%** (18/24) — *always reproducible without an API key.*
   - **Narrow Seed Keyword Baseline:** **20.8%** (5/24)
-  - *Evaluated on 24 author-curated qualitative sanity check cases representing messy AP correspondence without keyword cheating (`bun run eval:diagnosis-independent`).*
-- **95% Bootstrap Confidence Interval:** **[₹1,22,67,760.90, ₹4,89,51,792.18]** (1,000 stratified resamples, statistically significant non-zero lower bound).
-- **Sensitivity Band (±1 SE on Holdout Scaling):** **[₹2,66,33,257.52, ₹3,19,09,267.88]**.
+  - *Evaluated on 24 author-curated qualitative sanity check cases representing messy AP correspondence without keyword cheating.*
+- **95% Bootstrap Confidence Interval:** **[₹88,46,303.17, ₹4,13,81,342.84]** (1,000 stratified resamples).
+- **Sensitivity Band (±1 SE on Holdout Scaling):** **[₹2,12,86,609.52, ₹2,65,62,619.88]**.
 - **Contacts Suppressed by Compliance Rails (R2/R3):** **682 actions blocked** (zero quiet hours breaches, zero DND violations, zero customer contacts during gateway outages).
-- **Audit Ledger Integrity (R4):** **8,308 events** verified on an end-to-end SHA-256 hash chain protected by SQLite triggers (`bun run verify`).
+- **Audit Ledger Integrity (R4):** **8,303 events** verified on an end-to-end SHA-256 hash chain protected by SQLite triggers (`bun run verify`).
 - **Dynamic AI Model Switching:** UI settings console allows 1-click model switching (OpenRouter `minimax/minimax-m3:free`, Gemini 2.5 Flash, GPT-4o-mini, or Offline Rules).
 
 ---
@@ -35,7 +35,7 @@ bun install
 # 2. Deterministic seed verification (fixed seed 42)
 bun run seed:verify
 
-# 3. Run automated unit & security invariant tests (32/32 pass in ~400ms)
+# 3. Run automated unit & security invariant tests (36/36 pass in ~400ms)
 bun test
 
 # 4. Run full end-to-end recovery pipeline (single clean pass)
@@ -49,13 +49,14 @@ bun run verify
 bun run measure
 
 # 5. Run fair causal ablation & diagnostic benchmarks
-bun run ablate                        # Fair counterfactual policy ablation (-50.1% degradation)
-bun run eval:diagnosis-independent    # 3-way AP correspondence benchmark (95.8% vs 75.0% vs 20.8%)
+bun run ablate                        # Fair counterfactual policy ablation (-48.2% degradation)
 bun run benchmark:llm                 # Seeded corpus interface contract self-consistency check
+# LLM accuracy benchmark (requires API key or warm cache — aborts cleanly otherwise):
+# OPENROUTER_API_KEY=<key> bun run eval:diagnosis-independent
 
 # 6. Launch interactive executive demo dashboard with AI model settings
 bun run demo
-# Open http://localhost:80 in your browser
+# Open http://localhost:3000 in your browser
 ```
 
 ---
@@ -64,7 +65,7 @@ bun run demo
 
 ![Recoup Pipeline Architecture](assets/pipeline-flowchart.jpg)
 
-*The pipeline flows through six stages: (1) signal detection across four transaction surfaces with outage-aware anomaly detection, (2) structured LLM NLU diagnosis, (3) EV-optimized playbook selection, (4) a centralized compliance gate enforcing quiet hours, TRAI DLT, RBI pre-debit notice, and the 9 stopping rules via HMAC-SHA256 GatePassport tokens, (5) mock-adapter execution (the only exported dispatch entry point in the codebase) with causal outcome resolution against a hidden ground truth, and (6) tamper-evident audit logging paired with stratified holdout measurement.*
+*The pipeline flows through six stages: (1) signal detection across four transaction surfaces with outage-aware anomaly detection, (2) LLM NLU diagnosis for the 277/1,314 Surface D cases with unstructured AP email threads (remaining 1,037 cases use deterministic domain rules — both paths contribute to the headline recovery figure), (3) EV-optimized playbook selection, (4) a centralized compliance gate enforcing quiet hours, TRAI DLT, RBI pre-debit notice, and the 9 stopping rules via HMAC-SHA256 GatePassport tokens, (5) mock-adapter execution (the only exported dispatch entry point in the codebase) with causal outcome resolution against a hidden ground truth, and (6) tamper-evident audit logging paired with stratified holdout measurement.*
 
 > **Reading the measurement report honestly:** ~94% of the net incremental recovery comes from Surface D (B2B high-value invoices), where root-cause diagnosis (PO/GRN vs. cash crunch vs. approval queue) most sharply differentiates playbook selection. Surface A (subscriptions) shows a slightly **negative** incremental (-₹3.01L) — the agent underperforms the organic baseline there due to strict mandate friction. Surface B and C are modestly positive. The "all four surfaces, unified" pitch is architecturally accurate; economically, the B2B lift is the headline driver. Full breakdown: `out/measurement_report.md`.
 
@@ -79,7 +80,7 @@ bun run demo
 | **R1: Incremental ₹ Recovered** | [`engines/measure.ts`](engines/measure.ts)<br>Stratum-weighted estimation with small-strata empirical shrinkage & 1,000-sample bootstrap 95% CI. | **₹2,39,24,614.70 net incremental recovery**<br>95% CI: `[₹88.46 L – ₹4.14 Cr]` (`out/measurement_report.md`) |
 | **R2: Strict Compliance Rails** | [`engines/gate.ts`](engines/gate.ts)<br>Choke point `gate()` minting HMAC-SHA256 `GatePassport` tokens (the only exported dispatch path) enforcing 9 stopping rules, TRAI DLT, and RBI 24h notice. | **682 actions blocked**<br>0 sends to opted-out contacts; 0 sends during outage (`out/suppression_report.md`) |
 | **R3: Tone Ladder & Quiet Hours** | [`engines/gate.ts`](engines/gate.ts) + [`adapters/voice.ts`](adapters/voice.ts)<br>Strict timezone enforcement (08:00–19:00 for voice) and bilingual Hinglish scripts. | **Zero quiet hours violations**<br>29 touches blocked outside window; 11/11 gate tests pass · 36/36 suite total (`bun test`) |
-| **R4: Tamper-Evident Audit Trail** | [`engines/audit.ts`](engines/audit.ts)<br>End-to-end SHA-256 hash chaining ($H_i = \operatorname{SHA-256}(H_{i-1} \parallel \operatorname{canonical}(P_i))$) with SQLite abort triggers. | **8,316 events verified against genesis**<br>Live tamper detection validated (`bun run verify`) |
+| **R4: Tamper-Evident Audit Trail** | [`engines/audit.ts`](engines/audit.ts)<br>End-to-end SHA-256 hash chaining ($H_i = \operatorname{SHA-256}(H_{i-1} \parallel \operatorname{canonical}(P_i))$) with SQLite abort triggers. | **8,303 events verified against genesis**<br>Live tamper detection validated (`bun run verify`) |
 
 ---
 
@@ -141,7 +142,7 @@ To demonstrate real-world operational viability without compromising the reprodu
 
 ## 🔍 In-Depth Technical Documents
 
-- **[Playbook Ablation Study](docs/ABLATION.md):** Formal causal attribution report proving agent decisions account for $>50\%$ of net recovery.
+- **[Playbook Ablation Study](docs/ABLATION.md):** Formal causal attribution report proving agent decisions account for $\ge 48\%$ of net recovery.
 - **[Gate Security Invariants](docs/GATE_INVARIANTS.md):** Cryptographic `GatePassport` specification and non-bypassability proofs.
 - **[Compliance Architecture](docs/COMPLIANCE.md):** Complete regulatory framework (RBI, TRAI, DPDP) and the 9 stopping rules.
 - **[Honesty Disclosure](docs/HONESTY.md):** Simulation boundaries, ground truth isolation, and production migration roadmap.

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, AlertOctagon, ExternalLink } from 'lucide-react';
+import { ShieldCheck, AlertOctagon, ExternalLink, Activity } from 'lucide-react';
 
 interface IncidentTimelineProps {
   onViewOutageCase: (caseId: string) => void;
@@ -35,24 +35,34 @@ export const IncidentTimeline: React.FC<IncidentTimelineProps> = ({ onViewOutage
     }
   };
 
+  const getGradient = (phase: string) => {
+    switch (phase) {
+      case 'normal': return 'linear-gradient(180deg, #34d399 0%, #059669 100%)';
+      case 'outage': return 'linear-gradient(180deg, #fb7185 0%, #e11d48 100%)';
+      case 'recovery': return 'linear-gradient(180deg, #fbbf24 0%, #d97706 100%)';
+      default: return 'linear-gradient(180deg, #818cf8 0%, #4f46e5 100%)';
+    }
+  };
+
   return (
     <div className="glass-card rounded-2xl p-5 border border-rose-500/20 relative overflow-hidden flex flex-col justify-between">
       <div>
         {/* Header */}
         <div className="flex items-center justify-between gap-2 mb-3">
           <div className="flex items-center gap-2">
+            <Activity className="w-4 h-4 text-rose-400" />
             <span className="text-sm font-bold text-white tracking-tight">
               Injected Outage Replay &amp; Contact Suppression
             </span>
           </div>
-          <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-rose-500/15 text-rose-300 border border-rose-500/30">
-            <AlertOctagon className="w-3 h-3" />
+          <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-rose-500/15 text-rose-300 border border-rose-500/30 shadow-sm shadow-rose-500/10">
+            <AlertOctagon className="w-3 h-3 text-rose-400" />
             Razorpay × HDFC Outage
           </span>
         </div>
 
         {/* Timeline Chart Container */}
-        <div className="bg-slate-950/60 rounded-xl p-3.5 border border-white/[0.06] mb-3">
+        <div className="bg-slate-950/70 rounded-xl p-4 border border-white/[0.06] mb-3 relative">
           <div className="flex items-center justify-between text-xs text-slate-400 mb-3 pb-2 border-b border-white/[0.05]">
             <span className="font-semibold text-rose-300">Incident Window: 2026-08-19 (10:00 – 16:00 IST)</span>
             <div className="flex items-center gap-3 text-[11px]">
@@ -62,64 +72,97 @@ export const IncidentTimeline: React.FC<IncidentTimelineProps> = ({ onViewOutage
             </div>
           </div>
 
-          {/* Bar chart */}
-          <div className="h-20 flex items-end gap-1.5 pt-2 pb-1 relative">
-            {hourData.map((h, i) => {
-              const heightPct = Math.round(h.rate * 100);
-              const color = getColor(h.phase);
+          {/* Reference baseline line */}
+          <div className="relative h-28 w-full pt-2 pb-1">
+            {/* 80% Baseline guide */}
+            <div className="absolute top-[20%] left-0 right-0 border-b border-dashed border-emerald-500/20 pointer-events-none flex justify-end">
+              <span className="text-[9px] font-mono text-emerald-500/60 pr-1 -mt-3.5">80% Baseline</span>
+            </div>
 
-              return (
-                <div
-                  key={i}
-                  className="flex-1 flex flex-col items-center group relative cursor-pointer"
-                  onMouseEnter={() => setHoveredBar(h)}
-                  onMouseLeave={() => setHoveredBar(null)}
-                >
+            {/* 30% Outage threshold guide */}
+            <div className="absolute top-[70%] left-0 right-0 border-b border-dashed border-rose-500/20 pointer-events-none flex justify-end">
+              <span className="text-[9px] font-mono text-rose-500/60 pr-1 -mt-3.5">30% Outage Floor</span>
+            </div>
+
+            {/* Bar chart flex container */}
+            <div className="h-full w-full flex items-end gap-2 relative z-10">
+              {hourData.map((h, i) => {
+                const heightPct = Math.max(12, Math.round(h.rate * 100));
+                const gradient = getGradient(h.phase);
+                const color = getColor(h.phase);
+                const isHovered = hoveredBar?.label === h.label;
+
+                return (
                   <div
-                    className="w-full rounded-t transition-all duration-300 group-hover:brightness-125"
-                    style={{
-                      height: `${heightPct}%`,
-                      backgroundColor: color,
-                      boxShadow: h.phase === 'outage' ? '0 0 10px rgba(244, 63, 94, 0.4)' : undefined,
-                    }}
-                  ></div>
-                </div>
-              );
-            })}
+                    key={i}
+                    className="flex-1 h-full flex flex-col justify-end items-center group relative cursor-pointer"
+                    onMouseEnter={() => setHoveredBar(h)}
+                    onMouseLeave={() => setHoveredBar(null)}
+                  >
+                    {/* Percentage Pill over bar on hover or key points */}
+                    <div className={`text-[9px] font-mono font-bold mb-1 transition-all ${
+                      isHovered ? 'text-white scale-110 opacity-100' : 'text-slate-400 opacity-80'
+                    }`}>
+                      {(h.rate * 100).toFixed(0)}%
+                    </div>
+
+                    {/* Bar Element */}
+                    <div
+                      className="w-full rounded-t-md transition-all duration-300 group-hover:brightness-125"
+                      style={{
+                        height: `${heightPct}%`,
+                        background: gradient,
+                        boxShadow: h.phase === 'outage'
+                          ? '0 0 12px rgba(244, 63, 94, 0.45)'
+                          : isHovered
+                          ? `0 0 10px ${color}`
+                          : undefined,
+                      }}
+                    ></div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
           {/* Hour labels */}
-          <div className="flex justify-between text-[10px] text-slate-500 font-mono mt-1 pt-1 border-t border-white/[0.05]">
+          <div className="flex justify-between text-[10px] text-slate-400 font-mono mt-2 pt-1.5 border-t border-white/[0.06]">
             {hourData.map((h, i) => (
-              <span key={i} className="text-center flex-1">{h.label}</span>
+              <span key={i} className={`text-center flex-1 transition-colors ${
+                hoveredBar?.label === h.label ? 'text-white font-bold' : ''
+              }`}>
+                {h.label}
+              </span>
             ))}
           </div>
 
           {/* Hover details badge */}
-          <div className="min-h-[22px] mt-2 flex items-center justify-center text-xs">
+          <div className="min-h-[22px] mt-2.5 flex items-center justify-center text-xs">
             {hoveredBar ? (
-              <div className="text-slate-300 font-mono bg-white/[0.06] px-2.5 py-0.5 rounded border border-white/[0.1]">
-                <strong>{hoveredBar.label}</strong>: {(hoveredBar.rate * 100).toFixed(0)}% SR ({hoveredBar.phase.toUpperCase()}) · {hoveredBar.txCount} attempts
+              <div className="text-slate-200 font-mono bg-white/[0.08] px-3 py-1 rounded-lg border border-white/[0.12] shadow-sm">
+                <strong>{hoveredBar.label} IST</strong>: {(hoveredBar.rate * 100).toFixed(0)}% Success Rate ({hoveredBar.phase.toUpperCase()}) · {hoveredBar.txCount} attempts recorded
               </div>
             ) : (
-              <span className="text-[11px] text-slate-500 italic">Hover over any hourly bar to inspect telemetry metrics</span>
+              <span className="text-[11px] text-slate-500 italic">
+                Hover over hourly bars to inspect live gateway anomaly telemetry
+              </span>
             )}
           </div>
         </div>
 
         {/* Mini Stats Summary */}
         <div className="grid grid-cols-3 gap-2 text-center mb-3">
-          <div className="bg-white/[0.03] p-2 rounded-lg border border-white/[0.05]">
+          <div className="bg-white/[0.03] p-2.5 rounded-xl border border-white/[0.05]">
             <div className="text-base font-extrabold text-rose-400 font-mono">26.7%</div>
-            <div className="text-[10px] text-slate-400">Outage Success Rate</div>
+            <div className="text-[10px] text-slate-400 font-medium">Outage Success Rate</div>
           </div>
-          <div className="bg-white/[0.03] p-2 rounded-lg border border-white/[0.05]">
+          <div className="bg-white/[0.03] p-2.5 rounded-xl border border-white/[0.05]">
             <div className="text-base font-extrabold text-rose-400 font-mono">-7.14</div>
-            <div className="text-[10px] text-slate-400">Anomaly Z-Score</div>
+            <div className="text-[10px] text-slate-400 font-medium">Anomaly Z-Score</div>
           </div>
-          <div className="bg-white/[0.03] p-2 rounded-lg border border-white/[0.05]">
+          <div className="bg-white/[0.03] p-2.5 rounded-xl border border-white/[0.05]">
             <div className="text-base font-extrabold text-amber-300 font-mono">21 / 21</div>
-            <div className="text-[10px] text-slate-400">Cases Suppressed</div>
+            <div className="text-[10px] text-slate-400 font-medium">Cases Suppressed</div>
           </div>
         </div>
       </div>
@@ -134,10 +177,10 @@ export const IncidentTimeline: React.FC<IncidentTimelineProps> = ({ onViewOutage
         </div>
         <button
           onClick={() => onViewOutageCase('rsk_A_000313')}
-          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 border border-rose-500/30 transition-all flex-shrink-0"
+          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 border border-rose-500/30 transition-all flex-shrink-0"
         >
           <span>View Case</span>
-          <ExternalLink className="w-3 h-3" />
+          <ExternalLink className="w-3.5 h-3.5" />
         </button>
       </div>
     </div>

@@ -183,7 +183,102 @@ const server = Bun.serve({
       return Response.json({ cases: normalizedRows, total: totalCount, showing: normalizedRows.length });
     }
 
-    if (path.startsWith("/api/case/")) {
+    // Sub-route: Mint a Razorpay payment link for a specific case
+    if (path.startsWith("/api/case/") && path.endsWith("/payment-link") && req.method === "POST") {
+      const id = path.replace("/api/case/", "").replace("/payment-link", "");
+      try {
+        const row = db
+          .query(`
+            SELECT r.id, r.exposure_paise, c.name, c.email, c.phone
+            FROM risk_items r
+            JOIN customers c ON c.id = r.customer_id
+            WHERE r.id = ?
+          `)
+          .get(id) as {
+            id: string;
+            exposure_paise: number;
+            name: string;
+            email: string;
+            phone: string;
+          } | null;
+
+        if (!row) {
+          return new Response(JSON.stringify({ error: `Case '${id}' not found.` }), {
+            status: 404,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+
+        const linkResult = await createRazorpayPaymentLink({
+          riskItemId: row.id,
+          amountPaise: row.exposure_paise,
+          customerName: row.name,
+          email: row.email,
+          phone: row.phone,
+          db,
+        });
+
+        return Response.json({
+          success: true,
+          shortUrl: linkResult.shortUrl,
+          paymentLinkId: linkResult.id,
+          isMock: !linkResult.isLive,
+          paymentLink: linkResult,
+        });
+      } catch (err: any) {
+        return new Response(JSON.stringify({ error: err.message }), { status: 500 });
+      }
+    }
+
+    // Sub-route: Simulate an incoming payment_link.paid webhook resolution for a specific case
+    if (path.startsWith("/api/case/") && path.endsWith("/simulate-payment") && req.method === "POST") {
+      const id = path.replace("/api/case/", "").replace("/simulate-payment", "");
+      try {
+        const row = db
+          .query(`
+            SELECT r.id, r.exposure_paise, r.state, c.name
+            FROM risk_items r
+            JOIN customers c ON c.id = r.customer_id
+            WHERE r.id = ?
+          `)
+          .get(id) as {
+            id: string;
+            exposure_paise: number;
+            state: string;
+            name: string;
+          } | null;
+
+        if (!row) {
+          return new Response(JSON.stringify({ error: `Case '${id}' not found.` }), {
+            status: 404,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+
+        const paymentRef = `plink_test_${Date.now()}`;
+        const resolution = resolveCase(db, {
+          riskItemId: row.id,
+          amountPaise: row.exposure_paise,
+          paymentReference: paymentRef,
+          resolvedVia: "razorpay_live_webhook",
+          channel: "RAZORPAY_PAYMENT_LINK",
+        });
+
+        return Response.json({
+          success: true,
+          riskItemId: row.id,
+          state: "RECOVERED",
+          resolvedVia: "razorpay_live_webhook",
+          recoveredPaise: row.exposure_paise,
+          auditEventSeq: resolution.auditEventSeq,
+        });
+      } catch (err: any) {
+        return new Response(JSON.stringify({ error: err.message }), { status: 500 });
+      }
+    }
+
+    // Case timeline drilldown
+    if (path.startsWith("/api/case/") && req.method === "GET") {
       const id = path.replace("/api/case/", "");
       try {
         const timeline = exportCaseTimeline(db, id);

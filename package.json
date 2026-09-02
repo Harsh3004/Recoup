@@ -19,9 +19,22 @@
     "eval:diagnosis-independent": "bun run scripts/eval_diagnosis_independent.ts",
     "eval:diag": "bun run scripts/eval_diagnose.ts",
     "sensitivity": "bun run scripts/sensitivity_sweep.ts",
-    "demo": "bun run server/index.ts"
+    "demo": "bun run server/index.ts",
+    "build:ui": "vite build",
+    "dev:ui": "vite"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.5",
+    "@vitejs/plugin-react": "^6.1.1",
+    "autoprefixer": "^10.5.4",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.39.0",
+    "postcss": "^8.5.26",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "tailwindcss": "^3.4.17",
+    "vite": "^8.2.2"
   }
 }

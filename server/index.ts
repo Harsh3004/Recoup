@@ -433,10 +433,31 @@ const server = Bun.serve({
       }
     }
 
-    // --- STATIC FILES ---
+    // --- STATIC FILES (Serves modern React build from web/dist with fallback to web/) ---
+    const distIndex = join("web", "dist", "index.html");
+    const hasDist = existsSync(distIndex);
+
     if (path === "/" || path === "/index.html") {
-      const html = readFileSync("web/index.html", "utf8");
+      const filePath = hasDist ? distIndex : "web/index.html";
+      const html = readFileSync(filePath, "utf8");
       return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8" } });
+    }
+
+    if (path.startsWith("/assets/")) {
+      const assetPath = join("web", "dist", path);
+      if (existsSync(assetPath)) {
+        const fileContent = readFileSync(assetPath);
+        const contentType = path.endsWith(".js")
+          ? "application/javascript; charset=utf-8"
+          : path.endsWith(".css")
+          ? "text/css; charset=utf-8"
+          : path.endsWith(".svg")
+          ? "image/svg+xml"
+          : path.endsWith(".png")
+          ? "image/png"
+          : "application/octet-stream";
+        return new Response(fileContent, { headers: { "Content-Type": contentType } });
+      }
     }
 
     if (path === "/styles.css") {
@@ -447,6 +468,12 @@ const server = Bun.serve({
     if (path === "/app.js") {
       const js = readFileSync("web/app.js", "utf8");
       return new Response(js, { headers: { "Content-Type": "application/javascript; charset=utf-8" } });
+    }
+
+    // Fallback to index.html for SPA routing if needed
+    if (hasDist && !path.startsWith("/api/")) {
+      const html = readFileSync(distIndex, "utf8");
+      return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8" } });
     }
 
     return new Response("Not Found", { status: 404 });

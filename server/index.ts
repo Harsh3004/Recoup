@@ -164,7 +164,23 @@ const server = Bun.serve({
         );
       }
 
-      return Response.json({ cases: rows, total: totalCount, showing: rows.length });
+      const normalizedRows = rows.map((r) => ({
+        ...r,
+        id: r.id,
+        riskItemId: r.id,
+        customerId: r.customer_id,
+        customerName: r.customer_name,
+        exposurePaise: r.exposure_paise ?? 0,
+        exposureInr: (r.exposure_paise ?? 0) / 100,
+        rootCause: r.root_cause || "INVOICE_UNPAID",
+        playbook: r.playbook || "DUNNING_LADDER",
+        recoveredPaise: r.recovered_paise ?? 0,
+        recoveredInr: (r.recovered_paise ?? 0) / 100,
+        resolvedVia: r.resolved_via,
+        paymentLinkUrl: r.payment_link_url,
+      }));
+
+      return Response.json({ cases: normalizedRows, total: totalCount, showing: normalizedRows.length });
     }
 
     if (path.startsWith("/api/case/")) {

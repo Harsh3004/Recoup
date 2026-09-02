@@ -216,42 +216,54 @@ export const CaseExplorer: React.FC<CaseExplorerProps> = ({
                 </td>
               </tr>
             ) : (
-              sortedCases.map((c) => (
-                <tr
-                  key={c.riskItemId}
-                  onClick={() => onSelectCase(c.riskItemId)}
-                  className="hover:bg-slate-800/40 transition-colors cursor-pointer group"
-                >
-                  <td className="py-3 px-3 font-mono font-bold text-indigo-300 group-hover:text-indigo-200">
-                    {c.riskItemId}
-                  </td>
-                  <td className="py-3 px-3">
-                    {getSurfaceBadge(c.surface)}
-                  </td>
-                  <td className="py-3 px-3 font-medium text-slate-200 max-w-[180px] truncate">
-                    {c.customerName}
-                    <span className="text-[10px] text-slate-500 ml-1">({c.segment})</span>
-                  </td>
-                  <td className="py-3 px-3 font-mono font-medium text-slate-200">
-                    {formatInr(c.exposurePaise, true)}
-                  </td>
-                  <td className="py-3 px-3 font-mono text-slate-300 max-w-[160px] truncate" title={c.rootCause}>
-                    {c.rootCause}
-                  </td>
-                  <td className="py-3 px-3 font-mono text-slate-400 max-w-[140px] truncate" title={c.playbook}>
-                    {c.playbook}
-                  </td>
-                  <td className="py-3 px-3">
-                    {getStateBadge(c.state, c.resolvedVia)}
-                  </td>
-                  <td className="py-3 px-3 text-right font-mono font-bold text-emerald-400">
-                    {c.recoveredPaise > 0 ? formatInr(c.recoveredPaise, true) : '₹0.00'}
-                  </td>
-                  <td className="py-3 px-2 text-right text-slate-500 group-hover:text-indigo-400">
-                    <ChevronRight className="w-4 h-4 inline" />
-                  </td>
-                </tr>
-              ))
+              sortedCases.map((c: any) => {
+                const caseId = c.riskItemId || c.id || '';
+                const customerName = c.customerName || c.customer_name || '—';
+                const segment = c.segment || '';
+                const exposure = c.exposurePaise ?? c.exposure_paise ?? 0;
+                const rootCause = c.rootCause || c.root_cause || 'INVOICE_UNPAID';
+                const playbook = c.playbook || 'DUNNING_LADDER';
+                const recovered = c.recoveredPaise ?? c.recovered_paise ?? 0;
+                const state = c.state || 'OPEN';
+                const resolvedVia = c.resolvedVia || c.resolved_via;
+
+                return (
+                  <tr
+                    key={caseId}
+                    onClick={() => onSelectCase(caseId)}
+                    className="hover:bg-slate-800/40 transition-colors cursor-pointer group"
+                  >
+                    <td className="py-3 px-3 font-mono font-bold text-indigo-300 group-hover:text-indigo-200">
+                      {caseId}
+                    </td>
+                    <td className="py-3 px-3">
+                      {getSurfaceBadge(c.surface)}
+                    </td>
+                    <td className="py-3 px-3 font-medium text-slate-200 max-w-[180px] truncate">
+                      {customerName}
+                      {segment && <span className="text-[10px] text-slate-500 ml-1">({segment})</span>}
+                    </td>
+                    <td className="py-3 px-3 font-mono font-medium text-slate-200">
+                      {formatInr(exposure, true)}
+                    </td>
+                    <td className="py-3 px-3 font-mono text-slate-300 max-w-[160px] truncate" title={rootCause}>
+                      {rootCause}
+                    </td>
+                    <td className="py-3 px-3 font-mono text-slate-400 max-w-[140px] truncate" title={playbook}>
+                      {playbook}
+                    </td>
+                    <td className="py-3 px-3">
+                      {getStateBadge(state, resolvedVia)}
+                    </td>
+                    <td className="py-3 px-3 text-right font-mono font-bold text-emerald-400">
+                      {recovered > 0 ? formatInr(recovered, true) : '₹0.00'}
+                    </td>
+                    <td className="py-3 px-2 text-right text-slate-500 group-hover:text-indigo-400">
+                      <ChevronRight className="w-4 h-4 inline" />
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>

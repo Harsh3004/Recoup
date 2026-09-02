@@ -1,4 +1,7 @@
-export function formatInr(paiseOrRupees: number, isPaise = false): string {
+export function formatInr(paiseOrRupees: number | null | undefined, isPaise = false): string {
+  if (paiseOrRupees == null || typeof paiseOrRupees !== 'number' || isNaN(paiseOrRupees)) {
+    return '₹0.00';
+  }
   const inr = isPaise ? paiseOrRupees / 100 : paiseOrRupees;
   return new Intl.NumberFormat('en-IN', {
     style: 'currency',

@@ -103,11 +103,11 @@ export const CaseDrawer: React.FC<CaseDrawerProps> = ({
         <div className="p-5 border-b border-white/[0.08] flex items-center justify-between bg-slate-900/60">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-mono font-bold text-sm">
-              {caseData?.riskItemId || 'Loading…'}
+              {caseData?.riskItemId || (caseData as any)?.id || 'Loading…'}
             </div>
             <div>
               <h2 className="text-base font-bold text-white tracking-tight flex items-center gap-2">
-                <span>{caseData?.customerName || 'Case Drilldown'}</span>
+                <span>{caseData?.customerName || (caseData as any)?.name || 'Case Drilldown'}</span>
                 {caseData?.resolvedVia === 'razorpay_live_webhook' && (
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-400/40">
                     ⚡ LIVE RZP RECOVERED
@@ -115,7 +115,7 @@ export const CaseDrawer: React.FC<CaseDrawerProps> = ({
                 )}
               </h2>
               <p className="text-xs text-slate-400">
-                Surface {caseData?.surface} · {caseData?.segment} Segment · Exposure: <strong className="text-emerald-400 font-mono">{caseData ? formatInr(caseData.exposurePaise, true) : '—'}</strong>
+                Surface {caseData?.surface} · {caseData?.segment || (caseData as any)?.customerSegment} Segment · Exposure: <strong className="text-emerald-400 font-mono">{caseData ? formatInr(caseData.exposurePaise ?? (caseData as any)?.exposure_paise, true) : '—'}</strong>
               </p>
             </div>
           </div>
@@ -177,7 +177,7 @@ export const CaseDrawer: React.FC<CaseDrawerProps> = ({
                         </div>
                       </div>
                       <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/40">
-                        {caseData.state === 'RECOVERED' ? 'Resolved' : 'Ready'}
+                        {(caseData.currentState || caseData.state) === 'RECOVERED' ? 'Resolved' : 'Ready'}
                       </span>
                     </div>
 
@@ -212,7 +212,7 @@ export const CaseDrawer: React.FC<CaseDrawerProps> = ({
                         </div>
                       )}
 
-                      {caseData.state !== 'RECOVERED' && (
+                      {(caseData.currentState || caseData.state) !== 'RECOVERED' && (
                         <button
                           onClick={handleSimulateWebhook}
                           disabled={isSimulatingWebhook}
@@ -229,19 +229,19 @@ export const CaseDrawer: React.FC<CaseDrawerProps> = ({
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <div className="glass-card p-3 rounded-xl">
                       <div className="text-[10px] text-slate-400 uppercase font-semibold">Exposure</div>
-                      <div className="text-base font-mono font-bold text-white mt-1">{formatInr(caseData.exposurePaise, true)}</div>
+                      <div className="text-base font-mono font-bold text-white mt-1">{formatInr(caseData.exposurePaise ?? (caseData as any)?.exposure_paise, true)}</div>
                     </div>
                     <div className="glass-card p-3 rounded-xl">
                       <div className="text-[10px] text-slate-400 uppercase font-semibold">Risk Score</div>
-                      <div className="text-base font-mono font-bold text-amber-400 mt-1">{caseData.riskScore?.toLocaleString() || '—'}</div>
+                      <div className="text-base font-mono font-bold text-amber-400 mt-1">{caseData.riskScore?.toLocaleString() || (caseData as any)?.risk_score?.toLocaleString() || '—'}</div>
                     </div>
                     <div className="glass-card p-3 rounded-xl">
                       <div className="text-[10px] text-slate-400 uppercase font-semibold">Loss Prob (P_loss)</div>
-                      <div className="text-base font-mono font-bold text-rose-400 mt-1">{((caseData.pLossBps || 0) / 100).toFixed(1)}%</div>
+                      <div className="text-base font-mono font-bold text-rose-400 mt-1">{(((caseData.pLossBps ?? (caseData as any)?.p_loss_bps) || 0) / 100).toFixed(1)}%</div>
                     </div>
                     <div className="glass-card p-3 rounded-xl">
                       <div className="text-[10px] text-slate-400 uppercase font-semibold">Status</div>
-                      <div className="text-xs font-bold text-emerald-400 mt-1.5">{caseData.state}</div>
+                      <div className="text-xs font-bold text-emerald-400 mt-1.5">{caseData.currentState || caseData.state}</div>
                     </div>
                   </div>
                 </div>

@@ -544,14 +544,15 @@ const server = Bun.serve({
       }
     }
 
-    // --- STATIC FILES (Serves modern React build from web/dist with fallback to web/) ---
+    // --- STATIC FILES (Serves React build from web/dist) ---
     const distIndex = join("web", "dist", "index.html");
-    const hasDist = existsSync(distIndex);
 
     if (path === "/" || path === "/index.html") {
-      const filePath = hasDist ? distIndex : "web/index.html";
-      const html = readFileSync(filePath, "utf8");
-      return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8" } });
+      if (existsSync(distIndex)) {
+        const html = readFileSync(distIndex, "utf8");
+        return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8" } });
+      }
+      return new Response("React build not found. Run 'bun run build:ui' to build the frontend.", { status: 404 });
     }
 
     if (path.startsWith("/assets/")) {
@@ -571,18 +572,8 @@ const server = Bun.serve({
       }
     }
 
-    if (path === "/styles.css") {
-      const css = readFileSync("web/styles.css", "utf8");
-      return new Response(css, { headers: { "Content-Type": "text/css; charset=utf-8" } });
-    }
-
-    if (path === "/app.js") {
-      const js = readFileSync("web/app.js", "utf8");
-      return new Response(js, { headers: { "Content-Type": "application/javascript; charset=utf-8" } });
-    }
-
-    // Fallback to index.html for SPA routing if needed
-    if (hasDist && !path.startsWith("/api/")) {
+    // Fallback to index.html for SPA client-side routing
+    if (existsSync(distIndex) && !path.startsWith("/api/") && !path.startsWith("/webhooks/")) {
       const html = readFileSync(distIndex, "utf8");
       return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8" } });
     }

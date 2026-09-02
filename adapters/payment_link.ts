@@ -93,7 +93,8 @@ export async function createRazorpayPaymentLink(
 
   try {
     const payload = {
-      amount: Math.max(100, Math.round(options.amountPaise)), // Razorpay minimum 100 paise (₹1.00)
+      // Razorpay standard payment links require min 100 paise (₹1) and max 50,000,000 paise (₹5,00,000)
+      amount: Math.min(50000000, Math.max(100, Math.round(options.amountPaise))),
       currency: "INR",
       accept_partial: false,
       description: options.description ?? `Recoup Payment Recovery: ${options.riskItemId}`,

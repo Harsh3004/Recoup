@@ -6,11 +6,14 @@ import { diagnoseUnstructuredInvoiceLlm } from "../src/ai/diagnose_llm";
 
 describe("Live Path LLM Diagnosis & Honest Provenance Tracking", () => {
   let db: Database;
-  const originalGemini = process.env.GEMINI_API_KEY;
-  const originalOpenAI = process.env.OPENAI_API_KEY;
-  const originalOpenRouter = process.env.OPENROUTER_API_KEY;
+
+  // Capture whatever keys are genuinely set in the environment
+  const originalGemini      = process.env.GEMINI_API_KEY;
+  const originalOpenAI      = process.env.OPENAI_API_KEY;
+  const originalOpenRouter  = process.env.OPENROUTER_API_KEY;
 
   beforeEach(() => {
+    // Strip ALL real API keys — tests must not make live network calls
     delete process.env.GEMINI_API_KEY;
     delete process.env.OPENAI_API_KEY;
     delete process.env.OPENROUTER_API_KEY;
@@ -47,17 +50,19 @@ describe("Live Path LLM Diagnosis & Honest Provenance Tracking", () => {
   });
 
   afterEach(() => {
-    if (originalGemini) process.env.GEMINI_API_KEY = originalGemini;
+    // Always restore the real environment, even if a test throws
+    if (originalGemini !== undefined)     process.env.GEMINI_API_KEY = originalGemini;
     else delete process.env.GEMINI_API_KEY;
-    if (originalOpenAI) process.env.OPENAI_API_KEY = originalOpenAI;
+    if (originalOpenAI !== undefined)     process.env.OPENAI_API_KEY = originalOpenAI;
     else delete process.env.OPENAI_API_KEY;
-    if (originalOpenRouter) process.env.OPENROUTER_API_KEY = originalOpenRouter;
+    if (originalOpenRouter !== undefined) process.env.OPENROUTER_API_KEY = originalOpenRouter;
     else delete process.env.OPENROUTER_API_KEY;
 
     db.close();
   });
 
   it("honest runtime invariant: without API key, llmUsed is false and llmSkippedReason is 'no_api_key'", async () => {
+    // All API keys stripped by beforeEach — this must fall through to rules engine
     const riskItem = db.query(`SELECT * FROM risk_items WHERE id = 'rsk_unstructured'`).get() as any;
     const diag = await diagnoseRiskItem(db, riskItem, Date.now());
 
@@ -78,8 +83,15 @@ describe("Live Path LLM Diagnosis & Honest Provenance Tracking", () => {
     expect(diag.evidence.some((e) => e.includes("Deterministic rule"))).toBe(true);
   });
 
-  it("diagnoseUnstructuredInvoiceLlm provides honest token usage and latency when API key is present", async () => {
-    process.env.GEMINI_API_KEY = "test_key_replay";
+  it("diagnoseUnstructuredInvoiceLlm returns a cached/replayed response (no live network call)", async () => {
+    // This test sets a clearly fake, non-real key to exercise the LLM code path.
+    // The llm_client circuit breaker or in-process replay cache handles the call
+    // without making a real network request — token counts below come from the
+    // cached replay fixture, NOT from the Gemini API.
+    //
+    // IMPORTANT: if you add a real GEMINI_API_KEY to .env, this test STILL runs
+    // in isolation because beforeEach strips it. Do NOT set a real key here.
+    process.env.GEMINI_API_KEY = "test_key_replay_not_real";
 
     const res = await diagnoseUnstructuredInvoiceLlm({
       riskItemId: "rsk_bench_inv_000001",
@@ -103,7 +115,7 @@ describe("Live Path LLM Diagnosis & Honest Provenance Tracking", () => {
     expect(res.tokenUsage?.completionTokens).toBe(120);
     expect(res.tokenUsage?.totalTokens).toBe(1262);
     expect(res.latencyMs).toBeGreaterThanOrEqual(1);
-    expect(res.cached).toBe(true);
+    expect(res.cached).toBe(true); // Must come from replay cache — never a live call
   });
 
   it("runDiagnosis commits llm_latency_ms, llm_token_usage, and llm_skipped_reason to diagnoses table and audit_events", async () => {
@@ -127,3 +139,4 @@ describe("Live Path LLM Diagnosis & Honest Provenance Tracking", () => {
     expect(auditRow.inputs_digest).toBeDefined();
   });
 });
+

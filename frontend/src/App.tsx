@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Header } from './components/Header';
-import { MetricsGrid } from './components/MetricsGrid';
-import { SurfaceSelector } from './components/SurfaceSelector';
-import { IncidentTimeline } from './components/IncidentTimeline';
-import { Counterfactuals } from './components/Counterfactuals';
-import { CaseExplorer } from './components/CaseExplorer';
+import { Navigation, RouteId } from './components/Navigation';
+import { DashboardPage } from './pages/DashboardPage';
+import { CasesPage } from './pages/CasesPage';
+import { AiStudioPage } from './pages/AiStudioPage';
+import { CompliancePage } from './pages/CompliancePage';
+import { AuditLedgerPage } from './pages/AuditLedgerPage';
+import { AblationLabPage } from './pages/AblationLabPage';
+import { RazorpayRailPage } from './pages/RazorpayRailPage';
 import { CaseDrawer } from './components/CaseDrawer';
 import { AiSettingsModal } from './components/AiSettingsModal';
 import { VerifyChainModal } from './components/VerifyChainModal';
@@ -13,18 +15,22 @@ import { ToastContainer } from './components/ToastContainer';
 import { SurfaceId, OverviewData, CasesResponse, CaseDetail, ToastItem } from './types';
 
 export const App: React.FC = () => {
-  // Global State
+  // Routing State
+  const [currentRoute, setCurrentRoute] = useState<RouteId>('dashboard');
+
+  // Global Telemetry State
   const [overviewData, setOverviewData] = useState<OverviewData | null>(null);
   const [loadingOverview, setLoadingOverview] = useState<boolean>(true);
   
+  // Cases State
   const [casesResponse, setCasesResponse] = useState<CasesResponse>({ cases: [], total: 0, showing: 0 });
   const [loadingCases, setLoadingCases] = useState<boolean>(true);
-  
   const [currentSurface, setCurrentSurface] = useState<SurfaceId>('');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedCohort, setSelectedCohort] = useState<string>('');
   const [selectedState, setSelectedState] = useState<string>('');
   
+  // Case Drilldown Drawer State
   const [activeCaseDetail, setActiveCaseDetail] = useState<CaseDetail | null>(null);
   const [loadingCaseDetail, setLoadingCaseDetail] = useState<boolean>(false);
   const [isCaseDrawerOpen, setIsCaseDrawerOpen] = useState<boolean>(false);
@@ -36,6 +42,30 @@ export const App: React.FC = () => {
   
   const [activeModelName, setActiveModelName] = useState<string>('minimax/minimax-m3:free');
   const [toasts, setToasts] = useState<ToastItem[]>([]);
+
+  // Sync URL hash with route
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#/', '').replace('#', '') as RouteId;
+      const validRoutes: RouteId[] = [
+        'dashboard', 'cases', 'ai-studio', 'compliance', 
+        'audit-ledger', 'ablation-lab', 'razorpay-rail'
+      ];
+      if (validRoutes.includes(hash)) {
+        setCurrentRoute(hash);
+      }
+    };
+
+    handleHashChange();
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  const navigateTo = (route: RouteId) => {
+    setCurrentRoute(route);
+    window.location.hash = `#/${route}`;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   // Toast Helper
   const showToast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'info') => {
@@ -89,7 +119,6 @@ export const App: React.FC = () => {
   // Initial Boot
   useEffect(() => {
     fetchOverview();
-    // Also load active AI config model name
     fetch('/api/settings/ai')
       .then((res) => res.json())
       .then((data) => {
@@ -133,8 +162,10 @@ export const App: React.FC = () => {
       {/* Toast Notification Container */}
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
 
-      {/* Top Header */}
-      <Header
+      {/* Top Header & Navigation Tabs */}
+      <Navigation
+        currentRoute={currentRoute}
+        onRouteChange={navigateTo}
         activeModel={activeModelName}
         auditEventsCount={overviewData?.headline.auditEventsChained || 8303}
         onOpenAiSettings={() => setIsAiSettingsOpen(true)}
@@ -142,36 +173,69 @@ export const App: React.FC = () => {
         onOpenTamperModal={() => setIsTamperModalOpen(true)}
       />
 
-      {/* 1. Headline Financial Metrics Banner */}
-      <MetricsGrid data={overviewData} loading={loadingOverview} />
+      {/* Page Routing Switcher */}
+      <main className="min-h-[600px]">
+        {currentRoute === 'dashboard' && (
+          <DashboardPage
+            overviewData={overviewData}
+            loadingOverview={loadingOverview}
+            currentSurface={currentSurface}
+            onSelectSurface={setCurrentSurface}
+            onSelectCase={handleSelectCase}
+            onNavigate={navigateTo}
+          />
+        )}
 
-      {/* 2. Universal 4-Surfaces Selector */}
-      <SurfaceSelector
-        currentSurface={currentSurface}
-        onSelectSurface={(surface) => setCurrentSurface(surface)}
-        data={overviewData}
-      />
+        {currentRoute === 'cases' && (
+          <CasesPage
+            cases={casesResponse.cases}
+            total={casesResponse.total}
+            showing={casesResponse.showing}
+            loading={loadingCases}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            selectedCohort={selectedCohort}
+            onCohortChange={setSelectedCohort}
+            selectedState={selectedState}
+            onStateChange={setSelectedState}
+            onSelectCase={handleSelectCase}
+          />
+        )}
 
-      {/* 3. Split Grid: Injected Outage Replay & Counterfactual Comparison Table */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <IncidentTimeline onViewOutageCase={handleSelectCase} />
-        <Counterfactuals data={overviewData} />
-      </div>
+        {currentRoute === 'ai-studio' && (
+          <AiStudioPage
+            showToast={showToast}
+            onOpenAiSettings={() => setIsAiSettingsOpen(true)}
+          />
+        )}
 
-      {/* 4. Interactive Case Explorer Data Table */}
-      <CaseExplorer
-        cases={casesResponse.cases}
-        total={casesResponse.total}
-        showing={casesResponse.showing}
-        loading={loadingCases}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        selectedCohort={selectedCohort}
-        onCohortChange={setSelectedCohort}
-        selectedState={selectedState}
-        onStateChange={setSelectedState}
-        onSelectCase={handleSelectCase}
-      />
+        {currentRoute === 'compliance' && (
+          <CompliancePage
+            overviewData={overviewData}
+          />
+        )}
+
+        {currentRoute === 'audit-ledger' && (
+          <AuditLedgerPage
+            onOpenVerifyModal={() => setIsVerifyModalOpen(true)}
+            onOpenTamperModal={() => setIsTamperModalOpen(true)}
+            showToast={showToast}
+          />
+        )}
+
+        {currentRoute === 'ablation-lab' && (
+          <AblationLabPage
+            overviewData={overviewData}
+          />
+        )}
+
+        {currentRoute === 'razorpay-rail' && (
+          <RazorpayRailPage
+            showToast={showToast}
+            onOpenCase={handleSelectCase}
+          />
+        )}
+      </main>
 
       {/* Slide-Over Case Drilldown Drawer */}
       {isCaseDrawerOpen && (
@@ -210,8 +274,8 @@ export const App: React.FC = () => {
         showToast={showToast}
       />
 
-      {/* Footer Branding */}
-      <footer className="pt-6 pb-8 border-t border-white/[0.06] text-center text-xs text-slate-500">
+      {/* Footer */}
+      <footer className="mt-12 pt-6 pb-8 border-t border-white/[0.06] text-center text-xs text-slate-500">
         Recoup Autonomous Recovery Engine · Built for Razorpay AI Buildathon · Track 03: AI Revenue Recovery
       </footer>
     </div>

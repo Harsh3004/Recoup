@@ -866,6 +866,54 @@ export function runExecutionRunner(
       }
 
       if (!caseResolved) {
+        // Natural unassisted recovery: Organic payers (would_pay_anyway = 1) still pay naturally
+        // at their unassisted time, even if the treatment ladder did not accelerate them.
+        // A customer whose internal AP desk was already processing an invoice does not default simply
+        // because an automated email was generic.
+        const isOrganic = gtEv ? gtEv.would_pay_anyway === 1 : (gtCust?.would_pay_anyway === 1);
+        if (isOrganic) {
+          const recId = `rec_${pad(recIdx++, 8)}`;
+          const unassistedHours = gtEv?.hours_until_unassisted ?? 48;
+          const recoveredAt = item.first_seen_at + unassistedHours * HOUR;
+
+          insertRecovery.run(
+            recId,
+            item.id,
+            item.customer_id,
+            item.exposure_paise,
+            recoveredAt,
+            "ORGANIC",
+            item.playbook ?? "DUNNING_LADDER",
+            "TREATMENT",
+          );
+
+          updateRiskState.run("RECOVERED", item.id);
+          byState.RECOVERED++;
+          treatmentRecoveredCount++;
+          treatmentRecoveredPaise += item.exposure_paise;
+          caseResolved = true;
+
+          appendAudit(db, {
+            actor: "SYSTEM",
+            action: "RECOVERY_RECORDED",
+            entityType: "recovery",
+            entityId: recId,
+            inputs: {
+              riskItemId: item.id,
+              amountPaise: item.exposure_paise,
+              organic: true,
+              naturalUnassisted: true,
+            },
+            decision: "RECOVER",
+            reasonCodes: ["ORGANIC_NATURAL_RESOLUTION"],
+            policyVersion: POLICY_VERSION,
+            modelVersion: MODEL_VERSION,
+            ts: recoveredAt,
+          });
+        }
+      }
+
+      if (!caseResolved) {
         updateRiskState.run("CLOSED_LOST", item.id);
         byState.CLOSED_LOST++;
         appendAudit(db, {

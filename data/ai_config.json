@@ -1,0 +1,7 @@
+{
+  "activeProvider": "openrouter",
+  "activeModel": "minimax/minimax-m3:free",
+  "temperature": 0.1,
+  "timeoutMs": 8000,
+  "enableCache": true
+}

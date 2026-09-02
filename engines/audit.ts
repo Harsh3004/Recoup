@@ -498,6 +498,8 @@ export function exportCaseTimeline(db: Database, riskItemId: string): CaseFullTi
     currentState: risk.state,
     cohort: risk.cohort,
     incidentId: risk.incident_id,
+    resolvedVia: risk.resolved_via ?? "simulated",
+    paymentLinkUrl: risk.payment_link_url ?? null,
     diagnosis,
     interventionPlan,
     gateDecisions,

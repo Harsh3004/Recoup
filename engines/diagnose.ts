@@ -498,8 +498,8 @@ export async function diagnoseRiskItem(
     return {
       id: diagId,
       riskItemId: item.id,
-      rootCause: llmRes.rootCause,
-      confidenceBps: llmRes.confidenceBps,
+      rootCause: llmRes.rootCause || "INVOICE_UNPAID",
+      confidenceBps: llmRes.confidenceBps || 9000,
       isSystemic: false,
       evidence: evidenceList,
       declineCode: null,

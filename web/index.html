@@ -10,6 +10,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" style="position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; pointer-events: none;"></div>
   <div class="container">
     
     <!-- Top Header -->
@@ -22,6 +24,14 @@
         </div>
       </div>
       <div class="header-actions">
+        <div class="badge-ai-status" id="headerAiBadge" title="Configured AI Model">
+          <div class="pulse-dot-ai"></div>
+          <span>AI: <strong id="headerActiveModel">minimax/minimax-m3:free</strong></span>
+        </div>
+        <button class="btn btn-ai-settings" id="btnAiSettings">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+          AI Settings
+        </button>
         <div class="badge-chain-status" id="headerChainStatus">
           <div class="pulse-dot"></div>
           <span>Audit Chain: <strong id="headerEventCount">472</strong> Events Verified</span>
@@ -117,30 +127,50 @@
     <!-- 3. Split Grid: Incident Replay & Counterfactuals -->
     <div class="split-grid">
       
-      <!-- Incident Replay Simulator -->
-      <div class="panel-card">
+      <!-- Incident Replay Simulator (Animated Timeline) -->
+      <div class="panel-card" id="incidentPanel">
         <div class="panel-title">
-          <span>Injected Outage Replay & Contact Suppression</span>
+          <span>Injected Outage Replay &amp; Contact Suppression</span>
           <span class="incident-badge">Razorpay × HDFC Outage</span>
         </div>
-        <div class="incident-box">
-          <p><strong>Incident #inc_000001:</strong> 6-hour severe degradation injected on 2026-08-19 (10:00–16:00 IST).</p>
-          <div class="incident-stats">
-            <div class="inc-stat-item">
-              <div class="inc-stat-val">26.7%</div>
-              <div class="inc-stat-lbl">Success Rate (vs 80.6% baseline)</div>
+
+        <!-- Animated 6-hour incident timeline -->
+        <div class="incident-timeline-wrap">
+          <div class="incident-timeline-header">
+            <span class="itl-date">2026-08-19</span>
+            <div class="itl-legend">
+              <span class="itl-dot" style="background: #34d399;"></span><span>Normal</span>
+              <span class="itl-dot" style="background: #f87171; margin-left: 10px;"></span><span>Outage</span>
+              <span class="itl-dot" style="background: #fbbf24; margin-left: 10px;"></span><span>Recovery</span>
             </div>
-            <div class="inc-stat-item">
-              <div class="inc-stat-val">-7.14</div>
-              <div class="inc-stat-lbl">Anomaly Z-Score</div>
+          </div>
+
+          <!-- Hour markers + Animated bar chart -->
+          <div class="itl-chart" id="itlChart">
+            <!-- Bars injected by JS -->
+          </div>
+          <div class="itl-hours" id="itlHours">
+            <!-- Hour labels injected by JS -->
+          </div>
+
+          <!-- Stats row -->
+          <div class="itl-stats-row">
+            <div class="itl-stat">
+              <div class="itl-stat-val" id="itlSuccessRate">—</div>
+              <div class="itl-stat-lbl">Outage Success Rate</div>
             </div>
-            <div class="inc-stat-item">
-              <div class="inc-stat-val">21 / 21</div>
-              <div class="inc-stat-lbl">At-Risk Items Tagged</div>
+            <div class="itl-stat">
+              <div class="itl-stat-val" id="itlZScore">—</div>
+              <div class="itl-stat-lbl">Anomaly Z-Score</div>
+            </div>
+            <div class="itl-stat">
+              <div class="itl-stat-val" id="itlTagged">—</div>
+              <div class="itl-stat-lbl">Items Tagged &amp; Suppressed</div>
             </div>
           </div>
         </div>
-        <div class="incident-action-box">
+
+        <div class="incident-action-box" style="margin-top: 12px;">
           <div>
             <strong>Compliance Rule Enforced:</strong>
             <p style="font-size: 12px; margin-top: 2px;">Zero customer harassment during gateway downtime. 100% of outbound touches suppressed.</p>
@@ -210,6 +240,10 @@
             <option value="CLOSED_LOST">Closed Lost</option>
           </select>
         </div>
+        <div id="casesPaginationBar" style="font-size: 12px; color: var(--text-dim); padding: 6px 2px; display: none; align-items: center; gap: 8px;">
+          <span id="casesPaginationText">Loading…</span>
+          <span id="casesPaginationWarn" style="display:none; background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.3); border-radius: 4px; padding: 2px 8px; color: #fbbf24; font-size: 11px;">⚠ LIMIT 200 reached — use filters to narrow</span>
+        </div>
       </div>
 
       <table class="data-table">
@@ -269,6 +303,173 @@
     </div>
   </div>
 
-  <script src="app.js"></script>
+  <!-- AI Settings & Model Configuration Modal -->
+  <div class="modal-backdrop" id="aiSettingsModal" style="display: none;">
+    <div class="modal-content modal-lg">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div class="ai-modal-icon">⚡</div>
+          <div>
+            <h2 style="margin: 0; font-size: 18px; font-weight: 700;">AI Engine & Model Configuration</h2>
+            <div style="font-size: 12px; color: var(--text-dim); margin-top: 2px;">
+              Configure reasoning models, API credentials, and live inference endpoints
+            </div>
+          </div>
+        </div>
+        <button class="btn-close" id="btnCloseAiModal">&times;</button>
+      </div>
+
+      <div class="modal-body" style="padding: 20px 24px;">
+        <div class="settings-grid">
+          <!-- Left Column: Provider & Model Selector -->
+          <div class="settings-col">
+            <div class="setting-section-title">Active AI Provider</div>
+            <div class="provider-radio-group">
+              <label class="provider-card" data-provider="openrouter">
+                <input type="radio" name="aiProviderRadio" value="openrouter" checked>
+                <div class="provider-card-body">
+                  <div class="provider-title-row">
+                    <span class="provider-title">OpenRouter</span>
+                    <span class="pill-badge pill-free">Free Tier</span>
+                    <span class="pill-badge pill-rec">Recommended</span>
+                  </div>
+                  <div class="provider-sub">MiniMax M3, Gemini 2.0, Llama 3.3, Mistral, DeepSeek</div>
+                </div>
+              </label>
+
+              <label class="provider-card" data-provider="gemini">
+                <input type="radio" name="aiProviderRadio" value="gemini">
+                <div class="provider-card-body">
+                  <div class="provider-title-row">
+                    <span class="provider-title">Google Gemini</span>
+                    <span class="pill-badge">Direct API</span>
+                  </div>
+                  <div class="provider-sub">Direct Google AI Studio API key (Gemini 2.5 Flash)</div>
+                </div>
+              </label>
+
+              <label class="provider-card" data-provider="openai">
+                <input type="radio" name="aiProviderRadio" value="openai">
+                <div class="provider-card-body">
+                  <div class="provider-title-row">
+                    <span class="provider-title">OpenAI</span>
+                    <span class="pill-badge">Direct API</span>
+                  </div>
+                  <div class="provider-sub">GPT-4o Mini JSON completions via OpenAI key</div>
+                </div>
+              </label>
+
+              <label class="provider-card" data-provider="offline">
+                <input type="radio" name="aiProviderRadio" value="offline">
+                <div class="provider-card-body">
+                  <div class="provider-title-row">
+                    <span class="provider-title">Offline Rule Classifier</span>
+                    <span class="pill-badge pill-neutral">Zero Cost</span>
+                  </div>
+                  <div class="provider-sub">Deterministic domain regex heuristics with zero network calls</div>
+                </div>
+              </label>
+            </div>
+
+            <div class="form-group" style="margin-top: 18px;">
+              <label class="form-label" for="selectAiModel">Primary Reasoning Model</label>
+              <select class="form-select" id="selectAiModel">
+                <option value="minimax/minimax-m3:free" selected>MiniMax M3 (Free) — Recommended (Fast Reasoning)</option>
+                <option value="google/gemini-2.0-flash-exp:free">Google Gemini 2.0 Flash Exp (Free)</option>
+                <option value="meta-llama/llama-3.3-70b-instruct:free">Meta Llama 3.3 70B Instruct (Free)</option>
+                <option value="mistralai/mistral-7b-instruct:free">Mistral 7B Instruct (Free)</option>
+                <option value="deepseek/deepseek-r1:free">DeepSeek R1 (Free Reasoning)</option>
+                <option value="gemini-2.5-flash">Google Gemini 2.5 Flash (Direct)</option>
+                <option value="gemini-2.0-flash">Google Gemini 2.0 Flash (Direct)</option>
+                <option value="gpt-4o-mini">OpenAI GPT-4o Mini (Direct)</option>
+                <option value="custom">Custom Model Slug...</option>
+              </select>
+            </div>
+
+            <div class="form-group" id="customModelGroup" style="display: none;">
+              <label class="form-label" for="inputCustomModel">Custom Model Slug</label>
+              <input type="text" class="form-input" id="inputCustomModel" placeholder="e.g. qwen/qwen-2.5-72b-instruct">
+            </div>
+
+            <div class="form-group" style="margin-top: 12px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <label class="form-label" style="margin-bottom: 0;">Sampling Temperature</label>
+                <span class="temp-badge" id="valTempDisplay">0.10</span>
+              </div>
+              <input type="range" class="form-range" id="inputTemperature" min="0" max="1" step="0.05" value="0.10">
+              <div class="field-hint">Low temperature (0.05–0.15) produces deterministic root-cause diagnosis.</div>
+            </div>
+          </div>
+
+          <!-- Right Column: API Keys & Live Diagnostic Testing -->
+          <div class="settings-col">
+            <div class="setting-section-title">API Credentials</div>
+            
+            <div class="api-card">
+              <div class="form-group">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                  <label class="form-label" for="inputOrKey" style="margin-bottom: 0;">OpenRouter API Key</label>
+                  <span class="key-status-tag" id="statusOrKey">● Connected</span>
+                </div>
+                <div class="input-with-button">
+                  <input type="password" class="form-input" id="inputOrKey" placeholder="sk-or-v1-...">
+                  <button type="button" class="btn-toggle-key" data-target="inputOrKey" title="Toggle visibility">👁️</button>
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-top: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                  <label class="form-label" for="inputGeminiKey" style="margin-bottom: 0;">Gemini API Key</label>
+                  <span class="key-status-tag" id="statusGeminiKey">● Configured</span>
+                </div>
+                <div class="input-with-button">
+                  <input type="password" class="form-input" id="inputGeminiKey" placeholder="AIzaSy...">
+                  <button type="button" class="btn-toggle-key" data-target="inputGeminiKey" title="Toggle visibility">👁️</button>
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-top: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                  <label class="form-label" for="inputOpenaiKey" style="margin-bottom: 0;">OpenAI API Key</label>
+                  <span class="key-status-tag key-optional" id="statusOpenaiKey">Optional</span>
+                </div>
+                <div class="input-with-button">
+                  <input type="password" class="form-input" id="inputOpenaiKey" placeholder="sk-...">
+                  <button type="button" class="btn-toggle-key" data-target="inputOpenaiKey" title="Toggle visibility">👁️</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Live Benchmark Console -->
+            <div class="test-panel">
+              <div class="test-header">
+                <div>
+                  <div style="font-weight: 600; font-size: 13px;">Live Model Benchmark Test</div>
+                  <div style="font-size: 11px; color: var(--text-dim);">Sends live dispute text to verify latency & JSON output</div>
+                </div>
+                <button class="btn btn-sm btn-primary" id="btnTestAiConnection">
+                  <span class="btn-spinner" id="testAiSpinner" style="display: none;"></span>
+                  <span id="btnTestAiText">⚡ Test Model</span>
+                </button>
+              </div>
+              <div class="test-console" id="testAiConsole">
+                <div class="console-idle">Click "⚡ Test Model" to verify live reasoning, measure roundtrip API latency, and inspect parsed diagnosis.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; padding: 16px 24px;">
+        <div id="aiSettingsSaveStatus" style="font-size: 13px; font-weight: 500;"></div>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn btn-outline" id="btnCancelAiModal">Cancel</button>
+          <button class="btn btn-primary" id="btnSaveAiSettings">Save & Apply Settings</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js?v=3"></script>
 </body>
 </html>

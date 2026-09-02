@@ -1,6 +1,6 @@
 {
   "meta": {
-    "timestamp": "2026-09-01T14:25:40.379Z",
+    "timestamp": "2026-09-01T18:12:08.587Z",
     "policyVersion": "policy-v0-seed",
     "modelVersion": "none"
   },
@@ -12,64 +12,64 @@
     "holdoutExposureInr": 24374794
   },
   "results": {
-    "treatmentRecoveredInr": 31330061,
+    "treatmentRecoveredInr": 31436983,
     "holdoutRecoveredInr": 1346094,
     "counterfactualBaselineInr": 7512368.3,
-    "incrementalRecoveredInr": 23817692.7,
-    "incrementalLiftPct": 317.0463926801885,
+    "incrementalRecoveredInr": 23924614.7,
+    "incrementalLiftPct": 318.4696722070988,
     "ci95": {
-      "lowerInr": 8790260.89,
-      "medianInr": 23520206.86,
-      "upperInr": 41202537.86,
-      "lowerLiftPct": 93.47690344368226,
-      "medianLiftPct": 325.69534890019224,
-      "upperLiftPct": 964.6633967564318
+      "lowerInr": 8846303.17,
+      "medianInr": 23453790.18,
+      "upperInr": 41381342.84,
+      "lowerLiftPct": 90.83879466190841,
+      "medianLiftPct": 328.3674977129856,
+      "upperLiftPct": 938.9441752781787
     },
     "sensitivityBandInr": {
-      "minusOneSeInr": 26455697.88,
-      "plusOneSeInr": 21179687.52
+      "minusOneSeInr": 26562619.88,
+      "plusOneSeInr": 21286609.52
     },
-    "permutationPValue": 0.044
+    "permutationPValue": 0.058
   },
   "counterfactualComparison": {
     "pureHoldoutBaselineInr": 7512368.3,
     "naiveDunningBaselineInr": 29988105.77,
-    "recoupGrossRecoveredInr": 31330061,
-    "incrementalOverHoldoutInr": 23817692.7,
-    "incrementalOverNaiveInr": 1341955.23
+    "recoupGrossRecoveredInr": 31436983,
+    "incrementalOverHoldoutInr": 23924614.7,
+    "incrementalOverNaiveInr": 1448877.23
   },
   "bySurface": [
     {
       "surface": "Surface D",
       "treatmentCases": 236,
       "holdoutCases": 41,
-      "treatmentRecoveredInr": 30351000,
-      "incrementalInr": 23738682.93,
-      "recoveryRatePct": 19.1
+      "treatmentRecoveredInr": 30296750,
+      "incrementalInr": 23684432.93,
+      "recoveryRatePct": 19
     },
     {
       "surface": "Surface B",
       "treatmentCases": 323,
       "holdoutCases": 57,
-      "treatmentRecoveredInr": 646975,
-      "incrementalInr": 99121.67,
-      "recoveryRatePct": 36.6
+      "treatmentRecoveredInr": 759859,
+      "incrementalInr": 212005.67,
+      "recoveryRatePct": 43
     },
     {
       "surface": "Surface A",
       "treatmentCases": 400,
       "holdoutCases": 71,
-      "treatmentRecoveredInr": 222646,
-      "incrementalInr": -301145.55,
-      "recoveryRatePct": 29
+      "treatmentRecoveredInr": 269336,
+      "incrementalInr": -254455.55,
+      "recoveryRatePct": 35
     },
     {
       "surface": "Surface C",
       "treatmentCases": 158,
       "holdoutCases": 28,
-      "treatmentRecoveredInr": 109440,
-      "incrementalInr": 66040.79,
-      "recoveryRatePct": 44.1
+      "treatmentRecoveredInr": 111038,
+      "incrementalInr": 67638.79,
+      "recoveryRatePct": 44.7
     }
   ]
 }

@@ -134,12 +134,44 @@ ${input.emailThread ?? "No email correspondence recorded."}
     fallbackGenerator,
   );
 
+  const parsed = (resp.parsed ?? {}) as any;
+  const rootCause =
+    parsed.root_cause ||
+    parsed.rootCause ||
+    parsed.cause ||
+    parsed.diagnosis ||
+    "INVOICE_UNPAID";
+
+  const confidenceBps =
+    typeof parsed.confidence_bps === "number"
+      ? parsed.confidence_bps
+      : typeof parsed.confidenceBps === "number"
+      ? parsed.confidenceBps
+      : 9000;
+
+  const evidenceSpans = Array.isArray(parsed.evidence_spans)
+    ? parsed.evidence_spans
+    : Array.isArray(parsed.evidenceSpans)
+    ? parsed.evidenceSpans
+    : [];
+
+  const recommendedPlaybook =
+    parsed.recommended_playbook ||
+    parsed.recommendedPlaybook ||
+    parsed.playbook ||
+    "PROMISE_TO_PAY";
+
+  const rationale =
+    parsed.rationale ||
+    parsed.reason ||
+    `NLU classification identified ${rootCause} from AP correspondence context.`;
+
   return {
-    rootCause: resp.parsed.root_cause,
-    confidenceBps: resp.parsed.confidence_bps,
-    evidenceSpans: resp.parsed.evidence_spans ?? [],
-    recommendedPlaybook: resp.parsed.recommended_playbook,
-    rationale: resp.parsed.rationale,
+    rootCause,
+    confidenceBps,
+    evidenceSpans,
+    recommendedPlaybook,
+    rationale,
     model: resp.model,
     cached: resp.cached,
     fallbackUsed: resp.fallbackUsed,

@@ -168,6 +168,8 @@ CREATE TABLE IF NOT EXISTS risk_items (
   state          TEXT NOT NULL,
   cohort         TEXT NOT NULL CHECK (cohort IN ('TREATMENT', 'HOLDOUT')),
   incident_id    TEXT,
+  resolved_via   TEXT DEFAULT 'simulated',
+  payment_link_url TEXT,
   UNIQUE (surface, source_ref)
 );
 
@@ -257,7 +259,19 @@ CREATE TABLE IF NOT EXISTS recoveries (
   recovered_at INTEGER NOT NULL,
   channel      TEXT,
   playbook     TEXT,
-  cohort       TEXT NOT NULL CHECK (cohort IN ('TREATMENT', 'HOLDOUT'))
+  cohort       TEXT NOT NULL CHECK (cohort IN ('TREATMENT', 'HOLDOUT')),
+  resolved_via TEXT DEFAULT 'simulated',
+  payment_ref  TEXT
+);
+
+CREATE TABLE IF NOT EXISTS payment_links (
+  id           TEXT PRIMARY KEY,
+  risk_item_id TEXT NOT NULL REFERENCES risk_items(id),
+  short_url    TEXT NOT NULL,
+  amount_paise INTEGER NOT NULL CHECK (amount_paise >= 0),
+  status       TEXT NOT NULL DEFAULT 'created',
+  is_live      INTEGER NOT NULL DEFAULT 0 CHECK (is_live IN (0, 1)),
+  created_at   INTEGER NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS audit_events (

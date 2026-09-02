@@ -6997,5 +6997,49 @@
       "totalTokens": 817
     },
     "isFallback": false
+  },
+  "abd574e48e3a3eca6b80737d2e534c6a": {
+    "model": "minimax/minimax-m3:free",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9600,
+      "evidence_spans": [
+        "Is mahine collections weak hain",
+        "Do dates mein split kar sakte hain?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The CFO explicitly acknowledges the invoice liability (acknowledged via 'note kiya'), admits to weak collections this month indicating liquidity pressure, and proactively requests splitting the ₹4,00,000 payment across two installments. There is no dispute raised regarding goods, GRN, invoice receipt, or approval. The request for an installment schedule is a textbook cash crunch signal, warranting a partial payment playbook to secure a commitment and structured recovery."
+    },
+    "content": "```json\n{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9600,\n  \"evidence_spans\": [\n    \"Is mahine collections weak hain\",\n    \"Do dates mein split kar sakte hain?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The CFO explicitly acknowledges the invoice liability (acknowledged via 'note kiya'), admits to weak collections this month indicating liquidity pressure, and proactively requests splitting the ₹4,00,000 payment across two installments. There is no dispute raised regarding goods, GRN, invoice receipt, or approval. The request for an installment schedule is a textbook cash crunch signal, warranting a partial payment playbook to secure a commitment and structured recovery.\"\n}\n```",
+    "cachedAt": 1788346550092,
+    "inferredAt": "2026-09-02T10:55:44.692Z",
+    "tokenUsage": {
+      "promptTokens": 606,
+      "completionTokens": 165,
+      "totalTokens": 771
+    },
+    "isFallback": false
+  },
+  "7afa182f6b0835494f5ee57df19fcd43": {
+    "model": "minimax/minimax-m3:free",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 8500,
+      "evidence_spans": [
+        "Is mahine collections weak hain",
+        "Do dates mein split kar sakte hain"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer's CFO explicitly acknowledges liability for invoice inv_000081, does not raise any dispute on goods, pricing, or documentation, but cites weak collections this month and requests a split of payment across two dates. This is a classic liquidity-driven cash crunch signal, where the buyer is seeking a short-term installment arrangement to manage working capital. Since the liability is admitted and the request is for a structured (split) payment rather than a full deferral, the PARTIAL_PAYMENT playbook is appropriate — secure a commitment on both installment dates, confirm amounts, and follow up on each promised date. No dispute, GRN, or approval issues are evident, so a dunning escalation or human handoff is not warranted at this stage."
+    },
+    "content": "```json\n{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 8500,\n  \"evidence_spans\": [\n    \"Is mahine collections weak hain\",\n    \"Do dates mein split kar sakte hain\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer's CFO explicitly acknowledges liability for invoice inv_000081, does not raise any dispute on goods, pricing, or documentation, but cites weak collections this month and requests a split of payment across two dates. This is a classic liquidity-driven cash crunch signal, where the buyer is seeking a short-term installment arrangement to manage working capital. Since the liability is admitted and the request is for a structured (split) payment rather than a full deferral, the PARTIAL_PAYMENT playbook is appropriate — secure a commitment on both installment dates, confirm amounts, and follow up on each promised date. No dispute, GRN, or approval issues are evident, so a dunning escalation or human handoff is not warranted at this stage.\"\n}\n```",
+    "cachedAt": 1788347527669,
+    "inferredAt": "2026-09-02T11:12:02.838Z",
+    "tokenUsage": {
+      "promptTokens": 602,
+      "completionTokens": 226,
+      "totalTokens": 828
+    },
+    "isFallback": false
   }
 }

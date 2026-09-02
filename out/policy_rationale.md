@@ -3,7 +3,7 @@
 - **Total Risk Items Evaluated:** **1314**
 - **Active Intervention Plans Created:** **1281** (2578 ordered steps)
 - **Suppressed / Skipped Plans:** **33** (Counted as operational savings)
-- **Total Expected Net Value (EV):** **₹13,89,74,358.85**
+- **Total Expected Net Value (EV):** **₹13,89,44,358.85**
 
 ## Acceptance Verification
 
@@ -21,9 +21,9 @@
 
 | Playbook | Plans | Active Steps | Expected Net EV (₹) | Share of Total EV |
 |---|---:|---:|---:|---:|
-| `PARTIAL_PAYMENT` | 205 | 410 | ₹9,18,56,875.50 | 66.10% |
-| `HUMAN_ESCALATION` | 52 | 52 | ₹3,18,70,720.00 | 22.93% |
-| `PROMISE_TO_PAY` | 20 | 40 | ₹1,29,27,082.00 | 9.30% |
+| `PARTIAL_PAYMENT` | 206 | 412 | ₹9,20,31,864.60 | 66.24% |
+| `HUMAN_ESCALATION` | 52 | 52 | ₹3,18,70,720.00 | 22.94% |
+| `PROMISE_TO_PAY` | 19 | 38 | ₹1,27,22,092.90 | 9.16% |
 | `HINGLISH_VOICE` | 249 | 498 | ₹12,05,347.74 | 0.87% |
 | `ONE_TAP_UPI` | 194 | 388 | ₹5,40,036.18 | 0.39% |
 | `CART_RECOVERY` | 116 | 232 | ₹1,81,910.46 | 0.13% |

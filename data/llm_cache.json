@@ -5302,20 +5302,27 @@
     "isFallback": false
   },
   "6bc5a843c4fccee7a853625da1489885": {
-    "model": "recoup-nlu-keyword-classifier-v1",
+    "model": "minimax/minimax-m3:free",
     "parsed": {
-      "root_cause": "INVOICE_UNPAID",
-      "confidence_bps": 9400,
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9200,
       "evidence_spans": [
-        "Invoice overdue in 0_30 bucket with standard terms"
+        "collections weak hain",
+        "Do dates mein split kar sakte hain",
+        "Invoice inv_000162 (₹2,50,000.00) note kiya"
       ],
-      "recommended_playbook": "PROMISE_TO_PAY",
-      "rationale": "NLU classification identified INVOICE_UNPAID from AP correspondence context."
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The CFO of Cobalt Foods explicitly acknowledges the invoice liability (note kiya), attributes non-payment to weak collections this month (collections weak hain), and proactively proposes splitting the ₹2,50,000 payment across two installments (Do dates mein split kar sakte hain). This is a textbook liquidity-driven request for a payment schedule, not a dispute or missing document. The buyer has affirmed the debt and is seeking structured payment, making a Partial Payment playbook the optimal response: counter-propose installment terms, secure written commitment to dates and amounts, and monitor closely given SMB cash-flow volatility."
     },
-    "content": "{\"root_cause\":\"INVOICE_UNPAID\",\"confidence_bps\":9400,\"evidence_spans\":[\"Invoice overdue in 0_30 bucket with standard terms\"],\"recommended_playbook\":\"PROMISE_TO_PAY\",\"rationale\":\"NLU classification identified INVOICE_UNPAID from AP correspondence context.\"}",
-    "cachedAt": 1788285377147,
-    "inferredAt": "2026-09-01T17:56:05.771Z",
-    "isFallback": true
+    "content": "{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9200,\n  \"evidence_spans\": [\n    \"collections weak hain\",\n    \"Do dates mein split kar sakte hain\",\n    \"Invoice inv_000162 (₹2,50,000.00) note kiya\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The CFO of Cobalt Foods explicitly acknowledges the invoice liability (note kiya), attributes non-payment to weak collections this month (collections weak hain), and proactively proposes splitting the ₹2,50,000 payment across two installments (Do dates mein split kar sakte hain). This is a textbook liquidity-driven request for a payment schedule, not a dispute or missing document. The buyer has affirmed the debt and is seeking structured payment, making a Partial Payment playbook the optimal response: counter-propose installment terms, secure written commitment to dates and amounts, and monitor closely given SMB cash-flow volatility.\"\n}",
+    "cachedAt": 1788345408873,
+    "inferredAt": "2026-09-02T10:36:45.053Z",
+    "tokenUsage": {
+      "promptTokens": 605,
+      "completionTokens": 213,
+      "totalTokens": 818
+    },
+    "isFallback": false
   },
   "c14fdeda8b5801853c2b2a763969a081": {
     "model": "minimax/minimax-m3:free",

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Search, Filter, ArrowUpDown, ChevronRight, AlertCircle } from 'lucide-react';
-import { CaseSummary } from '../types';
+import { Search, Filter, ArrowUpDown, ChevronRight, AlertCircle, RotateCcw } from 'lucide-react';
+import { CaseSummary, SurfaceId } from '../types';
 import { formatInr } from '../utils/formatters';
 
 interface CaseExplorerProps {
@@ -10,11 +10,14 @@ interface CaseExplorerProps {
   loading: boolean;
   searchQuery: string;
   onSearchChange: (q: string) => void;
+  selectedSurface?: SurfaceId;
+  onSurfaceChange?: (s: SurfaceId) => void;
   selectedCohort: string;
   onCohortChange: (c: string) => void;
   selectedState: string;
   onStateChange: (s: string) => void;
   onSelectCase: (caseId: string) => void;
+  onResetFilters?: () => void;
 }
 
 export const CaseExplorer: React.FC<CaseExplorerProps> = ({
@@ -24,16 +27,19 @@ export const CaseExplorer: React.FC<CaseExplorerProps> = ({
   loading,
   searchQuery,
   onSearchChange,
+  selectedSurface = '',
+  onSurfaceChange,
   selectedCohort,
   onCohortChange,
   selectedState,
   onStateChange,
   onSelectCase,
+  onResetFilters,
 }) => {
-  const [sortField, setSortField] = useState<keyof CaseSummary>('exposurePaise');
+  const [sortField, setSortField] = useState<string>('exposurePaise');
   const [sortAsc, setSortAsc] = useState(false);
 
-  const handleSort = (field: keyof CaseSummary) => {
+  const handleSort = (field: string) => {
     if (sortField === field) {
       setSortAsc(!sortAsc);
     } else {
@@ -42,9 +48,17 @@ export const CaseExplorer: React.FC<CaseExplorerProps> = ({
     }
   };
 
-  const sortedCases = [...cases].sort((a, b) => {
-    const valA = a[sortField] ?? '';
-    const valB = b[sortField] ?? '';
+  const safeCases = Array.isArray(cases) ? cases : [];
+
+  const sortedCases = [...safeCases].sort((a: any, b: any) => {
+    let valA = a[sortField] ?? a[sortField === 'exposurePaise' ? 'exposure_paise' : sortField] ?? '';
+    let valB = b[sortField] ?? b[sortField === 'exposurePaise' ? 'exposure_paise' : sortField] ?? '';
+    
+    if (typeof valA === 'number' && typeof valB === 'number') {
+      return sortAsc ? valA - valB : valB - valA;
+    }
+    valA = String(valA).toLowerCase();
+    valB = String(valB).toLowerCase();
     if (valA < valB) return sortAsc ? -1 : 1;
     if (valA > valB) return sortAsc ? 1 : -1;
     return 0;
@@ -104,11 +118,13 @@ export const CaseExplorer: React.FC<CaseExplorerProps> = ({
       default:
         return (
           <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
-            {state}
+            {state || 'OPEN'}
           </span>
         );
     }
   };
+
+  const hasActiveFilters = searchQuery || selectedSurface || selectedCohort || selectedState;
 
   return (
     <div className="glass-card rounded-2xl p-5 border border-white/[0.08] mb-8">
@@ -121,16 +137,34 @@ export const CaseExplorer: React.FC<CaseExplorerProps> = ({
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Search risk ID, customer name, root cause, playbook..."
+            placeholder="Search risk ID (e.g. rsk_D_000977), customer, root cause, playbook..."
             className="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-900/80 border border-white/[0.1] text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
           />
         </div>
 
-        {/* Filters */}
-        <div className="flex flex-wrap items-center gap-2.5">
+        {/* Filter Dropdowns */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Surface Filter */}
+          {onSurfaceChange && (
+            <div className="flex items-center gap-1.5 text-xs text-slate-400">
+              <span className="text-[11px]">Surface:</span>
+              <select
+                value={selectedSurface}
+                onChange={(e) => onSurfaceChange(e.target.value as SurfaceId)}
+                className="bg-slate-900/80 border border-white/[0.1] text-xs text-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-indigo-500"
+              >
+                <option value="">All Surfaces</option>
+                <option value="A">Surface A (Subscriptions)</option>
+                <option value="B">Surface B (Checkout Drops)</option>
+                <option value="C">Surface C (Mandates)</option>
+                <option value="D">Surface D (B2B Invoices)</option>
+              </select>
+            </div>
+          )}
+
+          {/* Cohort Filter */}
           <div className="flex items-center gap-1.5 text-xs text-slate-400">
-            <Filter className="w-3.5 h-3.5 text-slate-500" />
-            <span>Cohort:</span>
+            <span className="text-[11px]">Cohort:</span>
             <select
               value={selectedCohort}
               onChange={(e) => onCohortChange(e.target.value)}
@@ -142,8 +176,9 @@ export const CaseExplorer: React.FC<CaseExplorerProps> = ({
             </select>
           </div>
 
+          {/* State Filter */}
           <div className="flex items-center gap-1.5 text-xs text-slate-400">
-            <span>State:</span>
+            <span className="text-[11px]">State:</span>
             <select
               value={selectedState}
               onChange={(e) => onStateChange(e.target.value)}
@@ -157,6 +192,18 @@ export const CaseExplorer: React.FC<CaseExplorerProps> = ({
               <option value="CLOSED_LOST">Closed Lost</option>
             </select>
           </div>
+
+          {/* Reset Filters */}
+          {hasActiveFilters && onResetFilters && (
+            <button
+              onClick={onResetFilters}
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-white/[0.05] hover:bg-white/[0.1] text-slate-300 transition-colors"
+              title="Reset all filters"
+            >
+              <RotateCcw className="w-3 h-3" />
+              <span>Reset</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -164,7 +211,7 @@ export const CaseExplorer: React.FC<CaseExplorerProps> = ({
       <div className="flex items-center justify-between pb-3 text-xs text-slate-400 border-b border-white/[0.06]">
         <div className="flex items-center gap-2">
           <span>
-            Showing <strong className="text-white font-mono">{showing.toLocaleString()}</strong> of <strong className="text-white font-mono">{total.toLocaleString()}</strong> cases
+            Showing <strong className="text-white font-mono">{showing || sortedCases.length}</strong> of <strong className="text-white font-mono">{total || sortedCases.length}</strong> cases
           </span>
           {total > 200 && !searchQuery && (
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30 text-[11px] font-medium">
@@ -181,7 +228,7 @@ export const CaseExplorer: React.FC<CaseExplorerProps> = ({
         <table className="w-full text-left text-xs">
           <thead>
             <tr className="border-b border-white/[0.08] text-slate-400 font-semibold uppercase text-[10px] tracking-wider select-none">
-              <th className="py-3 px-3 cursor-pointer hover:text-white" onClick={() => handleSort('riskItemId')}>
+              <th className="py-3 px-3 cursor-pointer hover:text-white" onClick={() => handleSort('id')}>
                 <div className="flex items-center gap-1">Risk Case ID <ArrowUpDown className="w-3 h-3" /></div>
               </th>
               <th className="py-3 px-3">Surface</th>
@@ -211,8 +258,18 @@ export const CaseExplorer: React.FC<CaseExplorerProps> = ({
               ))
             ) : sortedCases.length === 0 ? (
               <tr>
-                <td colSpan={9} className="py-12 text-center text-slate-500 text-xs">
-                  No cases found matching current filters.
+                <td colSpan={9} className="py-12 text-center text-slate-400 text-xs">
+                  <div className="space-y-2">
+                    <div>No cases found matching current filters.</div>
+                    {hasActiveFilters && onResetFilters && (
+                      <button
+                        onClick={onResetFilters}
+                        className="px-3 py-1.5 rounded-lg bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 text-xs font-semibold hover:bg-indigo-600/30"
+                      >
+                        Clear Active Filters
+                      </button>
+                    )}
+                  </div>
                 </td>
               </tr>
             ) : (

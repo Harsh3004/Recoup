@@ -3,9 +3,8 @@ import { MetricsGrid } from '../components/MetricsGrid';
 import { SurfaceSelector } from '../components/SurfaceSelector';
 import { IncidentTimeline } from '../components/IncidentTimeline';
 import { Counterfactuals } from '../components/Counterfactuals';
-import { CaseExplorer } from '../components/CaseExplorer';
-import { OverviewData, SurfaceId, CaseSummary } from '../types';
-import { Sparkles, ArrowRight, ShieldAlert, Cpu, FolderKanban } from 'lucide-react';
+import { OverviewData, SurfaceId } from '../types';
+import { ArrowRight } from 'lucide-react';
 import { RouteId } from '../components/Navigation';
 
 interface DashboardPageProps {
@@ -13,16 +12,6 @@ interface DashboardPageProps {
   loadingOverview: boolean;
   currentSurface: SurfaceId;
   onSelectSurface: (surface: SurfaceId) => void;
-  cases: CaseSummary[];
-  totalCases: number;
-  showingCases: number;
-  loadingCases: boolean;
-  searchQuery: string;
-  onSearchChange: (q: string) => void;
-  selectedCohort: string;
-  onCohortChange: (c: string) => void;
-  selectedState: string;
-  onStateChange: (s: string) => void;
   onSelectCase: (caseId: string) => void;
   onNavigate: (route: RouteId) => void;
 }
@@ -32,16 +21,6 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   loadingOverview,
   currentSurface,
   onSelectSurface,
-  cases,
-  totalCases,
-  showingCases,
-  loadingCases,
-  searchQuery,
-  onSearchChange,
-  selectedCohort,
-  onCohortChange,
-  selectedState,
-  onStateChange,
   onSelectCase,
   onNavigate,
 }) => {
@@ -63,40 +42,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         <Counterfactuals data={overviewData} />
       </div>
 
-      {/* 4. Interactive Case Explorer Data Table directly on Dashboard */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <FolderKanban className="w-5 h-5 text-indigo-400" />
-            <h3 className="text-base font-bold text-white tracking-tight">
-              Interactive Case Explorer &amp; Forensic Queue
-            </h3>
-          </div>
-          <button
-            onClick={() => onNavigate('cases')}
-            className="inline-flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300 font-semibold"
-          >
-            <span>Open Dedicated Triage View</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        <CaseExplorer
-          cases={cases}
-          total={totalCases}
-          showing={showingCases}
-          loading={loadingCases}
-          searchQuery={searchQuery}
-          onSearchChange={onSearchChange}
-          selectedCohort={selectedCohort}
-          onCohortChange={onCohortChange}
-          selectedState={selectedState}
-          onStateChange={onStateChange}
-          onSelectCase={onSelectCase}
-        />
-      </div>
-
-      {/* 5. Quick Domain Action Cards */}
+      {/* 4. Quick Domain Action Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
         {/* Case Explorer Quick Link */}
         <div

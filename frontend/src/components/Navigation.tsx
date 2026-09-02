@@ -1,11 +1,11 @@
 import React from 'react';
-import { 
-  LayoutDashboard, 
-  FolderKanban, 
-  BrainCircuit, 
-  ShieldAlert, 
-  Blocks, 
-  FlaskConical, 
+import {
+  LayoutDashboard,
+  FolderKanban,
+  BrainCircuit,
+  ShieldAlert,
+  Blocks,
+  FlaskConical,
   CreditCard,
   Cpu,
   CheckCircle2,
@@ -60,7 +60,7 @@ export const Navigation: React.FC<NavigationProps> = ({
               </span>
             </div>
             <p className="text-[11px] text-slate-400 font-medium">
-              Razorpay AI Buildathon · Track 03: AI Revenue Recovery Platform
+              AI Revenue Recovery Platform
             </p>
           </div>
         </div>
@@ -119,11 +119,10 @@ export const Navigation: React.FC<NavigationProps> = ({
             <button
               key={item.id}
               onClick={() => onRouteChange(item.id)}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 ${
-                isActive
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 ${isActive
                   ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 ring-1 ring-indigo-400/40'
                   : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'
-              }`}
+                }`}
             >
               {item.icon}
               <span>{item.label}</span>

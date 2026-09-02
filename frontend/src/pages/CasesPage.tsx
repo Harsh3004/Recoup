@@ -1,6 +1,7 @@
 import React from 'react';
 import { CaseExplorer } from '../components/CaseExplorer';
-import { CaseSummary } from '../types';
+import { CaseSummary, SurfaceId } from '../types';
+import { FolderKanban } from 'lucide-react';
 
 interface CasesPageProps {
   cases: CaseSummary[];
@@ -9,11 +10,14 @@ interface CasesPageProps {
   loading: boolean;
   searchQuery: string;
   onSearchChange: (q: string) => void;
+  selectedSurface: SurfaceId;
+  onSurfaceChange: (s: SurfaceId) => void;
   selectedCohort: string;
   onCohortChange: (c: string) => void;
   selectedState: string;
   onStateChange: (s: string) => void;
   onSelectCase: (caseId: string) => void;
+  onResetFilters: () => void;
 }
 
 export const CasesPage: React.FC<CasesPageProps> = ({
@@ -23,19 +27,26 @@ export const CasesPage: React.FC<CasesPageProps> = ({
   loading,
   searchQuery,
   onSearchChange,
+  selectedSurface,
+  onSurfaceChange,
   selectedCohort,
   onCohortChange,
   selectedState,
+  onStateChange,
   onSelectCase,
+  onResetFilters,
 }) => {
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-white/[0.08]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/[0.08]">
         <div>
-          <h2 className="text-xl font-black text-white tracking-tight">Case Explorer &amp; Forensic Triage</h2>
-          <p className="text-xs text-slate-400">
-            Real-time portfolio management across 1,314 risk-bearing customer payment failures
+          <div className="flex items-center gap-2">
+            <FolderKanban className="w-5 h-5 text-indigo-400" />
+            <h2 className="text-xl font-black text-white tracking-tight">Case Explorer &amp; Operations Triage</h2>
+          </div>
+          <p className="text-xs text-slate-400 mt-0.5">
+            Dedicated portfolio queue across 1,314 risk-bearing failed payment cases with deep forensic inspection.
           </p>
         </div>
       </div>
@@ -48,11 +59,14 @@ export const CasesPage: React.FC<CasesPageProps> = ({
         loading={loading}
         searchQuery={searchQuery}
         onSearchChange={onSearchChange}
+        selectedSurface={selectedSurface}
+        onSurfaceChange={onSurfaceChange}
         selectedCohort={selectedCohort}
         onCohortChange={onCohortChange}
         selectedState={selectedState}
         onStateChange={onStateChange}
         onSelectCase={onSelectCase}
+        onResetFilters={onResetFilters}
       />
     </div>
   );

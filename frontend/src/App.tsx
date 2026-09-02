@@ -67,6 +67,13 @@ export const App: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleResetFilters = () => {
+    setCurrentSurface('');
+    setSearchQuery('');
+    setSelectedCohort('');
+    setSelectedState('');
+  };
+
   // Toast Helper
   const showToast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'info') => {
     const id = Math.random().toString(36).substring(2, 9);
@@ -181,16 +188,6 @@ export const App: React.FC = () => {
             loadingOverview={loadingOverview}
             currentSurface={currentSurface}
             onSelectSurface={setCurrentSurface}
-            cases={casesResponse.cases}
-            totalCases={casesResponse.total}
-            showingCases={casesResponse.showing}
-            loadingCases={loadingCases}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            selectedCohort={selectedCohort}
-            onCohortChange={setSelectedCohort}
-            selectedState={selectedState}
-            onStateChange={setSelectedState}
             onSelectCase={handleSelectCase}
             onNavigate={navigateTo}
           />
@@ -204,11 +201,14 @@ export const App: React.FC = () => {
             loading={loadingCases}
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
+            selectedSurface={currentSurface}
+            onSurfaceChange={setCurrentSurface}
             selectedCohort={selectedCohort}
             onCohortChange={setSelectedCohort}
             selectedState={selectedState}
             onStateChange={setSelectedState}
             onSelectCase={handleSelectCase}
+            onResetFilters={handleResetFilters}
           />
         )}
 

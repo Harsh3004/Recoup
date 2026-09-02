@@ -181,6 +181,16 @@ export const App: React.FC = () => {
             loadingOverview={loadingOverview}
             currentSurface={currentSurface}
             onSelectSurface={setCurrentSurface}
+            cases={casesResponse.cases}
+            totalCases={casesResponse.total}
+            showingCases={casesResponse.showing}
+            loadingCases={loadingCases}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            selectedCohort={selectedCohort}
+            onCohortChange={setSelectedCohort}
+            selectedState={selectedState}
+            onStateChange={setSelectedState}
             onSelectCase={handleSelectCase}
             onNavigate={navigateTo}
           />

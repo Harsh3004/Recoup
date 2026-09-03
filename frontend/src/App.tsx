@@ -15,14 +15,11 @@ import { ToastContainer } from './components/ToastContainer';
 import { SurfaceId, OverviewData, CasesResponse, CaseDetail, ToastItem } from './types';
 
 export const App: React.FC = () => {
-  // Routing State
+  // 1. Core State
   const [currentRoute, setCurrentRoute] = useState<RouteId>('dashboard');
-
-  // Global Telemetry State
   const [overviewData, setOverviewData] = useState<OverviewData | null>(null);
   const [loadingOverview, setLoadingOverview] = useState<boolean>(true);
   
-  // Cases State
   const [casesResponse, setCasesResponse] = useState<CasesResponse>({ cases: [], total: 0, showing: 0 });
   const [loadingCases, setLoadingCases] = useState<boolean>(true);
   const [currentSurface, setCurrentSurface] = useState<SurfaceId>('');
@@ -30,12 +27,10 @@ export const App: React.FC = () => {
   const [selectedCohort, setSelectedCohort] = useState<string>('');
   const [selectedState, setSelectedState] = useState<string>('');
   
-  // Case Drilldown Drawer State
   const [activeCaseDetail, setActiveCaseDetail] = useState<CaseDetail | null>(null);
   const [loadingCaseDetail, setLoadingCaseDetail] = useState<boolean>(false);
   const [isCaseDrawerOpen, setIsCaseDrawerOpen] = useState<boolean>(false);
   
-  // Modals State
   const [isAiSettingsOpen, setIsAiSettingsOpen] = useState<boolean>(false);
   const [isVerifyModalOpen, setIsVerifyModalOpen] = useState<boolean>(false);
   const [isTamperModalOpen, setIsTamperModalOpen] = useState<boolean>(false);
@@ -43,55 +38,7 @@ export const App: React.FC = () => {
   const [activeModelName, setActiveModelName] = useState<string>('minimax/minimax-m3:free');
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
-  // Sync URL hash with route & payment-callback params
-  useEffect(() => {
-    const handleHashChange = () => {
-      const fullHash = window.location.hash.replace('#/', '').replace('#', '');
-      const [routePart, queryPart] = fullHash.split('?');
-      const route = routePart as RouteId;
-      const validRoutes: RouteId[] = [
-        'dashboard', 'cases', 'ai-studio', 'compliance', 
-        'audit-ledger', 'ablation-lab', 'razorpay-rail'
-      ];
-      if (validRoutes.includes(route)) {
-        setCurrentRoute(route);
-      }
-
-      // Detect post-checkout return: e.g. #/cases?openCase=rsk_...&recovered=1
-      if (queryPart) {
-        const params = new URLSearchParams(queryPart);
-        const openCaseId = params.get('openCase');
-        const isRecovered = params.get('recovered');
-        if (openCaseId) {
-          handleSelectCase(openCaseId);
-          if (isRecovered === '1') {
-            showToast(`🎉 Razorpay Test Payment Completed! Case ${openCaseId} marked RECOVERED in ledger.`, 'success');
-            fetchOverview();
-            fetchCases();
-          }
-        }
-      }
-    };
-
-    handleHashChange();
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, [fetchOverview, fetchCases, showToast]);
-
-  const navigateTo = (route: RouteId) => {
-    setCurrentRoute(route);
-    window.location.hash = `#/${route}`;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleResetFilters = () => {
-    setCurrentSurface('');
-    setSearchQuery('');
-    setSelectedCohort('');
-    setSelectedState('');
-  };
-
-  // Toast Helper
+  // 2. Callbacks (Declared before use)
   const showToast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'info') => {
     const id = Math.random().toString(36).substring(2, 9);
     setToasts((prev) => [...prev, { id, message, type }]);
@@ -104,7 +51,6 @@ export const App: React.FC = () => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
-  // Fetch Overview Metrics
   const fetchOverview = useCallback(async () => {
     setLoadingOverview(true);
     try {
@@ -119,7 +65,6 @@ export const App: React.FC = () => {
     }
   }, [showToast]);
 
-  // Fetch Cases with Reactive Filters
   const fetchCases = useCallback(async () => {
     setLoadingCases(true);
     try {
@@ -140,6 +85,75 @@ export const App: React.FC = () => {
     }
   }, [currentSurface, selectedCohort, selectedState, searchQuery, showToast]);
 
+  const handleSelectCase = useCallback(async (caseId: string) => {
+    setIsCaseDrawerOpen(true);
+    setLoadingCaseDetail(true);
+    try {
+      const res = await fetch(`/api/case/${caseId}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setActiveCaseDetail(data);
+    } catch (err: any) {
+      showToast(`Failed to load case ${caseId}: ${err.message}`, 'error');
+    } finally {
+      setLoadingCaseDetail(false);
+    }
+  }, [showToast]);
+
+  const handleCaseUpdated = useCallback((caseId: string) => {
+    handleSelectCase(caseId);
+    fetchOverview();
+    fetchCases();
+  }, [handleSelectCase, fetchOverview, fetchCases]);
+
+  const navigateTo = (route: RouteId) => {
+    setCurrentRoute(route);
+    window.location.hash = `#/${route}`;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleResetFilters = () => {
+    setCurrentSurface('');
+    setSearchQuery('');
+    setSelectedCohort('');
+    setSelectedState('');
+  };
+
+  // 3. Effects (Declared AFTER all callbacks)
+  useEffect(() => {
+    const handleHashChange = () => {
+      const fullHash = window.location.hash.replace('#/', '').replace('#', '');
+      const [routePart, queryPart] = fullHash.split('?');
+      const route = routePart as RouteId;
+      const validRoutes: RouteId[] = [
+        'dashboard', 'cases', 'ai-studio', 'compliance', 
+        'audit-ledger', 'ablation-lab', 'razorpay-rail'
+      ];
+      if (validRoutes.includes(route)) {
+        setCurrentRoute(route);
+      }
+
+      // Check for return from payment checkout: ?openCase=rsk_...&recovered=1
+      if (queryPart) {
+        const params = new URLSearchParams(queryPart);
+        const openCaseId = params.get('openCase');
+        const isRecovered = params.get('recovered');
+        if (openCaseId) {
+          handleSelectCase(openCaseId);
+          if (isRecovered === '1') {
+            showToast(`🎉 Razorpay Test Payment Completed! Case ${openCaseId} marked RECOVERED in ledger.`, 'success');
+            fetchOverview();
+            fetchCases();
+          }
+        }
+      }
+    };
+
+    handleHashChange();
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [fetchOverview, fetchCases, handleSelectCase, showToast]);
+
   // Initial Boot
   useEffect(() => {
     fetchOverview();
@@ -158,28 +172,6 @@ export const App: React.FC = () => {
     }, 150);
     return () => clearTimeout(timer);
   }, [fetchCases]);
-
-  // Open Case Drilldown Drawer
-  const handleSelectCase = async (caseId: string) => {
-    setIsCaseDrawerOpen(true);
-    setLoadingCaseDetail(true);
-    try {
-      const res = await fetch(`/api/case/${caseId}`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      setActiveCaseDetail(data);
-    } catch (err: any) {
-      showToast(`Failed to load case ${caseId}: ${err.message}`, 'error');
-    } finally {
-      setLoadingCaseDetail(false);
-    }
-  };
-
-  const handleCaseUpdated = (caseId: string) => {
-    handleSelectCase(caseId);
-    fetchOverview();
-    fetchCases();
-  };
 
   return (
     <div className="min-h-screen text-slate-100 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
@@ -303,7 +295,7 @@ export const App: React.FC = () => {
 
       {/* Footer */}
       <footer className="mt-12 pt-6 pb-8 border-t border-white/[0.06] text-center text-xs text-slate-500">
-        Recoup Autonomous Recovery Engine ·  AI Revenue Recovery
+        Recoup Autonomous Recovery Engine · AI Revenue Recovery
       </footer>
     </div>
   );

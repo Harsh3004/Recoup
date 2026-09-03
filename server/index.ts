@@ -399,10 +399,17 @@ const server = Bun.serve({
           const plink = event.payload?.payment_link?.entity;
           const payment = event.payload?.payment?.entity;
 
-          const riskItemId =
-            plink?.reference_id ||
+          const rawId =
+            plink?.notes?.risk_item_id ||
             payment?.notes?.risk_item_id ||
+            plink?.reference_id ||
             payment?.notes?.reference_id;
+
+          // Strip unique timestamp suffix if reference_id like rsk_D_000977_1725352819 was matched
+          let riskItemId = rawId;
+          if (rawId && typeof rawId === "string" && /^rsk_[A-D]_\d+_\d+$/.test(rawId)) {
+            riskItemId = rawId.substring(0, rawId.lastIndexOf("_"));
+          }
 
           const amountPaise =
             plink?.amount_paid ||

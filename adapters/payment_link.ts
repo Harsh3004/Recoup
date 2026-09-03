@@ -79,6 +79,25 @@ export async function createRazorpayPaymentLink(
   const keyId = process.env.RAZORPAY_KEY_ID;
   const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
+  // 1. Check if an active live Razorpay link was already generated for this case in the database
+  if (options.db) {
+    try {
+      const existing = options.db
+        .query(
+          `SELECT id, short_url, is_live, status FROM payment_links WHERE risk_item_id = ? AND is_live = 1 ORDER BY created_at DESC LIMIT 1`
+        )
+        .get(options.riskItemId) as any;
+      if (existing && existing.short_url && !existing.short_url.includes('/i/rec_')) {
+        return {
+          id: existing.id,
+          shortUrl: existing.short_url,
+          isLive: true,
+          status: existing.status || "created",
+        };
+      }
+    } catch {}
+  }
+
   if (!keyId || !keySecret) {
     const mockUrl = generateMockPaymentLink(options.riskItemId, options.amountPaise);
     return {
@@ -92,9 +111,10 @@ export async function createRazorpayPaymentLink(
   const authHeader = `Basic ${Buffer.from(`${keyId}:${keySecret}`).toString("base64")}`;
 
   try {
+    // Razorpay requires reference_id to be globally unique. Suffix timestamp to prevent 400 rejection on re-generation.
+    const uniqueRef = `${options.riskItemId}_${Date.now()}`;
     const payload = {
-      // Razorpay test-mode API caps payment links to 5,000,000 paise (₹50,000.00 max).
-      // Clamping to ₹50k ensures large B2B enterprise invoices generate a valid live test link without 400 rejection.
+      // Razorpay test-mode API caps payment links to 5,00,0000 paise (₹50,000.00 max).
       amount: Math.min(5000000, Math.max(100, Math.round(options.amountPaise))),
       currency: "INR",
       accept_partial: false,
@@ -109,7 +129,10 @@ export async function createRazorpayPaymentLink(
         email: false,
       },
       reminder_enable: false,
-      reference_id: options.riskItemId,
+      notes: {
+        risk_item_id: options.riskItemId,
+      },
+      reference_id: uniqueRef,
     };
 
     const res = await fetch("https://api.razorpay.com/v1/payment_links", {

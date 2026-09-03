@@ -93,8 +93,9 @@ export async function createRazorpayPaymentLink(
 
   try {
     const payload = {
-      // Razorpay standard payment links require min 100 paise (₹1) and max 50,000,000 paise (₹5,00,000)
-      amount: Math.min(50000000, Math.max(100, Math.round(options.amountPaise))),
+      // Razorpay test-mode API caps payment links to 5,000,000 paise (₹50,000.00 max).
+      // Clamping to ₹50k ensures large B2B enterprise invoices generate a valid live test link without 400 rejection.
+      amount: Math.min(5000000, Math.max(100, Math.round(options.amountPaise))),
       currency: "INR",
       accept_partial: false,
       description: options.description ?? `Recoup Payment Recovery: ${options.riskItemId}`,

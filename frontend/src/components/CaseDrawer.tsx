@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, ExternalLink, ShieldCheck, Zap, Copy, Check, Terminal, Cpu, FileCheck } from 'lucide-react';
+import { X, ExternalLink, ShieldCheck, Zap, Copy, Check, Terminal, Cpu, FileCheck, RefreshCw } from 'lucide-react';
 import { CaseDetail } from '../types';
 import { formatInr, formatDateTime } from '../utils/formatters';
 
@@ -12,7 +12,7 @@ interface CaseDrawerProps {
   onCaseUpdated: (caseId: string) => void;
 }
 
-type TabType = 'overview' | 'diagnosis' | 'policy' | 'gate' | 'comms' | 'audit';
+type TabType = 'overview' | 'payments' | 'diagnosis' | 'policy' | 'gate' | 'comms' | 'audit';
 
 export const CaseDrawer: React.FC<CaseDrawerProps> = ({
   caseData,
@@ -31,6 +31,10 @@ export const CaseDrawer: React.FC<CaseDrawerProps> = ({
     shortUrl: string;
     paymentLinkId: string;
     isMock: boolean;
+    amountPaise?: number;
+    totalExposurePaise?: number;
+    remainingPaise?: number;
+    isStaggered?: boolean;
   } | null>(null);
   const [isSimulatingWebhook, setIsSimulatingWebhook] = useState(false);
 
@@ -39,15 +43,15 @@ export const CaseDrawer: React.FC<CaseDrawerProps> = ({
   const copyToClipboard = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
     setCopiedHash(id);
-    showToast('Hash copied to clipboard', 'info');
+    showToast('Copied to clipboard', 'info');
     setTimeout(() => setCopiedHash(null), 2000);
   };
 
-  const handleGeneratePaymentLink = async () => {
+  const handleGeneratePaymentLink = async (forceNew = false) => {
     if (!caseData) return;
     setIsGeneratingLink(true);
     try {
-      const res = await fetch(`/api/case/${caseData.riskItemId}/payment-link`, { method: 'POST' });
+      const res = await fetch(`/api/case/${caseData.riskItemId}/payment-link${forceNew ? '?forceNew=1' : ''}`, { method: 'POST' });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to create payment link');
       
@@ -55,10 +59,16 @@ export const CaseDrawer: React.FC<CaseDrawerProps> = ({
         shortUrl: data.shortUrl,
         paymentLinkId: data.paymentLinkId,
         isMock: data.isMock,
+        amountPaise: data.amountPaise,
+        totalExposurePaise: data.totalExposurePaise,
+        remainingPaise: data.remainingPaise,
+        isStaggered: data.isStaggered,
       });
       showToast(
         data.isMock
           ? 'Generated deterministic mock payment link'
+          : forceNew
+          ? '⚡ Fresh Razorpay Test Payment Link generated!'
           : '⚡ Real Razorpay Test Payment Link generated!',
         'success'
       );
@@ -86,8 +96,11 @@ export const CaseDrawer: React.FC<CaseDrawerProps> = ({
     }
   };
 
+  const paymentsCount = caseData?.recoveries?.length ?? (caseData?.recoveredPaise ? 1 : 0);
+
   const tabs: Array<{ id: TabType; label: string; count?: number }> = [
     { id: 'overview', label: 'Case Overview' },
+    { id: 'payments', label: 'Payment History', count: paymentsCount },
     { id: 'diagnosis', label: 'Diagnosis & LLM' },
     { id: 'policy', label: 'Playbook & EV' },
     { id: 'gate', label: 'Gate Rails', count: caseData?.gateDecisions?.length },
@@ -192,9 +205,10 @@ export const CaseDrawer: React.FC<CaseDrawerProps> = ({
                           <span>{isGeneratingLink ? 'Minting Link…' : '⚡ Generate Razorpay Link'}</span>
                         </button>
                       ) : (
-                        <div className="w-full space-y-2">
+                        <div className="w-full space-y-2.5">
+                          {/* Payment Link URL Bar */}
                           <div className="flex items-center justify-between p-2.5 rounded-lg bg-slate-900/90 border border-sky-500/40">
-                            <span className="font-mono text-xs text-sky-300 truncate max-w-[340px]">
+                            <span className="font-mono text-xs text-sky-300 truncate max-w-[320px]">
                               {generatedLink.shortUrl}
                             </span>
                             <div className="flex items-center gap-1.5">
@@ -202,13 +216,65 @@ export const CaseDrawer: React.FC<CaseDrawerProps> = ({
                                 href={generatedLink.shortUrl}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-sky-500 text-slate-950 font-bold text-xs hover:bg-sky-400"
+                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-sky-500 text-slate-950 font-bold text-xs hover:bg-sky-400 shadow"
                               >
                                 <span>Pay Test</span>
                                 <ExternalLink className="w-3 h-3" />
                               </a>
+                              <button
+                                onClick={() => handleGeneratePaymentLink(true)}
+                                disabled={isGeneratingLink}
+                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-white/[0.08] text-slate-200 hover:text-white font-bold text-xs hover:bg-white/[0.15] border border-white/[0.1]"
+                                title="Mint a fresh active link to make another payment"
+                              >
+                                <RefreshCw className={`w-3 h-3 ${isGeneratingLink ? 'animate-spin' : ''}`} />
+                                <span>Pay Again</span>
+                              </button>
                             </div>
                           </div>
+
+                          {/* Staggered Tranche & Remaining Balance Breakdown */}
+                          {(generatedLink.isStaggered || ((caseData.exposurePaise ?? (caseData as any)?.exposure_paise ?? 0) > 5000000)) && (
+                            <div className="p-3 rounded-xl bg-slate-950/80 border border-amber-500/30 space-y-2">
+                              <div className="flex items-center justify-between">
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-300 px-1.5 py-0.5 rounded bg-amber-500/15">
+                                  ⚡ Staggered Payment Plan (Tranche 1)
+                                </span>
+                                <span className="text-[10px] text-slate-400 font-mono">
+                                  Razorpay Test Cap: ₹50,000 / link
+                                </span>
+                              </div>
+
+                              <div className="grid grid-cols-3 gap-2 text-center text-xs font-mono pt-1">
+                                <div className="p-2 rounded bg-white/[0.03] border border-white/[0.05]">
+                                  <span className="text-[10px] text-slate-400 block">Tranche 1 Link</span>
+                                  <strong className="text-sky-300 font-bold">
+                                    {formatInr(generatedLink.amountPaise ?? 5000000, true)}
+                                  </strong>
+                                </div>
+                                <div className="p-2 rounded bg-white/[0.03] border border-white/[0.05]">
+                                  <span className="text-[10px] text-slate-400 block">Remaining Due</span>
+                                  <strong className="text-amber-400 font-bold">
+                                    {formatInr(
+                                      generatedLink.remainingPaise ??
+                                        Math.max(0, (caseData.exposurePaise ?? (caseData as any)?.exposure_paise ?? 0) - 5000000),
+                                      true
+                                    )}
+                                  </strong>
+                                </div>
+                                <div className="p-2 rounded bg-white/[0.03] border border-white/[0.05]">
+                                  <span className="text-[10px] text-slate-400 block">Total Exposure</span>
+                                  <strong className="text-white font-bold">
+                                    {formatInr(generatedLink.totalExposurePaise ?? (caseData.exposurePaise ?? (caseData as any)?.exposure_paise), true)}
+                                  </strong>
+                                </div>
+                              </div>
+
+                              <p className="text-[10px] text-slate-400 leading-relaxed font-sans">
+                                Due to Razorpay test-mode transaction limits, this link collects Tranche 1. The remaining balance will be scheduled in subsequent dunning stages.
+                              </p>
+                            </div>
+                          )}
                         </div>
                       )}
 
@@ -228,21 +294,176 @@ export const CaseDrawer: React.FC<CaseDrawerProps> = ({
                   {/* Core Metrics Grid */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <div className="glass-card p-3 rounded-xl">
-                      <div className="text-[10px] text-slate-400 uppercase font-semibold">Exposure</div>
-                      <div className="text-base font-mono font-bold text-white mt-1">{formatInr(caseData.exposurePaise ?? (caseData as any)?.exposure_paise, true)}</div>
+                      <div className="text-[10px] text-slate-400 uppercase font-semibold">Remaining Due</div>
+                      <div className="text-base font-mono font-bold text-white mt-1">
+                        {formatInr(caseData.exposurePaise ?? (caseData as any)?.exposure_paise, true)}
+                      </div>
+                    </div>
+                    <div className="glass-card p-3 rounded-xl">
+                      <div className="text-[10px] text-slate-400 uppercase font-semibold">Total Recovered</div>
+                      <div className="text-base font-mono font-bold text-emerald-400 mt-1">
+                        {formatInr(caseData.totalRecoveredPaise ?? (caseData as any)?.recoveredPaise ?? 0, true)}
+                      </div>
                     </div>
                     <div className="glass-card p-3 rounded-xl">
                       <div className="text-[10px] text-slate-400 uppercase font-semibold">Risk Score</div>
-                      <div className="text-base font-mono font-bold text-amber-400 mt-1">{caseData.riskScore?.toLocaleString() || (caseData as any)?.risk_score?.toLocaleString() || '—'}</div>
+                      <div className="text-base font-mono font-bold text-amber-400 mt-1">
+                        {caseData.riskScore?.toLocaleString() || (caseData as any)?.risk_score?.toLocaleString() || '—'}
+                      </div>
                     </div>
                     <div className="glass-card p-3 rounded-xl">
-                      <div className="text-[10px] text-slate-400 uppercase font-semibold">Loss Prob (P_loss)</div>
-                      <div className="text-base font-mono font-bold text-rose-400 mt-1">{(((caseData.pLossBps ?? (caseData as any)?.p_loss_bps) || 0) / 100).toFixed(1)}%</div>
+                      <div className="text-[10px] text-slate-400 uppercase font-semibold">Case State</div>
+                      <div className="mt-1">
+                        {(caseData.currentState === 'RECOVERED' || caseData.state === 'RECOVERED') ? (
+                          <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                            FULLY RECOVERED
+                          </span>
+                        ) : (caseData.currentState === 'PARTIALLY_RECOVERED' || caseData.state === 'PARTIALLY_RECOVERED') ? (
+                          <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                            PARTIALLY RECOVERED
+                          </span>
+                        ) : (
+                          <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300">
+                            {caseData.currentState || caseData.state}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <div className="glass-card p-3 rounded-xl">
-                      <div className="text-[10px] text-slate-400 uppercase font-semibold">Status</div>
-                      <div className="text-xs font-bold text-emerald-400 mt-1.5">{caseData.currentState || caseData.state}</div>
+                  </div>
+
+                  {/* Payment History / Tranche Settlement History Card */}
+                  <div className="glass-card rounded-2xl p-5 border border-emerald-500/20 bg-slate-950/40 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+                        <FileCheck className="w-3.5 h-3.5" />
+                        <span>Settled Payments & Tranches ({caseData.recoveries?.length ?? (caseData.recoveredPaise ? 1 : 0)})</span>
+                      </h4>
+                      <span className="text-xs font-mono font-bold text-emerald-400">
+                        Total Collected: {formatInr(caseData.totalRecoveredPaise ?? (caseData as any)?.recoveredPaise ?? 0, true)}
+                      </span>
                     </div>
+
+                    {caseData.recoveries && caseData.recoveries.length > 0 ? (
+                      <div className="space-y-2">
+                        {caseData.recoveries.map((rec, idx) => (
+                          <div key={rec.id || idx} className="p-3 rounded-xl bg-slate-900/90 border border-white/[0.06] flex items-center justify-between">
+                            <div className="space-y-0.5">
+                              <div className="flex items-center gap-2">
+                                <span className="font-mono text-xs font-bold text-emerald-300">
+                                  + {formatInr(rec.amountPaise, true)}
+                                </span>
+                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300 font-mono">
+                                  {rec.channel || 'PAYMENT_LINK'}
+                                </span>
+                                {rec.resolvedVia && (
+                                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono">
+                                    {rec.resolvedVia === 'razorpay_live_webhook' ? 'Razorpay Live' : rec.resolvedVia}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-[11px] text-slate-400 font-mono flex items-center gap-2">
+                                <span>Ref: {rec.paymentRef || rec.id}</span>
+                                <span>·</span>
+                                <span>{rec.recoveredAt ? formatDateTime(rec.recoveredAt) : 'Recent'}</span>
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => copyToClipboard(rec.paymentRef || rec.id, `rec_${idx}`)}
+                              className="p-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.1] text-slate-400 hover:text-white transition-colors"
+                              title="Copy Payment Reference"
+                            >
+                              {copiedHash === `rec_${idx}` ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="p-4 rounded-xl bg-slate-900/40 border border-dashed border-white/[0.08] text-center text-xs text-slate-500">
+                        No payment tranches settled yet for this case.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* TAB: PAYMENT HISTORY (DEDICATED STATEMENT VIEW) */}
+              {activeTab === 'payments' && (
+                <div className="space-y-4">
+                  {/* Financial Summary KPIs */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="glass-card p-4 rounded-xl border border-emerald-500/30">
+                      <div className="text-xs text-slate-400 uppercase font-semibold">Total Collected So Far</div>
+                      <div className="text-xl font-mono font-bold text-emerald-400 mt-1">
+                        {formatInr(caseData.totalRecoveredPaise ?? (caseData as any)?.recoveredPaise ?? 0, true)}
+                      </div>
+                    </div>
+                    <div className="glass-card p-4 rounded-xl border border-white/[0.08]">
+                      <div className="text-xs text-slate-400 uppercase font-semibold">Remaining Exposure Balance</div>
+                      <div className="text-xl font-mono font-bold text-white mt-1">
+                        {formatInr(caseData.exposurePaise ?? (caseData as any)?.exposure_paise, true)}
+                      </div>
+                    </div>
+                    <div className="glass-card p-4 rounded-xl border border-sky-500/30">
+                      <div className="text-xs text-slate-400 uppercase font-semibold">Tranches Settled</div>
+                      <div className="text-xl font-mono font-bold text-sky-400 mt-1">
+                        {caseData.recoveries?.length ?? (caseData.recoveredPaise ? 1 : 0)}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Itemized Transactions Table */}
+                  <div className="glass-card rounded-2xl p-5 border border-white/[0.08] space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">
+                        Itemized Payment Tranches Ledger
+                      </h4>
+                      <span className="text-[10px] text-slate-400 font-mono">
+                        Chained into SQLite & SHA-256 Ledger
+                      </span>
+                    </div>
+
+                    {caseData.recoveries && caseData.recoveries.length > 0 ? (
+                      <div className="divide-y divide-white/[0.06] overflow-x-auto">
+                        <table className="w-full text-left text-xs font-mono">
+                          <thead>
+                            <tr className="text-slate-400 border-b border-white/[0.08]">
+                              <th className="pb-2">Date / Time</th>
+                              <th className="pb-2">Payment Ref (UTR)</th>
+                              <th className="pb-2">Channel</th>
+                              <th className="pb-2 text-right">Amount Paid</th>
+                              <th className="pb-2 text-right">Status</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-white/[0.04]">
+                            {caseData.recoveries.map((r, i) => (
+                              <tr key={r.id || i} className="hover:bg-white/[0.02]">
+                                <td className="py-2.5 text-slate-300">
+                                  {r.recoveredAt ? formatDateTime(r.recoveredAt) : 'Recent'}
+                                </td>
+                                <td className="py-2.5 text-sky-300 font-bold">
+                                  {r.paymentRef || r.id}
+                                </td>
+                                <td className="py-2.5 text-slate-400">
+                                  {r.channel || 'PAYMENT_LINK'}
+                                </td>
+                                <td className="py-2.5 text-right font-bold text-emerald-400">
+                                  +{formatInr(r.amountPaise, true)}
+                                </td>
+                                <td className="py-2.5 text-right">
+                                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300">
+                                    Settled
+                                  </span>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : (
+                      <div className="p-8 text-center text-slate-500 text-xs">
+                        No payments recorded yet for this invoice.
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

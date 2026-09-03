@@ -103,66 +103,67 @@ const server = Bun.serve({
       const cohort = url.searchParams.get("cohort");
       const state = url.searchParams.get("state");
       const query = url.searchParams.get("q")?.toLowerCase();
+      const page = Math.max(1, parseInt(url.searchParams.get("page") || "1", 10));
+      const limit = Math.max(1, Math.min(500, parseInt(url.searchParams.get("limit") || "50", 10)));
+      const offset = (page - 1) * limit;
 
-      let sql = `
+      let whereClause = " WHERE 1=1";
+      const filterParams: any[] = [];
+
+      if (surface) {
+        whereClause += ` AND r.surface = ?`;
+        filterParams.push(surface);
+      }
+      if (cohort) {
+        whereClause += ` AND r.cohort = ?`;
+        filterParams.push(cohort);
+      }
+      if (state) {
+        whereClause += ` AND r.state = ?`;
+        filterParams.push(state);
+      }
+      if (query) {
+        whereClause += ` AND (
+          LOWER(r.id) LIKE ? OR
+          LOWER(c.name) LIKE ? OR
+          LOWER(r.customer_id) LIKE ? OR
+          LOWER(COALESCE(d.root_cause, '')) LIKE ? OR
+          LOWER(COALESCE(p.playbook, '')) LIKE ?
+        )`;
+        const qPattern = `%${query}%`;
+        filterParams.push(qPattern, qPattern, qPattern, qPattern, qPattern);
+      }
+
+      // Total count with all active filters
+      const countSql = `
+        SELECT COUNT(DISTINCT r.id) AS cnt
+        FROM risk_items r
+        JOIN customers c ON c.id = r.customer_id
+        LEFT JOIN diagnoses d ON d.risk_item_id = r.id
+        LEFT JOIN intervention_plans p ON p.risk_item_id = r.id
+        ${whereClause}
+      `;
+      const totalRow = db.query(countSql).get(...filterParams) as any;
+      const totalCount = totalRow?.cnt ?? 0;
+      const totalPages = Math.max(1, Math.ceil(totalCount / limit));
+
+      const sql = `
         SELECT r.id, r.surface, r.customer_id, r.exposure_paise, r.state, r.cohort,
                r.incident_id, r.resolved_via, r.payment_link_url,
                c.name AS customer_name, c.segment, c.language,
                d.root_cause, d.confidence_bps, d.is_systemic,
                p.playbook, p.ev_paise,
-               COALESCE(rec.amount_paise, 0) AS recovered_paise
+               COALESCE((SELECT SUM(amount_paise) FROM recoveries rec WHERE rec.risk_item_id = r.id), 0) AS recovered_paise
         FROM risk_items r
         JOIN customers c ON c.id = r.customer_id
         LEFT JOIN diagnoses d ON d.risk_item_id = r.id
         LEFT JOIN intervention_plans p ON p.risk_item_id = r.id
-        LEFT JOIN recoveries rec ON rec.risk_item_id = r.id
-        WHERE 1=1
+        ${whereClause}
+        ORDER BY r.exposure_paise DESC
+        LIMIT ? OFFSET ?
       `;
-      const params: any[] = [];
 
-      if (surface) {
-        sql += ` AND r.surface = ?`;
-        params.push(surface);
-      }
-      if (cohort) {
-        sql += ` AND r.cohort = ?`;
-        params.push(cohort);
-      }
-      if (state) {
-        sql += ` AND r.state = ?`;
-        params.push(state);
-      }
-
-      sql += ` ORDER BY r.exposure_paise DESC LIMIT 200`;
-
-      let rows = db.query(sql).all(...params) as any[];
-
-      // Count total (without LIMIT) for pagination indicator
-      let totalSql = `
-        SELECT COUNT(*) AS cnt
-        FROM risk_items r
-        JOIN customers c ON c.id = r.customer_id
-        LEFT JOIN diagnoses d ON d.risk_item_id = r.id
-        LEFT JOIN intervention_plans p ON p.risk_item_id = r.id
-        WHERE 1=1
-      `;
-      const totalParams: any[] = [];
-      if (surface) { totalSql += ` AND r.surface = ?`; totalParams.push(surface); }
-      if (cohort) { totalSql += ` AND r.cohort = ?`; totalParams.push(cohort); }
-      if (state) { totalSql += ` AND r.state = ?`; totalParams.push(state); }
-      const totalRow = db.query(totalSql).get(...totalParams) as any;
-      const totalCount = totalRow?.cnt ?? rows.length;
-
-      if (query) {
-        rows = rows.filter(
-          (r) =>
-            r.id.toLowerCase().includes(query) ||
-            r.customer_name.toLowerCase().includes(query) ||
-            r.customer_id.toLowerCase().includes(query) ||
-            (r.root_cause && r.root_cause.toLowerCase().includes(query)) ||
-            (r.playbook && r.playbook.toLowerCase().includes(query)),
-        );
-      }
+      const rows = db.query(sql).all(...filterParams, limit, offset) as any[];
 
       const normalizedRows = rows.map((r) => ({
         ...r,
@@ -180,7 +181,14 @@ const server = Bun.serve({
         paymentLinkUrl: r.payment_link_url,
       }));
 
-      return Response.json({ cases: normalizedRows, total: totalCount, showing: normalizedRows.length });
+      return Response.json({
+        cases: normalizedRows,
+        total: totalCount,
+        showing: normalizedRows.length,
+        page,
+        limit,
+        totalPages,
+      });
     }
 
     // Sub-route: Mint a Razorpay payment link for a specific case
@@ -209,14 +217,12 @@ const server = Bun.serve({
           });
         }
 
-        const originHeader = req.headers.get("origin") || req.headers.get("referer") || `http://localhost:${PORT}`;
-        let callbackUrl: string | undefined;
-        try {
-          const originUrl = new URL(originHeader);
-          callbackUrl = `${originUrl.protocol}//${originUrl.host}/payment-callback?caseId=${row.id}`;
-        } catch {
-          callbackUrl = `http://localhost:${PORT}/payment-callback?caseId=${row.id}`;
-        }
+        const forceNew = url.searchParams.get("forceNew") === "1" || url.searchParams.get("fresh") === "1";
+        const fwdHost = req.headers.get("x-forwarded-host");
+        const fwdProto = req.headers.get("x-forwarded-proto");
+        const host = fwdHost || req.headers.get("host") || `localhost:${PORT}`;
+        const proto = fwdProto || (host.includes("localhost") ? "http" : "https");
+        const callbackUrl = `${proto}://${host}/payment-callback?caseId=${row.id}`;
 
         const linkResult = await createRazorpayPaymentLink({
           riskItemId: row.id,
@@ -225,6 +231,7 @@ const server = Bun.serve({
           email: row.email,
           phone: row.phone,
           callbackUrl,
+          forceNew,
           db,
         });
 
@@ -234,6 +241,10 @@ const server = Bun.serve({
           paymentLinkId: linkResult.id,
           isMock: !linkResult.isLive,
           paymentLink: linkResult,
+          amountPaise: linkResult.amountPaise,
+          totalExposurePaise: linkResult.totalExposurePaise,
+          remainingPaise: linkResult.remainingPaise,
+          isStaggered: linkResult.isStaggered,
         });
       } catch (err: any) {
         return new Response(JSON.stringify({ error: err.message }), { status: 500 });
@@ -249,23 +260,34 @@ const server = Bun.serve({
       }
 
       const paymentId = url.searchParams.get("razorpay_payment_id") || `rzp_pay_${Date.now()}`;
+      const plinkId = url.searchParams.get("razorpay_payment_link_id");
 
       if (caseId) {
         try {
           const row = db.query(`SELECT id, exposure_paise, state FROM risk_items WHERE id = ?`).get(caseId) as any;
-          if (row && row.state !== "RECOVERED") {
-            resolveCase(db, {
-              riskItemId: row.id,
-              amountPaise: row.exposure_paise,
-              channel: "PAYMENT_LINK",
-              playbook: "RAZORPAY_LIVE_RAIL",
-              resolvedVia: "razorpay_live_webhook",
-              paymentRef: paymentId,
-              reasonCode: "RAZORPAY_CHECKOUT_COMPLETED",
-            });
+          if (row) {
+            // Mark the payment link as paid so subsequent clicks can generate fresh links
             try {
-              measurement = runMeasurement(db);
+              if (plinkId) {
+                db.prepare(`UPDATE payment_links SET status = 'paid' WHERE id = ?`).run(plinkId);
+              }
+              db.prepare(`UPDATE payment_links SET status = 'paid' WHERE risk_item_id = ?`).run(row.id);
             } catch {}
+
+            if (row.state !== "RECOVERED") {
+              resolveCase(db, {
+                riskItemId: row.id,
+                amountPaise: row.exposure_paise,
+                channel: "PAYMENT_LINK",
+                playbook: "RAZORPAY_LIVE_RAIL",
+                resolvedVia: "razorpay_live_webhook",
+                paymentRef: paymentId,
+                reasonCode: "RAZORPAY_CHECKOUT_COMPLETED",
+              });
+              try {
+                measurement = runMeasurement(db);
+              } catch {}
+            }
           }
         } catch (err) {
           console.warn("[PAYMENT_CALLBACK_WARN]", err);
@@ -401,7 +423,14 @@ const server = Bun.serve({
     }
 
     // 2. Razorpay Webhook Consumer (HMAC-SHA256 signature verified)
-    if (path === "/webhooks/razorpay" && req.method === "POST") {
+    const isWebhook =
+      req.method === "POST" &&
+      (path === "/webhooks/razorpay" ||
+       path === "/webhook" ||
+       path === "/api/webhooks/razorpay" ||
+       ((path === "/" || path === "") && req.headers.has("x-razorpay-signature")));
+
+    if (isWebhook) {
       try {
         const rawBody = await req.text();
         const signature = req.headers.get("x-razorpay-signature");
@@ -600,7 +629,7 @@ const server = Bun.serve({
     // --- STATIC FILES (Serves React build from web/dist) ---
     const distIndex = join("web", "dist", "index.html");
 
-    if (path === "/" || path === "/index.html") {
+    if ((path === "/" || path === "/index.html") && req.method === "GET") {
       if (existsSync(distIndex)) {
         const html = readFileSync(distIndex, "utf8");
         return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8" } });

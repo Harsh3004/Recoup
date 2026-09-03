@@ -20,12 +20,14 @@ export const App: React.FC = () => {
   const [overviewData, setOverviewData] = useState<OverviewData | null>(null);
   const [loadingOverview, setLoadingOverview] = useState<boolean>(true);
   
-  const [casesResponse, setCasesResponse] = useState<CasesResponse>({ cases: [], total: 0, showing: 0 });
+  const [casesResponse, setCasesResponse] = useState<CasesResponse>({ cases: [], total: 0, showing: 0, page: 1, limit: 50, totalPages: 1 });
   const [loadingCases, setLoadingCases] = useState<boolean>(true);
   const [currentSurface, setCurrentSurface] = useState<SurfaceId>('');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedCohort, setSelectedCohort] = useState<string>('');
   const [selectedState, setSelectedState] = useState<string>('');
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(50);
   
   const [activeCaseDetail, setActiveCaseDetail] = useState<CaseDetail | null>(null);
   const [loadingCaseDetail, setLoadingCaseDetail] = useState<boolean>(false);
@@ -73,6 +75,8 @@ export const App: React.FC = () => {
       if (selectedCohort) params.set('cohort', selectedCohort);
       if (selectedState) params.set('state', selectedState);
       if (searchQuery) params.set('q', searchQuery);
+      params.set('page', String(currentPage));
+      params.set('limit', String(pageSize));
 
       const res = await fetch(`/api/cases?${params.toString()}`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -83,7 +87,7 @@ export const App: React.FC = () => {
     } finally {
       setLoadingCases(false);
     }
-  }, [currentSurface, selectedCohort, selectedState, searchQuery, showToast]);
+  }, [currentSurface, selectedCohort, selectedState, searchQuery, currentPage, pageSize, showToast]);
 
   const handleSelectCase = useCallback(async (caseId: string) => {
     setIsCaseDrawerOpen(true);
@@ -117,6 +121,27 @@ export const App: React.FC = () => {
     setSearchQuery('');
     setSelectedCohort('');
     setSelectedState('');
+    setCurrentPage(1);
+  };
+
+  const handleSurfaceChange = (s: SurfaceId) => {
+    setCurrentSurface(s);
+    setCurrentPage(1);
+  };
+
+  const handleCohortChange = (c: string) => {
+    setSelectedCohort(c);
+    setCurrentPage(1);
+  };
+
+  const handleStateChange = (st: string) => {
+    setSelectedState(st);
+    setCurrentPage(1);
+  };
+
+  const handleSearchChange = (q: string) => {
+    setSearchQuery(q);
+    setCurrentPage(1);
   };
 
   // 3. Effects (Declared AFTER all callbacks)
@@ -209,15 +234,23 @@ export const App: React.FC = () => {
             showing={casesResponse.showing}
             loading={loadingCases}
             searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
+            onSearchChange={handleSearchChange}
             selectedSurface={currentSurface}
-            onSurfaceChange={setCurrentSurface}
+            onSurfaceChange={handleSurfaceChange}
             selectedCohort={selectedCohort}
-            onCohortChange={setSelectedCohort}
+            onCohortChange={handleCohortChange}
             selectedState={selectedState}
-            onStateChange={setSelectedState}
+            onStateChange={handleStateChange}
             onSelectCase={handleSelectCase}
             onResetFilters={handleResetFilters}
+            page={currentPage}
+            limit={pageSize}
+            totalPages={casesResponse.totalPages || 1}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={(sz) => {
+              setPageSize(sz);
+              setCurrentPage(1);
+            }}
           />
         )}
 

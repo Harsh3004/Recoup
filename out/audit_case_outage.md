@@ -52,9 +52,6 @@ Zero outbound communications dispatched (Suppressed by compliance rails or contr
 
 | Seq | Event ID | Action | Actor | Decision | Timestamp | SHA-256 Hash |
 |---:|---|---|---|---|---|---|
-| 320 | `aud_00000320` | `DIAGNOSIS_COMMITTED` | `AGENT` | `SYSTEMIC_GATEWAY_OUTAGE` | 2026-08-20T06:30:00.000Z | `ef3f3558d5ad7636...` |
-| 2610 | `aud_00002610` | `GATE_BLOCKED` | `AGENT` | `BLOCK` | 2026-08-20T06:30:00.000Z | `200e64efd33db6df...` |
-| 5985 | `aud_00005985` | `CASE_STATE_TRANSITION` | `AGENT` | `SUPPRESS` | 2026-08-20T06:30:00.000Z | `40e6290576a14a1b...` |
-| 8628 | `aud_00008628` | `DIAGNOSIS_COMMITTED` | `AGENT` | `SYSTEMIC_GATEWAY_OUTAGE` | 2026-08-20T06:30:00.000Z | `e11afb128fb3a021...` |
-| 10918 | `aud_00010918` | `GATE_BLOCKED` | `AGENT` | `BLOCK` | 2026-08-20T06:30:00.000Z | `6f88c06c54589f0d...` |
-| 14293 | `aud_00014293` | `CASE_STATE_TRANSITION` | `AGENT` | `SUPPRESS` | 2026-08-20T06:30:00.000Z | `075f747ae562ebf1...` |
+| 320 | `aud_00000320` | `DIAGNOSIS_COMMITTED` | `AGENT` | `SYSTEMIC_GATEWAY_OUTAGE` | 2026-08-20T06:30:00.000Z | `9d08811b361aadb1...` |
+| 2610 | `aud_00002610` | `GATE_BLOCKED` | `AGENT` | `BLOCK` | 2026-08-20T06:30:00.000Z | `cc88abf1e47ed6f2...` |
+| 5985 | `aud_00005985` | `CASE_STATE_TRANSITION` | `AGENT` | `SUPPRESS` | 2026-08-20T06:30:00.000Z | `3e26ab5eced6ff81...` |

@@ -18,6 +18,11 @@ interface CaseExplorerProps {
   onStateChange: (s: string) => void;
   onSelectCase: (caseId: string) => void;
   onResetFilters?: () => void;
+  page?: number;
+  limit?: number;
+  totalPages?: number;
+  onPageChange?: (page: number) => void;
+  onPageSizeChange?: (limit: number) => void;
 }
 
 export const CaseExplorer: React.FC<CaseExplorerProps> = ({
@@ -35,7 +40,38 @@ export const CaseExplorer: React.FC<CaseExplorerProps> = ({
   onStateChange,
   onSelectCase,
   onResetFilters,
+  page = 1,
+  limit = 50,
+  totalPages = 1,
+  onPageChange,
+  onPageSizeChange,
 }) => {
+  const currentPage = page || 1;
+  const currentLimit = limit || 50;
+  const pagesCount = totalPages || Math.max(1, Math.ceil(total / currentLimit));
+
+  const startRecord = total === 0 ? 0 : (currentPage - 1) * currentLimit + 1;
+  const endRecord = Math.min(total, (currentPage - 1) * currentLimit + showing);
+
+  const getPageNumbers = () => {
+    const delta = 2;
+    const range: (number | string)[] = [];
+    for (let i = Math.max(2, currentPage - delta); i <= Math.min(pagesCount - 1, currentPage + delta); i++) {
+      range.push(i);
+    }
+    if (currentPage - delta > 2) {
+      range.unshift('...');
+    }
+    if (currentPage + delta < pagesCount - 1) {
+      range.push('...');
+    }
+    range.unshift(1);
+    if (pagesCount > 1) {
+      range.push(pagesCount);
+    }
+    return range;
+  };
+
   const [sortField, setSortField] = useState<string>('exposurePaise');
   const [sortAsc, setSortAsc] = useState(false);
 
@@ -324,6 +360,90 @@ export const CaseExplorer: React.FC<CaseExplorerProps> = ({
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Pagination Footer Controls */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4 py-3.5 bg-slate-950/70 border-t border-white/[0.08] text-xs font-mono">
+        <div className="flex flex-wrap items-center gap-3 text-slate-400">
+          <span>
+            Showing <strong className="text-slate-200">{startRecord.toLocaleString()}</strong> to{' '}
+            <strong className="text-slate-200">{endRecord.toLocaleString()}</strong> of{' '}
+            <strong className="text-indigo-400">{total.toLocaleString()}</strong> cases
+          </span>
+          <div className="flex items-center gap-1.5 ml-2 pl-3 border-l border-white/[0.08]">
+            <span className="text-[11px] text-slate-500">Per page:</span>
+            <select
+              value={currentLimit}
+              onChange={(e) => onPageSizeChange?.(Number(e.target.value))}
+              className="bg-slate-900 border border-white/[0.12] rounded-lg px-2 py-1 text-slate-200 text-xs focus:outline-none focus:border-indigo-500 cursor-pointer"
+            >
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+              <option value={200}>200</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Page Navigation Tabs */}
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => onPageChange?.(1)}
+            disabled={currentPage <= 1 || loading}
+            className="px-2.5 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-slate-300 hover:bg-white/[0.08] disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold"
+            title="First Page"
+          >
+            « First
+          </button>
+          <button
+            onClick={() => onPageChange?.(currentPage - 1)}
+            disabled={currentPage <= 1 || loading}
+            className="px-2.5 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-slate-300 hover:bg-white/[0.08] disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold"
+            title="Previous Page"
+          >
+            ‹ Prev
+          </button>
+
+          <div className="flex items-center gap-1 mx-1">
+            {getPageNumbers().map((p, idx) =>
+              p === '...' ? (
+                <span key={`ellipsis-${idx}`} className="px-1.5 py-1 text-slate-500">
+                  …
+                </span>
+              ) : (
+                <button
+                  key={`page-${p}`}
+                  onClick={() => onPageChange?.(Number(p))}
+                  disabled={loading}
+                  className={`min-w-[30px] h-7 px-2 rounded-lg text-xs font-bold transition-all ${
+                    currentPage === p
+                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+                      : 'bg-white/[0.04] text-slate-300 hover:bg-white/[0.08] border border-white/[0.08]'
+                  }`}
+                >
+                  {p}
+                </button>
+              )
+            )}
+          </div>
+
+          <button
+            onClick={() => onPageChange?.(currentPage + 1)}
+            disabled={currentPage >= pagesCount || loading}
+            className="px-2.5 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-slate-300 hover:bg-white/[0.08] disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold"
+            title="Next Page"
+          >
+            Next ›
+          </button>
+          <button
+            onClick={() => onPageChange?.(pagesCount)}
+            disabled={currentPage >= pagesCount || loading}
+            className="px-2.5 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-slate-300 hover:bg-white/[0.08] disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold"
+            title="Last Page"
+          >
+            Last »
+          </button>
+        </div>
       </div>
     </div>
   );

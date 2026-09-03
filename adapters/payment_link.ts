@@ -9,6 +9,7 @@ export interface CreatePaymentLinkOptions {
   phone?: string;
   description?: string;
   callbackUrl?: string;
+  forceNew?: boolean;
   db?: Database;
 }
 
@@ -17,6 +18,10 @@ export interface PaymentLinkResult {
   shortUrl: string;
   isLive: boolean;
   status: string;
+  amountPaise: number;
+  totalExposurePaise: number;
+  remainingPaise: number;
+  isStaggered: boolean;
 }
 
 // In-memory cache of generated live payment links for quick synchronous lookup
@@ -55,7 +60,7 @@ export function generatePaymentLink(riskItemId: string, amountPaise: number, db?
   if (db) {
     try {
       const row = db
-        .query(`SELECT short_url FROM payment_links WHERE risk_item_id = ? ORDER BY created_at DESC LIMIT 1`)
+        .query(`SELECT short_url FROM payment_links WHERE risk_item_id = ? AND status != 'paid' ORDER BY created_at DESC LIMIT 1`)
         .get(riskItemId) as { short_url: string } | null;
       if (row?.short_url) {
         activePaymentLinks.set(riskItemId, row.short_url);
@@ -80,46 +85,65 @@ export async function createRazorpayPaymentLink(
   const keyId = process.env.RAZORPAY_KEY_ID;
   const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
-  // 1. Check if an active live Razorpay link was already generated for this case in the database
-  if (options.db) {
+  const totalExposure = Math.round(options.amountPaise);
+  const MAX_RAZORPAY_TEST_PAISE = 5000000; // ₹50,000 max per link for Razorpay test mode accounts
+  const linkAmountPaise = Math.min(MAX_RAZORPAY_TEST_PAISE, Math.max(100, totalExposure));
+  const remainingPaise = Math.max(0, totalExposure - linkAmountPaise);
+  const isStaggered = totalExposure > MAX_RAZORPAY_TEST_PAISE;
+
+  // 1. Check if an active UNPAID live Razorpay link was already generated for this case in the database
+  if (options.db && !options.forceNew) {
     try {
       const existing = options.db
         .query(
-          `SELECT id, short_url, is_live, status FROM payment_links WHERE risk_item_id = ? AND is_live = 1 ORDER BY created_at DESC LIMIT 1`
+          `SELECT id, short_url, is_live, status, amount_paise FROM payment_links WHERE risk_item_id = ? AND is_live = 1 AND status != 'paid' ORDER BY created_at DESC LIMIT 1`
         )
         .get(options.riskItemId) as any;
       if (existing && existing.short_url && !existing.short_url.includes('/i/rec_')) {
+        const storedAmt = existing.amount_paise ?? linkAmountPaise;
         return {
           id: existing.id,
           shortUrl: existing.short_url,
           isLive: true,
           status: existing.status || "created",
+          amountPaise: storedAmt,
+          totalExposurePaise: totalExposure,
+          remainingPaise: Math.max(0, totalExposure - storedAmt),
+          isStaggered: totalExposure > storedAmt,
         };
       }
     } catch {}
   }
 
   if (!keyId || !keySecret) {
-    const mockUrl = generateMockPaymentLink(options.riskItemId, options.amountPaise);
+    const mockUrl = generateMockPaymentLink(options.riskItemId, linkAmountPaise);
     return {
       id: `plink_mock_${options.riskItemId.replace("rsk_", "")}`,
       shortUrl: mockUrl,
       isLive: false,
       status: "created",
+      amountPaise: linkAmountPaise,
+      totalExposurePaise: totalExposure,
+      remainingPaise,
+      isStaggered,
     };
   }
 
   const authHeader = `Basic ${Buffer.from(`${keyId}:${keySecret}`).toString("base64")}`;
 
   try {
-    // Razorpay requires reference_id to be globally unique. Suffix timestamp to prevent 400 rejection on re-generation.
     const uniqueRef = `${options.riskItemId}_${Date.now()}`;
+    const description = options.description ?? (
+      isStaggered
+        ? `Recoup Tranche 1: ₹${(linkAmountPaise / 100).toLocaleString('en-IN')} of ₹${(totalExposure / 100).toLocaleString('en-IN')} (Remaining: ₹${(remainingPaise / 100).toLocaleString('en-IN')}) - ${options.riskItemId}`
+        : `Recoup Payment Recovery: ${options.riskItemId}`
+    );
+
     const payload: any = {
-      // Razorpay test-mode API caps payment links to 5,00,0000 paise (₹50,000.00 max).
-      amount: Math.min(5000000, Math.max(100, Math.round(options.amountPaise))),
+      amount: linkAmountPaise,
       currency: "INR",
       accept_partial: false,
-      description: options.description ?? `Recoup Payment Recovery: ${options.riskItemId}`,
+      description,
       customer: {
         name: options.customerName || "Valued Customer",
         email: options.email || "accounts@example.com",
@@ -132,6 +156,10 @@ export async function createRazorpayPaymentLink(
       reminder_enable: false,
       notes: {
         risk_item_id: options.riskItemId,
+        total_exposure_paise: String(totalExposure),
+        tranche_amount_paise: String(linkAmountPaise),
+        remaining_balance_paise: String(remainingPaise),
+        is_staggered: isStaggered ? "true" : "false",
       },
       reference_id: uniqueRef,
     };
@@ -153,12 +181,16 @@ export async function createRazorpayPaymentLink(
     if (!res.ok) {
       const errText = await res.text();
       console.warn(`[RAZORPAY_API_WARN] Payment Link creation returned ${res.status}: ${errText}`);
-      const mockUrl = generateMockPaymentLink(options.riskItemId, options.amountPaise);
+      const mockUrl = generateMockPaymentLink(options.riskItemId, linkAmountPaise);
       return {
         id: `plink_mock_${options.riskItemId.replace("rsk_", "")}`,
         shortUrl: mockUrl,
         isLive: false,
         status: "fallback_mock",
+        amountPaise: linkAmountPaise,
+        totalExposurePaise: totalExposure,
+        remainingPaise,
+        isStaggered,
       };
     }
 
@@ -176,7 +208,7 @@ export async function createRazorpayPaymentLink(
         options.db.prepare(`
           INSERT INTO payment_links (id, risk_item_id, short_url, amount_paise, status, is_live, created_at)
           VALUES (?, ?, ?, ?, ?, 1, ?)
-        `).run(data.id, options.riskItemId, data.short_url, options.amountPaise, data.status, Date.now());
+        `).run(data.id, options.riskItemId, data.short_url, linkAmountPaise, data.status, Date.now());
 
         options.db.prepare(`
           UPDATE risk_items SET payment_link_url = ? WHERE id = ?
@@ -191,15 +223,23 @@ export async function createRazorpayPaymentLink(
       shortUrl: data.short_url,
       isLive: true,
       status: data.status,
+      amountPaise: linkAmountPaise,
+      totalExposurePaise: totalExposure,
+      remainingPaise,
+      isStaggered,
     };
   } catch (err: any) {
     console.error("[RAZORPAY_API_ERROR] Failed to reach Razorpay:", err.message);
-    const mockUrl = generateMockPaymentLink(options.riskItemId, options.amountPaise);
+    const mockUrl = generateMockPaymentLink(options.riskItemId, linkAmountPaise);
     return {
       id: `plink_mock_${options.riskItemId.replace("rsk_", "")}`,
       shortUrl: mockUrl,
       isLive: false,
       status: "fallback_mock",
+      amountPaise: linkAmountPaise,
+      totalExposurePaise: totalExposure,
+      remainingPaise,
+      isStaggered,
     };
   }
 }

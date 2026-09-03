@@ -78,6 +78,9 @@ export interface CasesResponse {
   cases: CaseSummary[];
   total: number;
   showing: number;
+  page?: number;
+  limit?: number;
+  totalPages?: number;
 }
 
 export interface CaseDetail {
@@ -156,6 +159,18 @@ export interface CaseDetail {
     hash: string;
     inputsDigest?: string;
   }>;
+  recoveries?: Array<{
+    id: string;
+    amountPaise: number;
+    recoveredAt: number;
+    recoveredIso: string;
+    channel: string;
+    playbook: string;
+    cohort: string;
+    resolvedVia?: string;
+    paymentRef?: string;
+  }>;
+  totalRecoveredPaise?: number;
 }
 
 export interface ModelOption {

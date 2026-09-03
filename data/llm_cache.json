@@ -7041,5 +7041,49 @@
       "totalTokens": 828
     },
     "isFallback": false
+  },
+  "a5816b7a24b85363cd757a63d28eee76": {
+    "model": "minimax/minimax-m3:free",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9400,
+      "evidence_spans": [
+        "Is mahine collections weak hain",
+        "Do dates mein split kar sakte hain"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The buyer (CFO of Cedar Retail) explicitly acknowledges the liability for invoice inv_000124 (₹1,50,000.00) without raising any dispute. They cite weak collections this month as the reason for non-payment and proactively request splitting the payment into two installments. This is a textbook liquidity/cash flow issue where the buyer admits the debt and seeks a structured payment schedule, aligning with the CASH_CRUNCH root cause. A PARTIAL_PAYMENT playbook is appropriate: secure a formal written commitment with two dated installments (e.g., 50% within 7 days, balance within 30 days) and obtain written confirmation from the CFO to lock in the promise before goods/services are jeopardized."
+    },
+    "content": "```json\n{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9400,\n  \"evidence_spans\": [\n    \"Is mahine collections weak hain\",\n    \"Do dates mein split kar sakte hain\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The buyer (CFO of Cedar Retail) explicitly acknowledges the liability for invoice inv_000124 (₹1,50,000.00) without raising any dispute. They cite weak collections this month as the reason for non-payment and proactively request splitting the payment into two installments. This is a textbook liquidity/cash flow issue where the buyer admits the debt and seeks a structured payment schedule, aligning with the CASH_CRUNCH root cause. A PARTIAL_PAYMENT playbook is appropriate: secure a formal written commitment with two dated installments (e.g., 50% within 7 days, balance within 30 days) and obtain written confirmation from the CFO to lock in the promise before goods/services are jeopardized.\"\n}\n```",
+    "cachedAt": 1788355454012,
+    "inferredAt": "2026-09-02T13:24:08.760Z",
+    "tokenUsage": {
+      "promptTokens": 605,
+      "completionTokens": 224,
+      "totalTokens": 829
+    },
+    "isFallback": false
+  },
+  "e2c6601cd28a29d1155c6c8aaca3d240": {
+    "model": "minimax/minimax-m3:free",
+    "parsed": {
+      "root_cause": "CASH_CRUNCH",
+      "confidence_bps": 9400,
+      "evidence_spans": [
+        "Is mahine collections weak hain",
+        "Do dates mein split kar sakte hain?"
+      ],
+      "recommended_playbook": "PARTIAL_PAYMENT",
+      "rationale": "The CFO of Harbor Electronics explicitly acknowledges the invoice liability (note kiya) and requests a split of the ₹4,00,000 outstanding amount into multiple payment dates, citing weak collections this month. This is a classic liquidity-driven installment request, which maps directly to CASH_CRUNCH. No dispute is raised against the PO, GRN, rate, or quantity. The buyer is not denying the debt—they are negotiating timing. The optimal playbook is PARTIAL_PAYMENT: secure a written commitment for the first tranche (ideally within 7 days), agree on a second tranche date, and monitor. Invoice is only 0-30 days aged, so no need for dunning ladder or human escalation yet, but a formal split schedule should be obtained in writing from the CFO."
+    },
+    "content": "```json\n{\n  \"root_cause\": \"CASH_CRUNCH\",\n  \"confidence_bps\": 9400,\n  \"evidence_spans\": [\n    \"Is mahine collections weak hain\",\n    \"Do dates mein split kar sakte hain?\"\n  ],\n  \"recommended_playbook\": \"PARTIAL_PAYMENT\",\n  \"rationale\": \"The CFO of Harbor Electronics explicitly acknowledges the invoice liability (note kiya) and requests a split of the ₹4,00,000 outstanding amount into multiple payment dates, citing weak collections this month. This is a classic liquidity-driven installment request, which maps directly to CASH_CRUNCH. No dispute is raised against the PO, GRN, rate, or quantity. The buyer is not denying the debt—they are negotiating timing. The optimal playbook is PARTIAL_PAYMENT: secure a written commitment for the first tranche (ideally within 7 days), agree on a second tranche date, and monitor. Invoice is only 0-30 days aged, so no need for dunning ladder or human escalation yet, but a formal split schedule should be obtained in writing from the CFO.\"\n}\n```",
+    "cachedAt": 1788355458315,
+    "inferredAt": "2026-09-02T13:24:14.050Z",
+    "tokenUsage": {
+      "promptTokens": 605,
+      "completionTokens": 237,
+      "totalTokens": 842
+    },
+    "isFallback": false
   }
 }

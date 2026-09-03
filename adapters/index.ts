@@ -8,15 +8,6 @@ import { formatVoiceTranscript } from "./voice";
 import { formatWhatsApp } from "./whatsapp";
 import { verifyGatePassport, type GatePassport } from "../engines/gate";
 
-/**
- * Universal Mock Adapter Dispatcher Choke Point.
- *
- * NOTE ON EXPORTS:
- * Raw communication formatters (formatEmail, formatSms, formatWhatsApp, formatVoiceTranscript,
- * formatGatewayCharge) are intentionally NOT exported from this module.
- * The only public customer-facing dispatch interface in this codebase is dispatchMockAdapter(),
- * which strictly requires an HMAC-SHA256 GatePassport minted by engines/gate.ts.
- */
 export function dispatchMockAdapter(
   input: AdapterMessageInput,
   passport?: GatePassport,

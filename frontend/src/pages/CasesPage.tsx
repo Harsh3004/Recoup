@@ -18,6 +18,11 @@ interface CasesPageProps {
   onStateChange: (s: string) => void;
   onSelectCase: (caseId: string) => void;
   onResetFilters: () => void;
+  page?: number;
+  limit?: number;
+  totalPages?: number;
+  onPageChange?: (page: number) => void;
+  onPageSizeChange?: (limit: number) => void;
 }
 
 export const CasesPage: React.FC<CasesPageProps> = ({
@@ -35,6 +40,11 @@ export const CasesPage: React.FC<CasesPageProps> = ({
   onStateChange,
   onSelectCase,
   onResetFilters,
+  page = 1,
+  limit = 50,
+  totalPages = 1,
+  onPageChange,
+  onPageSizeChange,
 }) => {
   return (
     <div className="space-y-6 animate-fadeIn">
@@ -67,6 +77,11 @@ export const CasesPage: React.FC<CasesPageProps> = ({
         onStateChange={onStateChange}
         onSelectCase={onSelectCase}
         onResetFilters={onResetFilters}
+        page={page}
+        limit={limit}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
+        onPageSizeChange={onPageSizeChange}
       />
     </div>
   );

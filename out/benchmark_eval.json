@@ -1,50 +1,50 @@
 {
   "meta": {
-    "timestamp": "2026-09-02T11:35:09.911Z",
+    "timestamp": "2026-09-03T11:06:29.583Z",
     "policyVersion": "policy-v0-seed",
     "modelVersion": "none"
   },
   "cohorts": {
-    "totalCases": 1314,
-    "treatmentCases": 1117,
+    "totalCases": 1317,
+    "treatmentCases": 1120,
     "holdoutCases": 197,
-    "treatmentExposureInr": 162097869,
+    "treatmentExposureInr": 167896870,
     "holdoutExposureInr": 24374794
   },
   "results": {
-    "treatmentRecoveredInr": 31436983,
+    "treatmentRecoveredInr": 32537982,
     "holdoutRecoveredInr": 1346094,
-    "counterfactualBaselineInr": 7512368.3,
-    "incrementalRecoveredInr": 23924614.7,
-    "incrementalLiftPct": 318.4696722070988,
+    "counterfactualBaselineInr": 7611920.19,
+    "incrementalRecoveredInr": 24926061.81,
+    "incrementalLiftPct": 327.4608927553667,
     "ci95": {
-      "lowerInr": 8846303.17,
-      "medianInr": 23453790.18,
-      "upperInr": 41381342.84,
-      "lowerLiftPct": 90.83879466190841,
-      "medianLiftPct": 328.3674977129856,
-      "upperLiftPct": 938.9441752781787
+      "lowerInr": 10285430.58,
+      "medianInr": 24468294.77,
+      "upperInr": 40181603.18,
+      "lowerLiftPct": 98.88404539154074,
+      "medianLiftPct": 324.3817384072902,
+      "upperLiftPct": 976.8962014567711
     },
     "sensitivityBandInr": {
-      "minusOneSeInr": 26562619.88,
-      "plusOneSeInr": 21286609.52
+      "minusOneSeInr": 27658440.81,
+      "plusOneSeInr": 22193682.81
     },
-    "permutationPValue": 0.058
+    "permutationPValue": 0.03
   },
   "counterfactualComparison": {
-    "pureHoldoutBaselineInr": 7512368.3,
-    "naiveDunningBaselineInr": 29988105.77,
-    "recoupGrossRecoveredInr": 31436983,
-    "incrementalOverHoldoutInr": 23924614.7,
-    "incrementalOverNaiveInr": 1448877.23
+    "pureHoldoutBaselineInr": 7611920.19,
+    "naiveDunningBaselineInr": 31060920.95,
+    "recoupGrossRecoveredInr": 32537982,
+    "incrementalOverHoldoutInr": 24926061.81,
+    "incrementalOverNaiveInr": 1477061.05
   },
   "bySurface": [
     {
       "surface": "Surface D",
-      "treatmentCases": 236,
+      "treatmentCases": 239,
       "holdoutCases": 41,
-      "treatmentRecoveredInr": 30296750,
-      "incrementalInr": 23684432.93,
+      "treatmentRecoveredInr": 31396750,
+      "incrementalInr": 24700378.05,
       "recoveryRatePct": 19
     },
     {
@@ -59,9 +59,9 @@
       "surface": "Surface A",
       "treatmentCases": 400,
       "holdoutCases": 71,
-      "treatmentRecoveredInr": 269336,
-      "incrementalInr": -254455.55,
-      "recoveryRatePct": 35
+      "treatmentRecoveredInr": 270335,
+      "incrementalInr": -253456.55,
+      "recoveryRatePct": 35.2
     },
     {
       "surface": "Surface C",

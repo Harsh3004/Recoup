@@ -23,10 +23,10 @@ export const RazorpayRailPage: React.FC<RazorpayRailPageProps> = ({ showToast, o
   const [simulatingWebhook, setSimulatingWebhook] = useState(false);
   const [webhookLog, setWebhookLog] = useState<any>(null);
 
-  const handleMintLink = async () => {
+  const handleMintLink = async (forceNew = false) => {
     setMinting(true);
     try {
-      const res = await fetch(`/api/case/${testCaseId}/payment-link`, { method: 'POST' });
+      const res = await fetch(`/api/case/${testCaseId}/payment-link${forceNew ? '?forceNew=1' : ''}`, { method: 'POST' });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to mint payment link');
       
@@ -34,6 +34,8 @@ export const RazorpayRailPage: React.FC<RazorpayRailPageProps> = ({ showToast, o
       showToast(
         data.isMock
           ? 'Generated deterministic mock payment URL (offline mode)'
+          : forceNew
+          ? '⚡ Fresh Razorpay Test Payment Link minted!'
           : '⚡ Real Razorpay Test Payment Link generated!',
         'success'
       );
@@ -144,7 +146,50 @@ export const RazorpayRailPage: React.FC<RazorpayRailPageProps> = ({ showToast, o
                 </span>
               </div>
               <div className="text-sky-300 font-bold break-all">{mintedLink.shortUrl}</div>
-              <div className="flex items-center gap-2 pt-2 border-t border-white/[0.06]">
+
+              {/* Staggered Tranche & Remaining Balance Breakdown */}
+              {(mintedLink.isStaggered || amountPaise > 5000000) && (
+                <div className="p-3 rounded-xl bg-slate-900/90 border border-amber-500/30 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-amber-300 px-1.5 py-0.5 rounded bg-amber-500/15">
+                      ⚡ Staggered Payment Plan (Tranche 1)
+                    </span>
+                    <span className="text-[10px] text-slate-400">
+                      Razorpay Test Cap: ₹50,000 / link
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2 text-center text-xs font-mono pt-1">
+                    <div className="p-2 rounded bg-white/[0.03] border border-white/[0.05]">
+                      <span className="text-[10px] text-slate-400 block">Tranche 1 Link</span>
+                      <strong className="text-sky-300 font-bold">
+                        {formatInr(mintedLink.amountPaise ?? 5000000, true)}
+                      </strong>
+                    </div>
+                    <div className="p-2 rounded bg-white/[0.03] border border-white/[0.05]">
+                      <span className="text-[10px] text-slate-400 block">Remaining Due</span>
+                      <strong className="text-amber-400 font-bold">
+                        {formatInr(
+                          mintedLink.remainingPaise ?? Math.max(0, amountPaise - 5000000),
+                          true
+                        )}
+                      </strong>
+                    </div>
+                    <div className="p-2 rounded bg-white/[0.03] border border-white/[0.05]">
+                      <span className="text-[10px] text-slate-400 block">Total Exposure</span>
+                      <strong className="text-white font-bold">
+                        {formatInr(mintedLink.totalExposurePaise ?? amountPaise, true)}
+                      </strong>
+                    </div>
+                  </div>
+
+                  <p className="text-[10px] text-slate-400 leading-relaxed font-sans">
+                    Due to Razorpay test-mode transaction limits, this link collects Tranche 1. The remaining balance will be scheduled in subsequent dunning stages.
+                  </p>
+                </div>
+              )}
+
+              <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-white/[0.06]">
                 <a
                   href={mintedLink.shortUrl}
                   target="_blank"
@@ -154,6 +199,15 @@ export const RazorpayRailPage: React.FC<RazorpayRailPageProps> = ({ showToast, o
                   <span>Open Hosted Checkout</span>
                   <ExternalLink className="w-3.5 h-3.5" />
                 </a>
+                <button
+                  onClick={() => handleMintLink(true)}
+                  disabled={minting}
+                  className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-white/[0.06] text-sky-300 border border-sky-500/30 font-bold text-xs hover:bg-white/[0.1] shadow"
+                  title="Mint a fresh active link to test another transaction"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${minting ? 'animate-spin' : ''}`} />
+                  <span>Mint Fresh Link</span>
+                </button>
               </div>
             </div>
           )}

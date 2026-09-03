@@ -19,7 +19,7 @@
     "eval:diagnosis-independent": "bun run scripts/eval_diagnosis_independent.ts",
     "eval:diag": "bun run scripts/eval_diagnose.ts",
     "sensitivity": "bun run scripts/sensitivity_sweep.ts",
-    "demo": "bun run server/index.ts",
+    "demo": "bun --watch server/index.ts",
     "build:ui": "vite build",
     "dev:ui": "vite"
   },

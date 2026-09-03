@@ -1,9 +1,9 @@
 # Audit Chain & Integrity Verification Report
 
 - **Verification Status:** **PASS (100% CRYPTOGRAPHIC INTEGRITY)**
-- **Total Events Chained:** **16611**
+- **Total Events Chained:** **8303**
 - **Genesis Prev Hash:** `0000000000000000000000000000000000000000000000000000000000000000`
-- **Head Hash:** `9a854ad9ead65feb9fa9966a15cad292492d0826cb8fd201dbf2ceee59812e6f`
+- **Head Hash:** `cb68e3ac074980b61c7dddf64ed3555bd7977dc670e157f261a2dc4871fd3447`
 
 ## Acceptance Verification
 
@@ -11,7 +11,7 @@
 
 | Check | Target | Actual Result | Status |
 |---|---|---|---|
-| Hash Chain Verification | Valid | **VALID** (16611 events checked) | **PASS** |
+| Hash Chain Verification | Valid | **VALID** (8303 events checked) | **PASS** |
 | Tamper Detection Proof | Detected | **DETECTED** (Seq 3 caught immediately) | **PASS** |
 | Append-Only Enforcement | Trigger Active | **SQLite triggers block UPDATE/DELETE** | **PASS** |
 | Per-Case Timeline Exporter | 1-click drilldown | **Generated for all test cases** | **PASS** |

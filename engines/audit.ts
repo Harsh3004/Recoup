@@ -115,7 +115,21 @@ export interface CaseFullTimeline {
     channel: string;
     playbook: string;
     cohort: string;
+    resolvedVia?: string;
+    paymentRef?: string;
   } | null;
+  recoveries?: {
+    id: string;
+    amountPaise: number;
+    recoveredAt: number;
+    recoveredIso: string;
+    channel: string;
+    playbook: string;
+    cohort: string;
+    resolvedVia?: string;
+    paymentRef?: string;
+  }[];
+  totalRecoveredPaise?: number;
   auditTrail: CaseTimelineEvent[];
 }
 
@@ -443,22 +457,25 @@ export function exportCaseTimeline(db: Database, riskItemId: string): CaseFullTi
     payload: c.payload,
   }));
 
-  // Recovery
-  const recRow = db
-    .query(`SELECT * FROM recoveries WHERE risk_item_id = ?`)
-    .get(riskItemId) as any;
+  // Recoveries / Payment History
+  const recRows = db
+    .query(`SELECT * FROM recoveries WHERE risk_item_id = ? ORDER BY recovered_at DESC`)
+    .all(riskItemId) as any[];
 
-  const recovery = recRow
-    ? {
-        id: recRow.id,
-        amountPaise: recRow.amount_paise,
-        recoveredAt: recRow.recovered_at,
-        recoveredIso: new Date(recRow.recovered_at).toISOString(),
-        channel: recRow.channel,
-        playbook: recRow.playbook,
-        cohort: recRow.cohort,
-      }
-    : null;
+  const recoveries = recRows.map((r) => ({
+    id: r.id,
+    amountPaise: r.amount_paise,
+    recoveredAt: r.recovered_at,
+    recoveredIso: new Date(r.recovered_at).toISOString(),
+    channel: r.channel,
+    playbook: r.playbook,
+    cohort: r.cohort,
+    resolvedVia: r.resolved_via,
+    paymentRef: r.payment_ref,
+  }));
+
+  const totalRecoveredPaise = recoveries.reduce((sum, r) => sum + (r.amountPaise || 0), 0);
+  const recovery = recoveries.length > 0 ? recoveries[0] : null;
 
   // Relevant Audit Events
   const auditRows = db
@@ -505,6 +522,8 @@ export function exportCaseTimeline(db: Database, riskItemId: string): CaseFullTi
     gateDecisions,
     communications,
     recovery,
+    recoveries,
+    totalRecoveredPaise,
     auditTrail,
   };
 }

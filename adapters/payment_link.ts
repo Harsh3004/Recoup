@@ -8,6 +8,7 @@ export interface CreatePaymentLinkOptions {
   email?: string;
   phone?: string;
   description?: string;
+  callbackUrl?: string;
   db?: Database;
 }
 
@@ -113,7 +114,7 @@ export async function createRazorpayPaymentLink(
   try {
     // Razorpay requires reference_id to be globally unique. Suffix timestamp to prevent 400 rejection on re-generation.
     const uniqueRef = `${options.riskItemId}_${Date.now()}`;
-    const payload = {
+    const payload: any = {
       // Razorpay test-mode API caps payment links to 5,00,0000 paise (₹50,000.00 max).
       amount: Math.min(5000000, Math.max(100, Math.round(options.amountPaise))),
       currency: "INR",
@@ -134,6 +135,11 @@ export async function createRazorpayPaymentLink(
       },
       reference_id: uniqueRef,
     };
+
+    if (options.callbackUrl) {
+      payload.callback_url = options.callbackUrl;
+      payload.callback_method = "get";
+    }
 
     const res = await fetch("https://api.razorpay.com/v1/payment_links", {
       method: "POST",

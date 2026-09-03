@@ -209,12 +209,22 @@ const server = Bun.serve({
           });
         }
 
+        const originHeader = req.headers.get("origin") || req.headers.get("referer") || `http://localhost:${PORT}`;
+        let callbackUrl: string | undefined;
+        try {
+          const originUrl = new URL(originHeader);
+          callbackUrl = `${originUrl.protocol}//${originUrl.host}/payment-callback?caseId=${row.id}`;
+        } catch {
+          callbackUrl = `http://localhost:${PORT}/payment-callback?caseId=${row.id}`;
+        }
+
         const linkResult = await createRazorpayPaymentLink({
           riskItemId: row.id,
           amountPaise: row.exposure_paise,
           customerName: row.name,
           email: row.email,
           phone: row.phone,
+          callbackUrl,
           db,
         });
 
@@ -228,6 +238,42 @@ const server = Bun.serve({
       } catch (err: any) {
         return new Response(JSON.stringify({ error: err.message }), { status: 500 });
       }
+    }
+
+    // Razorpay Checkout Return Callback (Automatic Redirect Back to Application)
+    if (path === "/payment-callback" && req.method === "GET") {
+      const rawCaseId = url.searchParams.get("caseId") || url.searchParams.get("razorpay_payment_link_reference_id");
+      let caseId = rawCaseId;
+      if (rawCaseId && /^rsk_[A-D]_\d+_\d+$/.test(rawCaseId)) {
+        caseId = rawCaseId.substring(0, rawCaseId.lastIndexOf("_"));
+      }
+
+      const paymentId = url.searchParams.get("razorpay_payment_id") || `rzp_pay_${Date.now()}`;
+
+      if (caseId) {
+        try {
+          const row = db.query(`SELECT id, exposure_paise, state FROM risk_items WHERE id = ?`).get(caseId) as any;
+          if (row && row.state !== "RECOVERED") {
+            resolveCase(db, {
+              riskItemId: row.id,
+              amountPaise: row.exposure_paise,
+              channel: "PAYMENT_LINK",
+              playbook: "RAZORPAY_LIVE_RAIL",
+              resolvedVia: "razorpay_live_webhook",
+              paymentRef: paymentId,
+              reasonCode: "RAZORPAY_CHECKOUT_COMPLETED",
+            });
+            try {
+              measurement = runMeasurement(db);
+            } catch {}
+          }
+        } catch (err) {
+          console.warn("[PAYMENT_CALLBACK_WARN]", err);
+        }
+      }
+
+      const redirectTarget = caseId ? `/#/cases?openCase=${caseId}&recovered=1` : `/#/cases`;
+      return Response.redirect(redirectTarget, 302);
     }
 
     // Sub-route: Simulate an incoming payment_link.paid webhook resolution for a specific case

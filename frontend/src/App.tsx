@@ -43,23 +43,40 @@ export const App: React.FC = () => {
   const [activeModelName, setActiveModelName] = useState<string>('minimax/minimax-m3:free');
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
-  // Sync URL hash with route
+  // Sync URL hash with route & payment-callback params
   useEffect(() => {
     const handleHashChange = () => {
-      const hash = window.location.hash.replace('#/', '').replace('#', '') as RouteId;
+      const fullHash = window.location.hash.replace('#/', '').replace('#', '');
+      const [routePart, queryPart] = fullHash.split('?');
+      const route = routePart as RouteId;
       const validRoutes: RouteId[] = [
         'dashboard', 'cases', 'ai-studio', 'compliance', 
         'audit-ledger', 'ablation-lab', 'razorpay-rail'
       ];
-      if (validRoutes.includes(hash)) {
-        setCurrentRoute(hash);
+      if (validRoutes.includes(route)) {
+        setCurrentRoute(route);
+      }
+
+      // Detect post-checkout return: e.g. #/cases?openCase=rsk_...&recovered=1
+      if (queryPart) {
+        const params = new URLSearchParams(queryPart);
+        const openCaseId = params.get('openCase');
+        const isRecovered = params.get('recovered');
+        if (openCaseId) {
+          handleSelectCase(openCaseId);
+          if (isRecovered === '1') {
+            showToast(`🎉 Razorpay Test Payment Completed! Case ${openCaseId} marked RECOVERED in ledger.`, 'success');
+            fetchOverview();
+            fetchCases();
+          }
+        }
       }
     };
 
     handleHashChange();
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
+  }, [fetchOverview, fetchCases, showToast]);
 
   const navigateTo = (route: RouteId) => {
     setCurrentRoute(route);
@@ -286,7 +303,7 @@ export const App: React.FC = () => {
 
       {/* Footer */}
       <footer className="mt-12 pt-6 pb-8 border-t border-white/[0.06] text-center text-xs text-slate-500">
-        Recoup Autonomous Recovery Engine · Built for Razorpay AI Buildathon · Track 03: AI Revenue Recovery
+        Recoup Autonomous Recovery Engine ·  AI Revenue Recovery
       </footer>
     </div>
   );

@@ -52,6 +52,6 @@ Zero outbound communications dispatched (Suppressed by compliance rails or contr
 
 | Seq | Event ID | Action | Actor | Decision | Timestamp | SHA-256 Hash |
 |---:|---|---|---|---|---|---|
-| 320 | `aud_00000320` | `DIAGNOSIS_COMMITTED` | `AGENT` | `SYSTEMIC_GATEWAY_OUTAGE` | 2026-08-20T06:30:00.000Z | `f00d5903983a6b5d...` |
-| 2610 | `aud_00002610` | `GATE_BLOCKED` | `AGENT` | `BLOCK` | 2026-08-20T06:30:00.000Z | `189318d74a01c2a6...` |
-| 5985 | `aud_00005985` | `CASE_STATE_TRANSITION` | `AGENT` | `SUPPRESS` | 2026-08-20T06:30:00.000Z | `4b591d12ee3a481a...` |
+| 320 | `aud_00000320` | `DIAGNOSIS_COMMITTED` | `AGENT` | `SYSTEMIC_GATEWAY_OUTAGE` | 2026-08-20T06:30:00.000Z | `82a4bf7d6b0b0e0c...` |
+| 2610 | `aud_00002610` | `GATE_BLOCKED` | `AGENT` | `BLOCK` | 2026-08-20T06:30:00.000Z | `8c6f498119d65e73...` |
+| 5985 | `aud_00005985` | `CASE_STATE_TRANSITION` | `AGENT` | `SUPPRESS` | 2026-08-20T06:30:00.000Z | `4b2df190596617bf...` |

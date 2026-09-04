@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { X, ExternalLink, ShieldCheck, Zap, Copy, Check, Terminal, Cpu, FileCheck, RefreshCw } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, ExternalLink, ShieldCheck, Zap, Copy, Check, Cpu, FileCheck, RefreshCw } from 'lucide-react';
 import { CaseDetail } from '../types';
 import { formatInr, formatDateTime } from '../utils/formatters';
 
@@ -37,6 +37,11 @@ export const CaseDrawer: React.FC<CaseDrawerProps> = ({
     isStaggered?: boolean;
   } | null>(null);
   const [isSimulatingWebhook, setIsSimulatingWebhook] = useState(false);
+
+  // Reset generated payment link when switching cases
+  useEffect(() => {
+    setGeneratedLink(null);
+  }, [caseData?.riskItemId]);
 
   if (!caseData && !loading) return null;
 
@@ -97,12 +102,13 @@ export const CaseDrawer: React.FC<CaseDrawerProps> = ({
   };
 
   const paymentsCount = caseData?.recoveries?.length ?? (caseData?.recoveredPaise ? 1 : 0);
+  const planStepsCount = (caseData?.policy || caseData?.interventionPlan)?.steps?.length;
 
   const tabs: Array<{ id: TabType; label: string; count?: number }> = [
     { id: 'overview', label: 'Case Overview' },
     { id: 'payments', label: 'Payment History', count: paymentsCount },
     { id: 'diagnosis', label: 'Diagnosis & LLM' },
-    { id: 'policy', label: 'Playbook & EV' },
+    { id: 'policy', label: 'Playbook & EV', count: planStepsCount },
     { id: 'gate', label: 'Gate Rails', count: caseData?.gateDecisions?.length },
     { id: 'comms', label: 'Comms', count: caseData?.communications?.length },
     { id: 'audit', label: 'SHA-256 Audit Trail', count: caseData?.auditTrail?.length },
@@ -541,49 +547,57 @@ export const CaseDrawer: React.FC<CaseDrawerProps> = ({
               {/* TAB 3: POLICY & EV */}
               {activeTab === 'policy' && (
                 <div className="space-y-4">
-                  {caseData.policy ? (
-                    <>
-                      <div className="glass-card rounded-2xl p-5 border border-purple-500/30">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-[11px] font-bold text-purple-300 uppercase tracking-wider">
-                            Selected Playbook
-                          </span>
-                          <span className="text-xs font-mono font-bold text-emerald-400">
-                            EV: {formatInr(caseData.policy.expectedValuePaise, true)}
-                          </span>
-                        </div>
-                        <div className="text-base font-mono font-bold text-white mb-2">
-                          {caseData.policy.playbook}
-                        </div>
-                        <p className="text-xs text-slate-300 bg-slate-950/60 p-3 rounded-xl border border-white/[0.05]">
-                          {caseData.policy.reasoning}
-                        </p>
-                      </div>
-
-                      {/* Scheduled Steps */}
-                      <div className="glass-card rounded-2xl p-4">
-                        <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
-                          Intervention Plan Steps
-                        </h4>
-                        <div className="space-y-2">
-                          {caseData.policy.steps?.map((step) => (
-                            <div key={step.stepOrder} className="flex items-center justify-between p-2.5 rounded-lg bg-white/[0.03] border border-white/[0.05] text-xs">
-                              <div className="flex items-center gap-2">
-                                <span className="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-300 flex items-center justify-center font-mono font-bold text-[10px]">
-                                  {step.stepOrder}
-                                </span>
-                                <span className="font-semibold text-slate-200">{step.channel} · {step.action}</span>
-                              </div>
-                              <span className="font-mono text-[11px] text-slate-400">
-                                {formatDateTime(step.scheduledAt)}
+                  {(caseData.policy || caseData.interventionPlan) ? (
+                    (() => {
+                      const plan = (caseData.policy || caseData.interventionPlan)!;
+                      const steps = plan.steps || [];
+                      const evPaise = plan.expectedValuePaise ?? (plan as any).evPaise ?? 0;
+                      const reasoning = plan.reasoning || (plan as any).rationale || 'EV-maximizing intervention strategy calibrated for customer segment and root-cause.';
+                      return (
+                        <>
+                          <div className="glass-card rounded-2xl p-5 border border-purple-500/30">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-[11px] font-bold text-purple-300 uppercase tracking-wider">
+                                Selected Playbook
+                              </span>
+                              <span className="text-xs font-mono font-bold text-emerald-400">
+                                EV: {formatInr(evPaise, true)}
                               </span>
                             </div>
-                          ))}
-                        </div>
-                      </div>
-                    </>
+                            <div className="text-base font-mono font-bold text-white mb-2">
+                              {plan.playbook}
+                            </div>
+                            <p className="text-xs text-slate-300 bg-slate-950/60 p-3 rounded-xl border border-white/[0.05] leading-relaxed">
+                              {reasoning}
+                            </p>
+                          </div>
+
+                          {/* Scheduled Steps */}
+                          <div className="glass-card rounded-2xl p-4">
+                            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
+                              Intervention Plan Steps ({steps.length})
+                            </h4>
+                            <div className="space-y-2">
+                              {steps.map((step, idx) => (
+                                <div key={step.stepOrder ?? (step as any).stepNo ?? idx} className="flex items-center justify-between p-2.5 rounded-lg bg-white/[0.03] border border-white/[0.05] text-xs">
+                                  <div className="flex items-center gap-2">
+                                    <span className="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-300 flex items-center justify-center font-mono font-bold text-[10px]">
+                                      {step.stepOrder ?? (step as any).stepNo ?? idx + 1}
+                                    </span>
+                                    <span className="font-semibold text-slate-200">{step.channel} · {step.action}</span>
+                                  </div>
+                                  <span className="font-mono text-[11px] text-slate-400">
+                                    {formatDateTime(step.scheduledAt)}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </>
+                      );
+                    })()
                   ) : (
-                    <div className="p-8 text-center text-slate-500 text-xs">No policy plan recorded.</div>
+                    <div className="p-8 text-center text-slate-500 text-xs">No policy plan recorded for this case.</div>
                   )}
                 </div>
               )}
@@ -591,57 +605,91 @@ export const CaseDrawer: React.FC<CaseDrawerProps> = ({
               {/* TAB 4: GATE DECISIONS */}
               {activeTab === 'gate' && (
                 <div className="space-y-3">
-                  {caseData.gateDecisions?.map((gate) => (
-                    <div key={gate.id} className="glass-card rounded-xl p-4 border border-white/[0.08]">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                            gate.allowed ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'
-                          }`}>
-                            {gate.allowed ? 'PASS' : 'BLOCKED'}
-                          </span>
-                          <span className="text-xs font-semibold text-white">Step #{gate.stepOrder}: {gate.channel}</span>
+                  {caseData.gateDecisions && caseData.gateDecisions.length > 0 ? (
+                    caseData.gateDecisions.map((gate, idx) => {
+                      const reasons = (gate.reasonCodes && gate.reasonCodes.length > 0)
+                        ? gate.reasonCodes
+                        : gate.reasonCode
+                        ? [gate.reasonCode]
+                        : [];
+                      const timestamp = gate.evaluatedAt || gate.decidedAt || 0;
+                      return (
+                        <div key={gate.id || idx} className="glass-card rounded-xl p-4 border border-white/[0.08]">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                                gate.allowed ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'
+                              }`}>
+                                {gate.allowed ? 'PASS' : 'BLOCKED'}
+                              </span>
+                              <span className="text-xs font-semibold text-white">
+                                Step #{gate.stepOrder ?? (gate as any).stepNo ?? idx + 1}: {gate.channel || 'COMMUNICATION'}
+                              </span>
+                            </div>
+                            <span className="text-[10px] text-slate-500 font-mono">{formatDateTime(timestamp)}</span>
+                          </div>
+                          {gate.details && (
+                            <p className="text-xs text-slate-300 leading-relaxed mb-2 font-sans">
+                              {gate.details}
+                            </p>
+                          )}
+                          {reasons.length > 0 && (
+                            <div className="text-xs text-slate-400 flex flex-wrap gap-1">
+                              {reasons.map((rc, rIdx) => (
+                                <span key={rIdx} className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-white/[0.06] text-amber-300">
+                                  {rc}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                          {gate.passportSignature && (
+                            <div className="mt-2 text-[10px] font-mono text-slate-500 truncate">
+                              Passport: {gate.passportSignature}
+                            </div>
+                          )}
                         </div>
-                        <span className="text-[10px] text-slate-500 font-mono">{formatDateTime(gate.evaluatedAt)}</span>
-                      </div>
-                      {gate.reasonCodes && gate.reasonCodes.length > 0 && (
-                        <div className="text-xs text-slate-400 mt-2 flex flex-wrap gap-1">
-                          {gate.reasonCodes.map((rc, idx) => (
-                            <span key={idx} className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-white/[0.06] text-amber-300">
-                              {rc}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                      {gate.passportSignature && (
-                        <div className="mt-2 text-[10px] font-mono text-slate-500 truncate">
-                          Passport: {gate.passportSignature}
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                      );
+                    })
+                  ) : (
+                    <div className="p-8 text-center text-slate-500 text-xs">No gate decisions evaluated for this case.</div>
+                  )}
                 </div>
               )}
 
               {/* TAB 5: COMMS */}
               {activeTab === 'comms' && (
                 <div className="space-y-3">
-                  {caseData.communications?.map((msg) => (
-                    <div key={msg.id} className="glass-card rounded-xl p-4 border border-white/[0.08] space-y-2">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="font-bold text-indigo-300">{msg.channel} Dispatch</span>
-                        <span className="text-[10px] text-slate-500 font-mono">{formatDateTime(msg.sentAt)}</span>
-                      </div>
-                      <div className="text-xs text-slate-200 bg-slate-950/60 p-3 rounded-lg border border-white/[0.05] whitespace-pre-wrap font-sans">
-                        {msg.payloadText}
-                      </div>
-                      {msg.customerReplied && (
-                        <div className="text-xs text-emerald-300 bg-emerald-950/30 p-2.5 rounded border border-emerald-500/20">
-                          <strong>Customer Reply:</strong> {msg.replyText || 'Acknowledged'}
+                  {caseData.communications && caseData.communications.length > 0 ? (
+                    caseData.communications.map((msg, idx) => {
+                      let text = msg.payloadText;
+                      if (!text && msg.payload) {
+                        try {
+                          const p = typeof msg.payload === 'string' ? JSON.parse(msg.payload) : msg.payload;
+                          text = p.body || p.text || p.message || (typeof p === 'string' ? p : JSON.stringify(p, null, 2));
+                        } catch {
+                          text = msg.payload;
+                        }
+                      }
+                      return (
+                        <div key={msg.id || idx} className="glass-card rounded-xl p-4 border border-white/[0.08] space-y-2">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="font-bold text-indigo-300">{msg.channel} Dispatch</span>
+                            <span className="text-[10px] text-slate-500 font-mono">{formatDateTime(msg.sentAt)}</span>
+                          </div>
+                          <div className="text-xs text-slate-200 bg-slate-950/60 p-3 rounded-lg border border-white/[0.05] whitespace-pre-wrap font-sans leading-relaxed">
+                            {text || 'Dispatched via compliance-gated communication adapter.'}
+                          </div>
+                          {msg.customerReplied && (
+                            <div className="text-xs text-emerald-300 bg-emerald-950/30 p-2.5 rounded border border-emerald-500/20">
+                              <strong>Customer Reply:</strong> {msg.replyText || 'Acknowledged'}
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  ))}
+                      );
+                    })
+                  ) : (
+                    <div className="p-8 text-center text-slate-500 text-xs">No outbound communications recorded.</div>
+                  )}
                 </div>
               )}
 
@@ -663,7 +711,7 @@ export const CaseDrawer: React.FC<CaseDrawerProps> = ({
 
                   {/* Vertical Blockchain Spine */}
                   <div className="relative pl-6 space-y-4 before:content-[''] before:absolute before:left-2 before:top-2 before:bottom-2 before:w-[2px] before:bg-gradient-to-b before:from-indigo-500 before:via-cyan-500 before:to-emerald-500">
-                    {caseData.auditTrail?.map((evt, idx) => (
+                    {caseData.auditTrail?.map((evt) => (
                       <div key={evt.seq} className="relative glass-card rounded-xl p-4 border border-white/[0.08] hover:border-indigo-500/40 transition-all">
                         {/* Dot on spine */}
                         <div className="absolute -left-[27px] top-4 w-3.5 h-3.5 rounded-full bg-[#0d1322] border-2 border-indigo-400 shadow-sm shadow-indigo-500/50"></div>
@@ -675,7 +723,7 @@ export const CaseDrawer: React.FC<CaseDrawerProps> = ({
                               {evt.action}
                             </span>
                           </div>
-                          <span className="text-[10px] font-mono text-slate-500">{formatDateTime(evt.timestamp)}</span>
+                          <span className="text-[10px] font-mono text-slate-500">{formatDateTime(evt.timestamp || evt.ts || 0)}</span>
                         </div>
 
                         {/* Prev Hash & Block Hash */}

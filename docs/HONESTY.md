@@ -26,10 +26,10 @@ To guarantee that measurement is **scientifically honest** rather than theatrica
 3. Only the **Step 6 Outcome Resolver** and the offline benchmark evaluation script read ground truth to resolve actual payment occurrences.
 4. All measurement is computed against a **randomized 15% holdout control group** across 36 strata.
 5. **Headline Result (Primary Benchmark Run, `out/measurement_report.md`):**
-   - **Net Incremental Recovery:** **₹2,49,26,061.81** (**+327.5% relative lift** over holdout baseline).
-   - **Gross Treatment Recovery:** **₹3,25,37,982.00** across $n_t = 1,120$ cases (total evaluated: $N = 1,317$, $n_h = 197$).
-   - **Counterfactual Holdout Baseline:** **₹76,11,920.19**.
-   - **95% Bootstrap Confidence Interval:** **[₹1,02,85,430.58, ₹4,01,81,603.18]** (Permutation $p = 0.030$).
+   - **Net Incremental Recovery:** **₹2,39,24,614.70** (**+318.5% relative lift** over holdout baseline).
+   - **Gross Treatment Recovery:** **₹3,14,36,983.00** across $n_t = 1,117$ cases (total evaluated: $N = 1,314$, $n_h = 197$).
+   - **Counterfactual Holdout Baseline:** **₹75,12,368.30**.
+   - **95% Bootstrap Confidence Interval:** **[₹88,46,303.17, ₹4,13,81,342.84]** (Permutation $p = 0.058$).
 
 ---
 

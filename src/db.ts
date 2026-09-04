@@ -59,7 +59,24 @@ export function applySchema(db: Database, schemaPath = "db/schema.sql"): void {
 }
 
 export function resetDbFile(path: string): void {
-  for (const p of [path, `${path}-wal`, `${path}-shm`]) {
-    if (existsSync(p)) unlinkSync(p);
+  try {
+    for (const p of [path, `${path}-wal`, `${path}-shm`]) {
+      if (existsSync(p)) unlinkSync(p);
+    }
+  } catch (err: any) {
+    if (err.code === "EBUSY" || err.code === "EPERM") {
+      try {
+        const tempDb = openDb(path);
+        const tables = tempDb.query(`SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'`).all() as { name: string }[];
+        tempDb.run("PRAGMA foreign_keys = OFF;");
+        for (const t of tables) {
+          try { tempDb.run(`DROP TABLE IF EXISTS "${t.name}"`); } catch {}
+        }
+        tempDb.run("PRAGMA foreign_keys = ON;");
+        tempDb.close();
+        return;
+      } catch {}
+    }
+    throw err;
   }
 }

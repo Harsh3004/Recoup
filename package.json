@@ -21,6 +21,7 @@
     "eval:diag": "bun run scripts/eval_diagnose.ts",
     "sensitivity": "bun run scripts/sensitivity_sweep.ts",
     "demo": "bun --watch server/index.ts",
+    "build": "vite build",
     "build:ui": "vite build",
     "dev:ui": "vite"
   },

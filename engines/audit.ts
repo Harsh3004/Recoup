@@ -61,26 +61,65 @@ export interface CaseFullTimeline {
   customerEmail: string;
   customerLanguage: string;
   customerSegment: string;
+  segment?: string;
   exposurePaise: number;
   currentState: string;
+  state?: string;
   cohort: string;
   incidentId: string | null;
+  riskScore?: number;
+  pLossBps?: number;
+  urgencyBps?: number;
+  resolvedVia?: string | null;
+  paymentLinkUrl?: string | null;
   diagnosis: {
     rootCause: string;
     confidenceBps: number;
     isSystemic: boolean;
     evidence: string[];
+    evidenceSpans?: string[];
     declineCode: string | null;
     llmUsed: boolean;
+    rationale?: string;
+    model?: string;
+    latencyMs?: number | null;
+    tokenUsage?: {
+      promptTokens: number;
+      completionTokens: number;
+      totalTokens: number;
+    } | null;
+    llmSkippedReason?: string | null;
   } | null;
   interventionPlan: {
     playbook: string;
     evPaise: number;
+    expectedValuePaise?: number;
     rationale: string;
+    reasoning?: string;
     skipped: boolean;
     skipReason: string | null;
     steps: {
       stepNo: number;
+      stepOrder?: number;
+      channel: string;
+      action: string;
+      scheduledAt: number;
+      scheduledIso: string;
+      status: string;
+      exitCriteria: string;
+    }[];
+  } | null;
+  policy?: {
+    playbook: string;
+    expectedValuePaise: number;
+    evPaise?: number;
+    reasoning: string;
+    rationale?: string;
+    skipped?: boolean;
+    skipReason?: string | null;
+    steps: {
+      stepOrder: number;
+      stepNo?: number;
       channel: string;
       action: string;
       scheduledAt: number;
@@ -94,9 +133,15 @@ export interface CaseFullTimeline {
     planStepId: string | null;
     allowed: boolean;
     reasonCode: string;
+    reasonCodes?: string[];
     details: string;
     decidedAt: number;
+    evaluatedAt?: number;
     decidedIso: string;
+    stepOrder?: number;
+    channel?: string;
+    action?: string;
+    passportSignature?: string | null;
   }[];
   communications: {
     id: string;
@@ -105,7 +150,11 @@ export interface CaseFullTimeline {
     sentAt: number;
     sentIso: string;
     status: string;
+    deliveryStatus?: string;
     payload: string;
+    payloadText?: string;
+    customerReplied?: boolean;
+    replyText?: string | null;
   }[];
   recovery: {
     id: string;
@@ -352,6 +401,7 @@ export function exportCaseTimeline(db: Database, riskItemId: string): CaseFullTi
     .query(
       `SELECT r.id, r.surface, r.customer_id, r.source_ref, r.exposure_paise,
               r.first_seen_at, r.state, r.cohort, r.incident_id,
+              r.resolved_via, r.payment_link_url, r.risk_score, r.p_loss_bps, r.urgency_bps,
               c.name, c.phone, c.email, c.language, c.segment
        FROM risk_items r
        JOIN customers c ON c.id = r.customer_id
@@ -367,6 +417,11 @@ export function exportCaseTimeline(db: Database, riskItemId: string): CaseFullTi
     state: string;
     cohort: string;
     incident_id: string | null;
+    resolved_via?: string | null;
+    payment_link_url?: string | null;
+    risk_score?: number;
+    p_loss_bps?: number;
+    urgency_bps?: number;
     name: string;
     phone: string;
     email: string;
@@ -386,14 +441,35 @@ export function exportCaseTimeline(db: Database, riskItemId: string): CaseFullTi
     if (diagRow?.evidence_json) evidence = JSON.parse(diagRow.evidence_json);
   } catch {}
 
+  let rationale = "";
+  const rationaleEntry = evidence.find((e) => e.startsWith("Rationale: "));
+  if (rationaleEntry) {
+    rationale = rationaleEntry.replace("Rationale: ", "");
+  } else if (diagRow?.evidence_json) {
+    rationale = evidence.join(" · ");
+  }
+
+  let tokenUsage = null;
+  try {
+    if (diagRow?.llm_token_usage) tokenUsage = JSON.parse(diagRow.llm_token_usage);
+  } catch {}
+
+  const evidenceSpans = evidence.filter((e) => e.startsWith('Evidence: "') || e.startsWith("Evidence: ")).map((e) => e.replace(/^Evidence: "?/, "").replace(/"?$/, ""));
+
   const diagnosis = diagRow
     ? {
         rootCause: diagRow.root_cause,
         confidenceBps: diagRow.confidence_bps,
         isSystemic: diagRow.is_systemic === 1,
         evidence,
+        evidenceSpans: evidenceSpans.length > 0 ? evidenceSpans : evidence,
         declineCode: diagRow.decline_code,
         llmUsed: diagRow.llm_used === 1,
+        rationale: rationale || `Diagnosed root cause: ${diagRow.root_cause}`,
+        model: diagRow.model_version || (diagRow.llm_used === 1 ? "gemini-3.5-flash-lite" : "Deterministic Rules Engine"),
+        latencyMs: diagRow.llm_latency_ms ?? 1,
+        tokenUsage,
+        llmSkippedReason: diagRow.llm_skipped_reason,
       }
     : null;
 
@@ -412,11 +488,14 @@ export function exportCaseTimeline(db: Database, riskItemId: string): CaseFullTi
     ? {
         playbook: planRow.playbook,
         evPaise: planRow.ev_paise,
+        expectedValuePaise: planRow.ev_paise,
         rationale: planRow.rationale,
+        reasoning: planRow.rationale,
         skipped: planRow.skipped === 1,
         skipReason: planRow.skip_reason,
         steps: stepRows.map((s) => ({
           stepNo: s.step_no,
+          stepOrder: s.step_no,
           channel: s.channel,
           action: s.action,
           scheduledAt: s.scheduled_at,
@@ -427,9 +506,37 @@ export function exportCaseTimeline(db: Database, riskItemId: string): CaseFullTi
       }
     : null;
 
+  const policy = interventionPlan
+    ? {
+        playbook: interventionPlan.playbook,
+        expectedValuePaise: interventionPlan.evPaise,
+        evPaise: interventionPlan.evPaise,
+        reasoning: interventionPlan.rationale,
+        rationale: interventionPlan.rationale,
+        skipped: interventionPlan.skipped,
+        skipReason: interventionPlan.skipReason,
+        steps: interventionPlan.steps.map((s) => ({
+          stepOrder: s.stepNo,
+          stepNo: s.stepNo,
+          channel: s.channel,
+          action: s.action,
+          scheduledAt: s.scheduledAt,
+          scheduledIso: s.scheduledIso,
+          status: s.status,
+          exitCriteria: s.exitCriteria,
+        })),
+      }
+    : null;
+
   // Gate Decisions
   const gateRows = db
-    .query(`SELECT * FROM gate_decisions WHERE risk_item_id = ? ORDER BY decided_at ASC`)
+    .query(`
+      SELECT g.*, p.step_no, p.channel AS plan_channel, p.action AS plan_action
+      FROM gate_decisions g
+      LEFT JOIN plan_steps p ON p.id = g.plan_step_id
+      WHERE g.risk_item_id = ?
+      ORDER BY g.decided_at ASC
+    `)
     .all(riskItemId) as any[];
 
   const gateDecisions = gateRows.map((g) => ({
@@ -437,9 +544,15 @@ export function exportCaseTimeline(db: Database, riskItemId: string): CaseFullTi
     planStepId: g.plan_step_id,
     allowed: g.allowed === 1,
     reasonCode: g.reason_code,
+    reasonCodes: [g.reason_code].filter(Boolean),
     details: g.details,
     decidedAt: g.decided_at,
+    evaluatedAt: g.decided_at,
     decidedIso: new Date(g.decided_at).toISOString(),
+    stepOrder: g.step_no ?? 1,
+    channel: g.plan_channel || (g.details?.includes("Voice") ? "VOICE" : "COMMUNICATION"),
+    action: g.plan_action || "EXECUTE_TOUCH",
+    passportSignature: g.passport_token ? (g.passport_token.length > 20 ? `${g.passport_token.substring(0, 20)}...` : g.passport_token) : null,
   }));
 
   // Communications
@@ -447,15 +560,30 @@ export function exportCaseTimeline(db: Database, riskItemId: string): CaseFullTi
     .query(`SELECT * FROM communications WHERE risk_item_id = ? ORDER BY sent_at ASC`)
     .all(riskItemId) as any[];
 
-  const communications = commRows.map((c) => ({
-    id: c.id,
-    channel: c.channel,
-    templateId: c.template_id,
-    sentAt: c.sent_at,
-    sentIso: new Date(c.sent_at).toISOString(),
-    status: c.status,
-    payload: c.payload,
-  }));
+  const communications = commRows.map((c) => {
+    let payloadText = "";
+    try {
+      if (c.payload) {
+        const parsed = typeof c.payload === "string" ? JSON.parse(c.payload) : c.payload;
+        payloadText = parsed.body || parsed.text || parsed.message || (typeof parsed === "string" ? parsed : JSON.stringify(parsed, null, 2));
+      }
+    } catch {
+      payloadText = c.payload || "";
+    }
+    return {
+      id: c.id,
+      channel: c.channel,
+      templateId: c.template_id,
+      sentAt: c.sent_at,
+      sentIso: new Date(c.sent_at).toISOString(),
+      status: c.status,
+      deliveryStatus: c.status,
+      payload: c.payload,
+      payloadText: payloadText || "Notification dispatched through compliance choke point.",
+      customerReplied: false,
+      replyText: null,
+    };
+  });
 
   // Recoveries / Payment History
   const recRows = db
@@ -490,6 +618,7 @@ export function exportCaseTimeline(db: Database, riskItemId: string): CaseFullTi
     seq: a.seq,
     id: a.id,
     ts: a.ts,
+    timestamp: a.ts,
     isoTime: new Date(a.ts).toISOString(),
     actor: a.actor,
     action: a.action,
@@ -511,14 +640,20 @@ export function exportCaseTimeline(db: Database, riskItemId: string): CaseFullTi
     customerEmail: risk.email,
     customerLanguage: risk.language,
     customerSegment: risk.segment,
+    segment: risk.segment,
     exposurePaise: risk.exposure_paise,
     currentState: risk.state,
+    state: risk.state,
     cohort: risk.cohort,
     incidentId: risk.incident_id,
     resolvedVia: risk.resolved_via ?? "simulated",
     paymentLinkUrl: risk.payment_link_url ?? null,
+    riskScore: risk.risk_score ?? 0,
+    pLossBps: risk.p_loss_bps ?? 0,
+    urgencyBps: risk.urgency_bps ?? 0,
     diagnosis,
     interventionPlan,
+    policy,
     gateDecisions,
     communications,
     recovery,

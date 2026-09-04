@@ -72,4 +72,4 @@
 
 | Seq | Event ID | Action | Actor | Decision | Timestamp | SHA-256 Hash |
 |---:|---|---|---|---|---|---|
-| 1049 | `aud_00001049` | `DIAGNOSIS_COMMITTED` | `AGENT` | `CASH_CRUNCH` | 2026-08-20T06:30:00.000Z | `12e376d65e4fb038...` |
+| 1049 | `aud_00001049` | `DIAGNOSIS_COMMITTED` | `AGENT` | `CASH_CRUNCH` | 2026-08-20T06:30:00.000Z | `9df80626243dd173...` |

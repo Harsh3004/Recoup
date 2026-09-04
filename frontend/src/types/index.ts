@@ -88,27 +88,37 @@ export interface CaseDetail {
   surface: string;
   customerId: string;
   customerName: string;
-  segment: string;
+  segment?: string;
+  customerSegment?: string;
+  customerPhone?: string;
+  customerEmail?: string;
+  customerLanguage?: string;
   exposurePaise: number;
-  state: string;
+  state?: string;
+  currentState?: string;
   cohort: string;
-  riskScore: number;
-  pLossBps: number;
-  urgencyBps: number;
-  firstSeenAt: number;
+  riskScore?: number;
+  pLossBps?: number;
+  urgencyBps?: number;
+  firstSeenAt?: number;
   resolvedVia?: string | null;
   recoveredPaise?: number;
+  totalRecoveredPaise?: number;
+  incidentId?: string | null;
+  paymentLinkUrl?: string | null;
   diagnosis?: {
     rootCause: string;
     confidenceBps: number;
-    evidenceSpans: string[];
-    recommendedPlaybook: string;
-    rationale: string;
-    model: string;
-    llmUsed: boolean;
-    llmSkippedReason: string | null;
-    latencyMs: number | null;
-    tokenUsage: {
+    isSystemic?: boolean;
+    evidenceSpans?: string[];
+    evidence?: string[];
+    recommendedPlaybook?: string;
+    rationale?: string;
+    model?: string;
+    llmUsed?: boolean;
+    llmSkippedReason?: string | null;
+    latencyMs?: number | null;
+    tokenUsage?: {
       promptTokens: number;
       completionTokens: number;
       totalTokens: number;
@@ -117,48 +127,85 @@ export interface CaseDetail {
   policy?: {
     playbook: string;
     expectedValuePaise: number;
-    reasoning: string;
-    steps: Array<{
-      stepOrder: number;
+    evPaise?: number;
+    reasoning?: string;
+    rationale?: string;
+    steps?: Array<{
+      stepOrder?: number;
+      stepNo?: number;
       channel: string;
       action: string;
       scheduledAt: number;
+      scheduledIso?: string;
       status: string;
       executedAt?: number | null;
+      exitCriteria?: string;
+    }>;
+  } | null;
+  interventionPlan?: {
+    playbook: string;
+    evPaise: number;
+    expectedValuePaise?: number;
+    rationale?: string;
+    reasoning?: string;
+    skipped?: boolean;
+    skipReason?: string | null;
+    steps?: Array<{
+      stepNo?: number;
+      stepOrder?: number;
+      channel: string;
+      action: string;
+      scheduledAt: number;
+      scheduledIso?: string;
+      status: string;
+      exitCriteria?: string;
     }>;
   } | null;
   gateDecisions?: Array<{
     id: string;
+    planStepId?: string | null;
     allowed: boolean;
-    reasonCodes: string[];
-    passportSignature: string | null;
-    evaluatedAt: number;
-    stepOrder: number;
-    channel: string;
-    action: string;
+    reasonCode?: string;
+    reasonCodes?: string[];
+    passportSignature?: string | null;
+    evaluatedAt?: number;
+    decidedAt?: number;
+    decidedIso?: string;
+    details?: string;
+    stepOrder?: number;
+    stepNo?: number;
+    channel?: string;
+    action?: string;
   }>;
   communications?: Array<{
     id: string;
     channel: string;
-    action: string;
-    payloadText: string;
+    action?: string;
+    templateId?: string | null;
+    payload?: string;
+    payloadText?: string;
     sentAt: number;
-    deliveryStatus: string;
-    customerReplied: boolean;
+    sentIso?: string;
+    status?: string;
+    deliveryStatus?: string;
+    customerReplied?: boolean;
     replyText?: string | null;
   }>;
   auditTrail?: Array<{
     seq: number;
-    eventId: string;
+    id?: string;
+    eventId?: string;
     action: string;
     actor: string;
     decision: string;
     reasonCodes?: string[] | string | null;
-    timestamp: number;
+    timestamp?: number;
+    ts?: number;
     prevHash: string;
     hash: string;
     inputsDigest?: string;
   }>;
+  recovery?: any;
   recoveries?: Array<{
     id: string;
     amountPaise: number;
@@ -170,7 +217,6 @@ export interface CaseDetail {
     resolvedVia?: string;
     paymentRef?: string;
   }>;
-  totalRecoveredPaise?: number;
 }
 
 export interface ModelOption {

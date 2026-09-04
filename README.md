@@ -1,27 +1,33 @@
 # Recoup — Autonomous Failed Payment Recovery & Compliance Engine
 
-### ₹2.39 Cr recovered in a simulated economy of 1,200 merchants (+318.5% lift over 15% holdout baseline)
+[![CI](https://github.com/Harsh3004/Recoup/actions/workflows/ci.yml/badge.svg)](https://github.com/Harsh3004/Recoup/actions/workflows/ci.yml)
+[![Tests: 39/39 passing](https://img.shields.io/badge/tests-39%2F39%20passing-brightgreen)](package.json)
+[![Architecture: Production-Shaped](https://img.shields.io/badge/architecture-production--shaped-blue)](docs/HONESTY.md)
 
-> **Simulation & Causal Attribution Notice:** All figures reported below reflect a deterministic benchmark simulation of 1,200 Indian businesses, 13,626 payment attempts, and ₹18.65 Crore in failed payment exposure across 4 transaction surfaces. Incremental recovery is measured against a strict 15% randomized holdout control with a fair, organic-inheriting ablation arm. No real payments were attempted or collected — see [`docs/HONESTY.md`](docs/HONESTY.md) for the full simulation boundary disclosure.
+### ₹2.49 Cr recovered in a simulated economy of 1,200 merchants (+327.5% lift over 15% holdout baseline)
+
+> **Simulation & Causal Attribution Notice:** All figures reported below reflect a deterministic benchmark simulation of 1,200 Indian businesses, 13,626 payment attempts, and ₹16.79 Crore in failed payment exposure across 4 transaction surfaces. Incremental recovery is measured against a strict 15% randomized holdout control with a fair, organic-inheriting ablation arm. No real customer bank accounts were debited — see [`docs/HONESTY.md`](docs/HONESTY.md) for the full simulation boundary disclosure.
 
 ---
 
 ## 🏆 Benchmark Results
 
-Across 1,200 simulated Indian businesses and ₹18.65 Crore in total failure exposure:
+Across 1,200 simulated Indian businesses and ₹16.79 Crore in total treatment failure exposure:
 
-- **Net Incremental ₹ Recovered (R1):** **₹2,39,24,614.70** (**+318.5% lift** over the 15% control holdout baseline).
-- **Gross Treatment Cash Collected:** **₹3,14,36,983.00** (recovered across 1,314 treatment cases).
+- **Net Incremental ₹ Recovered (R1):** **₹2,49,26,061.81** (**+327.5% lift** over the 15% control holdout baseline).
+- **Gross Treatment Cash Collected:** **₹3,25,37,982.00** (19.4% recovery rate across 1,120 treatment cases, $N = 1,317$ total evaluated).
+- **Counterfactual Holdout Baseline:** **₹76,11,920.19** ($n_h = 197$).
 - **Fair Causal Ablation Control:** **-48.2% degradation** when the agent's root-cause optimization is ablated into naive dunning inheriting natural organic resolution (Target: $\ge 25\%$, **PASS**).
+- **Causal Revenue Contribution of Agent Decisions:** **₹1,07,05,134.00**.
 - **Diagnostic NLU Evaluation (3-Way Benchmark):**
   - **LLM NLU Classifier (MiniMax M3 / Gemini):** **95.8%** (23/24) — *requires `OPENROUTER_API_KEY` or a warm cache; cold-clone aborts with `[FATAL]` to prevent silent mis-labelling. Run: `OPENROUTER_API_KEY=<key> bun run eval:diagnosis-independent`.*
   - **Fair Domain Rules Baseline (Expanded Synonyms):** **75.0%** (18/24) — *always reproducible without an API key.*
   - **Narrow Seed Keyword Baseline:** **20.8%** (5/24)
   - *Evaluated on 24 author-curated qualitative sanity check cases representing messy AP correspondence without keyword cheating.*
-- **95% Bootstrap Confidence Interval:** **[₹88,46,303.17, ₹4,13,81,342.84]** (1,000 stratified resamples).
-- **Sensitivity Band (±1 SE on Holdout Scaling):** **[₹2,12,86,609.52, ₹2,65,62,619.88]**.
-- **Contacts Suppressed by Compliance Rails (R2/R3):** **682 actions blocked** (zero quiet hours breaches, zero DND violations, zero customer contacts during gateway outages).
-- **Audit Ledger Integrity (R4):** **8,303 events** verified on an end-to-end SHA-256 hash chain protected by SQLite triggers (`bun run verify`).
+- **95% Bootstrap Confidence Interval:** **[₹1,02,85,430.58, ₹4,01,81,603.18]** (1,000 stratified resamples, exact permutation $p = 0.030$).
+- **Sensitivity Band (±1 SE on Holdout Scaling):** **[₹2,21,93,682.81, ₹2,76,58,440.81]**.
+- **Contacts Suppressed by Compliance Rails (R2/R3):** **682 actions blocked** (zero quiet hours breaches, zero DND violations, zero customer contacts during gateway outages, mandatory ₹15,000 RBI AFA limits enforced).
+- **Audit Ledger Integrity (R4):** **8,308 events** verified on an end-to-end SHA-256 hash chain protected by SQLite triggers (`bun run verify`).
 - **Dynamic AI Model Switching:** UI settings console allows 1-click model switching (OpenRouter `minimax/minimax-m3:free`, Gemini 2.5 Flash, GPT-4o-mini, or Offline Rules).
 
 ---
@@ -32,11 +38,11 @@ Across 1,200 simulated Indian businesses and ₹18.65 Crore in total failure exp
 # 1. Install dependencies (Bun v1.0+)
 bun install
 
-# 2. Deterministic seed verification (fixed seed 42)
-bun run seed:verify
-
-# 3. Run automated unit & security invariant tests (36/36 pass in ~400ms)
+# 2. Run automated unit & security invariant tests (39/39 pass in ~400ms)
 bun test
+
+# 3. Deterministic seed verification (fixed seed 42)
+bun run seed:verify
 
 # 4. Run full end-to-end recovery pipeline (single clean pass)
 bun run seed
@@ -65,9 +71,9 @@ bun run demo
 
 ![Recoup Pipeline Architecture](assets/pipeline-flowchart.jpg)
 
-*The pipeline flows through six stages: (1) signal detection across four transaction surfaces with outage-aware anomaly detection, (2) LLM NLU diagnosis for the 277/1,314 Surface D cases with unstructured AP email threads (remaining 1,037 cases use deterministic domain rules — both paths contribute to the headline recovery figure), (3) EV-optimized playbook selection, (4) a centralized compliance gate enforcing quiet hours, TRAI DLT, RBI pre-debit notice, and the 9 stopping rules via HMAC-SHA256 GatePassport tokens, (5) mock-adapter execution (the only exported dispatch entry point in the codebase) with causal outcome resolution against a hidden ground truth, and (6) tamper-evident audit logging paired with stratified holdout measurement.*
+*The pipeline flows through six stages: (1) signal detection across four transaction surfaces with outage-aware anomaly detection, (2) LLM NLU diagnosis for the 277/1,314 Surface D cases with unstructured AP email threads (remaining 1,037 cases use deterministic domain rules — both paths contribute to the headline recovery figure), (3) EV-optimized playbook selection, (4) a centralized compliance gate enforcing quiet hours, TRAI DLT, RBI pre-debit notice, ₹15,000 AFA caps, and the 9 stopping rules via HMAC-SHA256 GatePassport tokens, (5) mock-adapter execution (the only exported dispatch entry point in the codebase) with causal outcome resolution against a hidden ground truth, and (6) tamper-evident audit logging paired with stratified holdout measurement.*
 
-> **Reading the measurement report honestly:** ~94% of the net incremental recovery comes from Surface D (B2B high-value invoices), where root-cause diagnosis (PO/GRN vs. cash crunch vs. approval queue) most sharply differentiates playbook selection. Surface A (subscriptions) shows a slightly **negative** incremental (-₹3.01L) — the agent underperforms the organic baseline there due to strict mandate friction. Surface B and C are modestly positive. The "all four surfaces, unified" pitch is architecturally accurate; economically, the B2B lift is the headline driver. Full breakdown: `out/measurement_report.md`.
+> **Reading the measurement report honestly:** ~94% of the net incremental recovery comes from Surface D (B2B high-value invoices), where root-cause diagnosis (PO/GRN vs. cash crunch vs. approval queue) most sharply differentiates playbook selection. Surface A (subscriptions) shows a slightly **negative** incremental (-₹2.53L) — the agent underperforms the organic baseline there due to strict mandate friction. Surface B and C are modestly positive. The "all four surfaces, unified" pitch is architecturally accurate; economically, the B2B lift is the headline driver. Full breakdown: `out/measurement_report.md`.
 
 > **Simulation disclosure:** All ₹ figures are properties of a simulated economy (synthetic customers, seeded PRNG outcomes, mock adapter dispatches). No real payments were attempted or collected. The lift is a property of the outcome resolution model — bounded, fatigued, and honestly calibrated — not external market validation. Full disclosure: `docs/HONESTY.md`.
 
@@ -77,21 +83,32 @@ bun run demo
 
 | Requirement | Implementation & Location | Verification Output |
 |---|---|---|
-| **R1: Incremental ₹ Recovered** | [`engines/measure.ts`](engines/measure.ts)<br>Stratum-weighted estimation with small-strata empirical shrinkage & 1,000-sample bootstrap 95% CI. | **₹2,39,24,614.70 net incremental recovery**<br>95% CI: `[₹88.46 L – ₹4.14 Cr]` (`out/measurement_report.md`) |
-| **R2: Strict Compliance Rails** | [`engines/gate.ts`](engines/gate.ts)<br>Choke point `gate()` minting HMAC-SHA256 `GatePassport` tokens (the only exported dispatch path) enforcing 9 stopping rules, TRAI DLT, and RBI 24h notice. | **682 actions blocked**<br>0 sends to opted-out contacts; 0 sends during outage (`out/suppression_report.md`) |
-| **R3: Tone Ladder & Quiet Hours** | [`engines/gate.ts`](engines/gate.ts) + [`adapters/voice.ts`](adapters/voice.ts)<br>Strict timezone enforcement (08:00–19:00 for voice) and bilingual Hinglish scripts. | **Zero quiet hours violations**<br>29 touches blocked outside window; 11/11 gate tests pass · 36/36 suite total (`bun test`) |
-| **R4: Tamper-Evident Audit Trail** | [`engines/audit.ts`](engines/audit.ts)<br>End-to-end SHA-256 hash chaining ($H_i = \operatorname{SHA-256}(H_{i-1} \parallel \operatorname{canonical}(P_i))$) with SQLite abort triggers. | **8,303 events verified against genesis**<br>Live tamper detection validated (`bun run verify`) |
+| **R1: Incremental ₹ Recovered** | [`engines/measure.ts`](engines/measure.ts)<br>Stratum-weighted estimation with small-strata empirical shrinkage & 1,000-sample bootstrap 95% CI. | **₹2,49,26,061.81 net incremental recovery**<br>95% CI: `[₹1.03 Cr – ₹4.02 Cr]` (`out/measurement_report.md`) |
+| **R2: Strict Compliance Rails** | [`engines/gate.ts`](engines/gate.ts)<br>Choke point `gate()` minting HMAC-SHA256 `GatePassport` tokens (the only exported dispatch path) enforcing 9 stopping rules, TRAI DLT, RBI 24h notice, and ₹15k AFA limits. | **682 actions blocked**<br>0 sends to opted-out contacts; 0 sends during outage (`out/suppression_report.md`) |
+| **R3: Tone Ladder & Quiet Hours** | [`engines/gate.ts`](engines/gate.ts) + [`adapters/voice.ts`](adapters/voice.ts)<br>Strict timezone enforcement (08:00–19:00 for voice) and bilingual Hinglish scripts. | **Zero quiet hours violations**<br>29 touches blocked outside window; 13/13 gate tests pass · 39/39 suite total (`bun test`) |
+| **R4: Tamper-Evident Audit Trail** | [`engines/audit.ts`](engines/audit.ts)<br>End-to-end SHA-256 hash chaining ($H_i = \operatorname{SHA-256}(H_{i-1} \parallel \operatorname{canonical}(P_i))$) with SQLite abort triggers. | **8,308 events verified against genesis**<br>Live tamper detection validated (`bun run verify`) |
 
 ---
 
 ## ⚖️ Counterfactual & Ablation Comparison
 
-| Recovery Strategy | Gross Collected | Comms Cost | Net Realized Value | Lift vs Organic Holdout | Causal Degradation |
+### 1. Counterfactual Baseline Comparison (`out/measurement_report.md`)
+
+| Strategy | Gross Collected | Comms Cost | Net Realized Value | Lift vs Organic Holdout | Description |
+|---|---:|---:|---:|---:|---|
+| **Pure Holdout Control** | ₹76,11,920.19 | ₹0.00 | **₹76,11,920.19** | 0.0% | Organic recovery baseline with zero outbound contact (MEASURED — 15% holdout cohort data) |
+| **Naive Dunning Baseline** | ₹3,10,60,920.95 | ₹672.00 | **₹3,10,60,248.95** | +152.4% | MODELLED (18.5% rate assumption, not a measured arm) — 3 generic unstratified emails |
+| **Recoup Autonomous Engine** | **₹3,25,37,982.00** | ₹2,076.00 | **₹3,25,35,906.00** | **+327.5%** | Recoup AI: Root-cause diagnosis, 11 playbooks, compliance rails, Hinglish voice, 1-tap UPI |
+
+### 2. Multi-Arm Policy Ablation (`out/ablation_report.md`)
+
+| Experimental Arm | Gross Collected ₹ | Scaled Holdout Baseline ₹ | Net Incremental ₹ | Recovery Rate (%) | Degradation vs Agent |
 |---|---:|---:|---:|---:|---:|
-| **Pure Holdout Control (Unaided Baseline)** | ₹75,12,368.30 | ₹0.00 | ₹75,12,368.30 | 0.0% | — |
-| **Identical Naive Dunning Arm (Fair Control)** | ₹2,07,31,849.00 | ₹1,240.00 | ₹1,32,19,480.70 | +175.9% | **-48.2%** |
-| **Random Applicable Playbook Arm** | ₹2,09,86,102.00 | ₹1,820.00 | ₹1,34,71,913.70 | +179.3% | **-47.1%** |
-| **Recoup Autonomous Engine** | **₹3,14,36,983.00** | **₹2,085.00** | **₹2,39,24,614.70** | **+318.5%** | **Baseline (0.0%)** |
+| **Recoup Autonomous Agent** | ₹2,97,30,685.00 | ₹75,12,368.30 | **₹2,22,18,316.70** | 18.3% | **Baseline (0.0%)** |
+| **Random Playbook Policy** | ₹1,95,99,189.50 | ₹75,12,368.30 | **₹1,20,86,821.20** | 12.1% | **-45.6%** |
+| **Identical Naive Dunning** | ₹1,90,25,551.00 | ₹75,12,368.30 | **₹1,15,13,182.70** | 11.7% | **-48.2%** |
+
+*Ablating the agent's playbook optimization into a naive identical dunning campaign degrades net incremental recovery by **48.2%** (₹1,07,05,134.00 lost), proving that recovery outcomes are causally driven by Recoup's root-cause routing and EV-optimization rather than latent customer willingness to pay.*
 
 ---
 

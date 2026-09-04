@@ -2,7 +2,7 @@ import { describe, expect, it } from "bun:test";
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { dispatchMockAdapter } from "../adapters";
-import { gate, mintGatePassport, verifyGatePassport, type GatePassport } from "../engines/gate";
+import { gate, mintGatePassport, verifyGatePassport, getGatePassportSecret, type GatePassport } from "../engines/gate";
 import { createTestDb } from "./setup";
 
 describe("Gate Invariants & Non-Bypassability Security Proof", () => {
@@ -270,5 +270,20 @@ describe("Gate Invariants & Non-Bypassability Security Proof", () => {
     const indexContent = readFileSync(indexPath, "utf8");
     expect(indexContent).not.toMatch(/export\s+\*\s+from\s+["']\.\/(email|sms|whatsapp|voice|gateway|payment_link)["']/);
     expect(indexContent).not.toMatch(/export\s+\{[^}]*formatEmail[^}]*\}/);
+  });
+
+  it("refuses to operate without GATE_PASSPORT_SECRET in production mode", () => {
+    const origEnv = process.env.NODE_ENV;
+    const origSecret = process.env.GATE_PASSPORT_SECRET;
+    try {
+      process.env.NODE_ENV = "production";
+      delete process.env.GATE_PASSPORT_SECRET;
+      expect(() => {
+        getGatePassportSecret();
+      }).toThrow("[FATAL SECURITY INVARIANT]");
+    } finally {
+      process.env.NODE_ENV = origEnv;
+      if (origSecret) process.env.GATE_PASSPORT_SECRET = origSecret;
+    }
   });
 });

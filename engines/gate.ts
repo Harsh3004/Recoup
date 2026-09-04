@@ -48,6 +48,7 @@ export type ComplianceRail =
   | "QUIET_HOURS_COMMERCIAL"
   | "DLT_TEMPLATE_MISSING"
   | "RBI_PRE_DEBIT_REQUIRED"
+  | "RBI_AFA_STEPUP_REQUIRED"
   | "FREQUENCY_CAP_EXCEEDED"
   | "CHANNEL_CONSENT_MISSING";
 
@@ -74,10 +75,30 @@ export interface GatePassport {
   signature: string;
 }
 
-import { createHmac } from "node:crypto";
+import { createHmac, randomBytes } from "node:crypto";
 
-const PASSPORT_SECRET =
-  process.env.GATE_PASSPORT_SECRET || "recoup_gate_passport_dev_secret_2026";
+let ephemeralDevSecret: string | null = null;
+
+export function getGatePassportSecret(): string {
+  const secret = process.env.GATE_PASSPORT_SECRET;
+  if (!secret) {
+    if (process.env.NODE_ENV === "production" || process.env.PRODUCTION_MODE === "1") {
+      throw new Error(
+        "[FATAL SECURITY INVARIANT] GATE_PASSPORT_SECRET environment variable is not set. " +
+        "The compliance gate cannot operate without an authentic cryptographic signing secret in production mode.",
+      );
+    }
+    if (!ephemeralDevSecret) {
+      ephemeralDevSecret = randomBytes(32).toString("hex");
+      console.warn(
+        "[GATE_SECURITY_WARN] GATE_PASSPORT_SECRET not set in environment. " +
+        "Generated ephemeral 256-bit process secret. Static token forgery is prevented.",
+      );
+    }
+    return ephemeralDevSecret;
+  }
+  return secret;
+}
 
 function hmacSha256(payload: string, secret: string): string {
   return createHmac("sha256", secret).update(payload).digest("hex");
@@ -93,7 +114,7 @@ export function mintGatePassport(input: {
   const passportId = `pass_${pad(Math.floor(Math.random() * 1_000_000_000), 9)}`;
   const expiresAt = input.issuedAt + 4 * 3600 * 1000; // 4 hours validity
   const payload = `${passportId}|${input.riskItemId}|${input.planStepId ?? ""}|${input.channel}|${input.action}|${input.issuedAt}|${expiresAt}`;
-  const signature = hmacSha256(payload, PASSPORT_SECRET);
+  const signature = hmacSha256(payload, getGatePassportSecret());
   return {
     passportId,
     riskItemId: input.riskItemId,
@@ -126,7 +147,7 @@ export function verifyGatePassport(
     return false;
   }
   const payload = `${passport.passportId}|${passport.riskItemId}|${passport.planStepId ?? ""}|${passport.channel}|${passport.action}|${passport.issuedAt}|${passport.expiresAt}`;
-  const expectedSig = hmacSha256(payload, PASSPORT_SECRET);
+  const expectedSig = hmacSha256(payload, getGatePassportSecret());
   return passport.signature === expectedSig;
 }
 
@@ -493,24 +514,52 @@ export function gate(
   }
 
   // --- COMPLIANCE RAIL 4: RBI E-MANDATE AFA / 24H PRE-DEBIT ---
-  if (risk && risk.surface === "C" && input.channel === "GATEWAY") {
+  if (risk && risk.surface === "C" && (input.channel === "GATEWAY" || input.action === "RETRY_DEBIT" || input.action === "EXECUTE_DEBIT")) {
+    const debitAmountPaise = risk.exposure_paise ?? 0;
+
+    // Rule 4a: Mandatory step-up AFA for recurring debits exceeding ₹15,000 (15,00,000 paise)
+    // RBI Circular RBI/2020-21/74: Automated recurring mandate debits > ₹15,000 require customer step-up AFA (OTP / 2FA).
+    // Direct headless gateway retry/debit without customer step-up authentication is strictly blocked.
+    if (debitAmountPaise > 1_500_000) {
+      return {
+        id: decisionId,
+        riskItemId: input.riskItemId,
+        planStepId: input.planStepId ?? null,
+        allowed: false,
+        reasonCode: "RBI_AFA_STEPUP_REQUIRED",
+        details: `RBI e-mandate threshold exceeded (${formatInr(debitAmountPaise)} > ₹15,000 cap). Mandatory step-up Additional Factor of Authentication (AFA) required before debit retry.`,
+        decidedAt,
+      };
+    }
+
+    // Rule 4b: 24-hour advance pre-debit notice required before any mandate debit retry
     const man = db
       .query(`SELECT last_pre_debit_notice_at FROM mandates WHERE id = ?`)
       .get(risk.source_ref) as { last_pre_debit_notice_at: number | null } | null;
 
-    if (man && man.last_pre_debit_notice_at) {
-      const hoursSinceNotice = (decidedAt - man.last_pre_debit_notice_at) / (3600 * 1000);
-      if (hoursSinceNotice < 24) {
-        return {
-          id: decisionId,
-          riskItemId: input.riskItemId,
-          planStepId: input.planStepId ?? null,
-          allowed: false,
-          reasonCode: "RBI_PRE_DEBIT_REQUIRED",
-          details: `RBI e-mandate rule: 24-hour pre-debit notification required before autopay retry (${hoursSinceNotice.toFixed(1)}h elapsed).`,
-          decidedAt,
-        };
-      }
+    if (!man || !man.last_pre_debit_notice_at) {
+      return {
+        id: decisionId,
+        riskItemId: input.riskItemId,
+        planStepId: input.planStepId ?? null,
+        allowed: false,
+        reasonCode: "RBI_PRE_DEBIT_REQUIRED",
+        details: `RBI e-mandate rule: 24-hour advance pre-debit notification required before autopay retry. No prior pre-debit notice found on file.`,
+        decidedAt,
+      };
+    }
+
+    const hoursSinceNotice = (decidedAt - man.last_pre_debit_notice_at) / (3600 * 1000);
+    if (hoursSinceNotice < 24) {
+      return {
+        id: decisionId,
+        riskItemId: input.riskItemId,
+        planStepId: input.planStepId ?? null,
+        allowed: false,
+        reasonCode: "RBI_PRE_DEBIT_REQUIRED",
+        details: `RBI e-mandate rule: 24-hour pre-debit notification required before autopay retry (${hoursSinceNotice.toFixed(1)}h elapsed).`,
+        decidedAt,
+      };
     }
   }
 

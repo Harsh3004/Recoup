@@ -5,6 +5,7 @@
   "type": "module",
   "description": "Closed-loop agent that diagnoses stalled rupees and recovers them inside compliance rails.",
   "scripts": {
+    "test": "bun test",
     "seed": "bun run scripts/seed.ts",
     "seed:verify": "bun run scripts/seed.ts --verify-repro",
     "detect": "bun run engines/detect.ts",

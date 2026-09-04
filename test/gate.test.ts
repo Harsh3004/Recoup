@@ -217,4 +217,60 @@ describe("Guardrails & Compliance Gate (Step 5)", () => {
     expect(dec.allowed).toBe(false);
     expect(dec.reasonCode).toBe("NEGATIVE_EV");
   });
+
+  it("enforces RBI E-Mandate Rail: blocks debits > ₹15,000 without AFA step-up", () => {
+    const testRiskId = "rsk_test_mandate_afa";
+    const testMandateId = "man_test_afa";
+    const now = Date.now();
+    
+    db.query(
+      `INSERT INTO mandates (id, customer_id, method, status, debit_cap_paise, last_pre_debit_notice_at, created_at)
+       VALUES (?, 'cus_test_001', 'UPI_AUTOPAY', 'ACTIVE', 2500000, ?, ?)`,
+    ).run(testMandateId, now - 36 * 3600 * 1000, now);
+
+    // Exposure ₹20,000 (20,00,000 paise) > ₹15,000 limit
+    db.query(
+      `INSERT INTO risk_items (id, surface, customer_id, source_ref, exposure_paise, p_loss_bps, urgency_bps, risk_score, first_seen_at, state, cohort)
+       VALUES (?, 'C', 'cus_test_001', ?, 2000000, 4500, 5000, 2250, ?, 'DETECTED', 'TREATMENT')`,
+    ).run(testRiskId, testMandateId, now);
+
+    const dec = gate(db, {
+      riskItemId: testRiskId,
+      customerId: "cus_test_001",
+      channel: "GATEWAY",
+      action: "RETRY_DEBIT",
+      scheduledAt: now,
+    });
+    expect(dec.allowed).toBe(false);
+    expect(dec.reasonCode).toBe("RBI_AFA_STEPUP_REQUIRED");
+    expect(dec.details).toContain("₹15,000");
+  });
+
+  it("enforces RBI E-Mandate Rail: blocks retry without 24-hour advance pre-debit notice", () => {
+    const testRiskId = "rsk_test_mandate_notice";
+    const testMandateId = "man_test_notice";
+    const now = Date.now();
+    
+    // Notice sent only 4 hours ago (< 24h)
+    db.query(
+      `INSERT INTO mandates (id, customer_id, method, status, debit_cap_paise, last_pre_debit_notice_at, created_at)
+       VALUES (?, 'cus_test_001', 'UPI_AUTOPAY', 'ACTIVE', 500000, ?, ?)`,
+    ).run(testMandateId, now - 4 * 3600 * 1000, now);
+
+    db.query(
+      `INSERT INTO risk_items (id, surface, customer_id, source_ref, exposure_paise, p_loss_bps, urgency_bps, risk_score, first_seen_at, state, cohort)
+       VALUES (?, 'C', 'cus_test_001', ?, 500000, 4500, 5000, 2250, ?, 'DETECTED', 'TREATMENT')`,
+    ).run(testRiskId, testMandateId, now);
+
+    const dec = gate(db, {
+      riskItemId: testRiskId,
+      customerId: "cus_test_001",
+      channel: "GATEWAY",
+      action: "RETRY_DEBIT",
+      scheduledAt: now,
+    });
+    expect(dec.allowed).toBe(false);
+    expect(dec.reasonCode).toBe("RBI_PRE_DEBIT_REQUIRED");
+    expect(dec.details).toContain("24-hour");
+  });
 });
